@@ -106,30 +106,7 @@ async function getUploadFileName() {
     return encodeURI(`${institution}/dev/idExtension${extensionId}.vue`)
 }
 async function sendExtensionsFile() {
-    var debug = Args.findIndex(a => a == 'debug') > -1 ? true : false
-    console.log("Chamando a API")
-    if(debug) console.time("Login")
-    await silentLogin()
-    if(debug) console.timeEnd("Login")
-    // Create a new blob in the bucket and upload the file data.
-    // Uploads a local file to the bucket
-    let filename = await getUploadFileName()
-    if(debug) console.time("Upload")
-    await bucket.upload('./index.vue', {
-        destination: filename,
-        gzip: true,
-        metadata: {
-          cacheControl: 'public, max-age=0',
-        },  
-      });
-    if(debug) console.timeEnd("Upload")
-    if(debug) console.time("Firebase")
-    await firebase.firestore().collection('dynamicComponents').doc(extensionIdStorage).update({
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    })
-    if(debug) console.timeEnd("Firebase")
-    console.log(`${filename} uploaded to ${'dynamic-components'}.`);
-    // [END storage_upload_file]
+    const result = await axios.get(`http://localhost:1235/sendmodifications`)
 }
 async function listExtensions() {
     let token = await firebase.auth().currentUser.getIdToken()
