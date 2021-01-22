@@ -98,7 +98,7 @@ async function silentLogin(callsetup = false) {
         return extensionId
     }
     else if(!extensionId ){
-        console.log("Você já estar logado. Agora execute npm run setup para selecionar uma extensão")
+        console.log("Você já está logado. Agora execute npm run setup para selecionar uma extensão")
         process.exit(0)
     }else{
         console.log('Você está trabalhando na extensão ', extensionValue)
@@ -109,11 +109,15 @@ async function getUploadFileName() {
     return encodeURI(`${institution}/dev/idExtension${extensionId}.vue`)
 }
 async function sendExtensionsFile() {
+    var debug = Args.findIndex(a => a == 'debug') > -1 ? true : false
     console.log("Chamando a API")
+    if(debug) console.time("Login")
     await silentLogin()
+    if(debug) console.timeEnd("Login")
     // Create a new blob in the bucket and upload the file data.
     // Uploads a local file to the bucket
     let filename = await getUploadFileName()
+    if(debug) console.time("Upload")
     await bucket.upload('./index.vue', {
         destination: filename,
         gzip: true,
@@ -121,10 +125,13 @@ async function sendExtensionsFile() {
           cacheControl: 'public, max-age=0',
         },  
       });
+    if(debug) console.timeEnd("Upload")
     const id = 'DdrMeO03Zd7tgDwFE0f7'
+    if(debug) console.time("Firebase")
     await firebase.firestore().collection('dynamicComponents').doc(id).update({
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     })
+    if(debug) console.timeEnd("Firebase")
     console.log(`${filename} uploaded to ${'dynamic-components'}.`);
     // [END storage_upload_file]
 }

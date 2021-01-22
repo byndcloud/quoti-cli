@@ -6,7 +6,7 @@
   
     <v-tabs-slider color="blue"></v-tabs-slider>
     <v-tab :key="'1'">
-      <span> Usando API Quoti </span>
+      <span> Usando API Quoti7 </span>
     </v-tab>
     <v-tab :key="'2'">
       <span> Usando o Firebase </span>
