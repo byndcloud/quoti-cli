@@ -20,6 +20,7 @@ const bucket = storage.bucket('dynamic-components');
 var institution = null
 var _token = null
 var extensionId = null
+var extensionIdStorage = null
 
 
 var firebaseConfig = {
@@ -84,6 +85,7 @@ async function silentLogin(callsetup = false) {
             const userData = (JSON.parse(rawdata)).user
             extensionId = (JSON.parse(rawdata)).extensionId
             extensionValue = (JSON.parse(rawdata)).extensionValue
+            extensionIdStorage = (JSON.parse(rawdata)).extensionStorageId
 
             const user = new firebase.User(userData, userData.stsTokenManager, userData)
             await firebase.auth().updateCurrentUser(user)
@@ -98,7 +100,7 @@ async function silentLogin(callsetup = false) {
         return extensionId
     }
     else if(!extensionId ){
-        console.log("Você já está logado. Agora execute npm run setup para selecionar uma extensão")
+        console.log("\n\n\tVocê já estar logado. Agora execute npm run setup para selecionar uma extensão")
         process.exit(0)
     }else{
         console.log('Você está trabalhando na extensão ', extensionValue)
@@ -125,10 +127,7 @@ async function sendExtensionsFile() {
           cacheControl: 'public, max-age=0',
         },  
       });
-    if(debug) console.timeEnd("Upload")
-    const id = 'DdrMeO03Zd7tgDwFE0f7'
-    if(debug) console.time("Firebase")
-    await firebase.firestore().collection('dynamicComponents').doc(id).update({
+    await firebase.firestore().collection('dynamicComponents').doc(extensionIdStorage).update({
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     })
     if(debug) console.timeEnd("Firebase")
@@ -143,19 +142,20 @@ async function listExtensions() {
 }
 async function setup() {
     await silentLogin('setup')
-    
-    
     let extensions = await listExtensions()
     rawdata = fs.readFileSync('credentials.json');
     let credenciais = (JSON.parse(rawdata))
     let mappedExt = extensions.map(el =>{
         return el.title
     })
+    console.log(extensions)
     let choose = await cliSelect({values:mappedExt})
     credenciais.extensionId = extensions[choose.id].id
+    credenciais.extensionStorageId = extensions[choose.id].storeId
     credenciais.extensionValue = choose.value
+    console.log(credenciais)
     fs.writeFileSync('credentials.json', JSON.stringify(credenciais));
-    console.log("Agora execure npm run serve")
+    console.log("\n\n\t\tAgora execure npm run serve")
 
 }
 (function () {
