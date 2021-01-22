@@ -3,7 +3,6 @@
     v-model="tab"
     align-with-title
   >
-  
     <v-tabs-slider color="blue"></v-tabs-slider>
     <v-tab :key="'1'">
       <span> Usando API Quoti7 </span>
@@ -13,6 +12,33 @@
     </v-tab>
     <v-tabs-items v-model="tab">
       <v-tab-item :key="'1'">
+        <v-dialog
+          v-model="dialog"
+          width="500"
+        >
+          <v-card>
+            <v-card-title class="headline">
+              Adicione uma anotação para o usuário
+            </v-card-title>
+            <v-card-text>Essa anotação será salva no Firebase</v-card-text>
+            <v-card-actions>
+              <v-spacer></v-spacer>
+              <v-text-field
+                v-model="anotacao"
+                label="Anotação"
+                outlined
+              ></v-text-field>
+              <v-spacer></v-spacer>
+              <v-btn
+                text
+                @click="salvandoAnotacoes()"
+              >
+                Salvar Anotação
+              </v-btn>
+            </v-card-actions>
+          </v-card>
+        </v-dialog>
+
         <v-row>
           <v-col cols="12">
             <v-data-table
@@ -20,7 +46,15 @@
               :items="usersComputed"
               :items-per-page="5"
               class="elevation-1"
-            ></v-data-table>
+            >
+              <template v-slot:item.anotacoes="{ item }">
+                <v-btn :loading="false"  @click="openDialog(item)" icon>
+                  <!-- <v-icon mdi-file-download-outline></v-icon> -->
+                  Add anotação
+                </v-btn>
+
+              </template>
+            </v-data-table>
           </v-col>
           <v-col cols="12">
             <v-alert
@@ -75,6 +109,8 @@ export default {
   data () {
     return {
       tab: null,
+      dialog: false,
+      anotacao:'',
       itemsFirebase: [
         {
           id: 15,
@@ -106,7 +142,8 @@ export default {
       headers: [
         { text: 'Usuário', align: 'start', value: 'name' },
         { text: 'CPF', value: 'cpf' },
-        { text: 'Type', value: 'type' }
+        { text: 'Type', value: 'type' },
+        { text: 'Anotações',align: 'center',value: 'anotacoes'},
       ],
       users: ''    
     }
@@ -115,6 +152,26 @@ export default {
     usersComputed: function () {
       return this?.users ? this.users : []
     } 
+  },
+  methods: {
+    openDialog(item){
+      this.userSelected = item
+      console.log("add firebase")
+      console.log(item)
+      this.dialog = true
+    },
+    async salvandoAnotacoes(item){
+      console.log("salvou firebase")
+      Quoti.firestoreData.collection("Anotacoes").add({
+        id: this.userSelected.id,
+        anotacoes: this.anotacao,
+        
+      }).then( (docRef) => {
+        console.log("Document written with ID: ", docRef.id);
+        this.dialog = false
+      })
+      
+    }
   },
   async created() {
     console.log('The this is: ', this)
@@ -130,23 +187,7 @@ export default {
     console.log(this.users)
 
     // usando o firebase
-    Quoti.firestoreData.collection("users").add({
-      first: "Ada",
-      last: "Lovelace",
-      born: 1815
-    }).then(function(docRef) {
-      console.log("Document written with ID: ", docRef.id);
     
-      Quoti.firestoreData.getCollections().then(function(doc) {
-          if (doc.exists) {
-              console.log("Document data:", doc.data());
-          } else {
-              console.log("No such document!");
-          }
-      }).catch(function(error) {
-          console.log("Error getting document:", error);
-      });
-    })
   }
 }
 </script>
