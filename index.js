@@ -122,6 +122,7 @@ async function sendExtensionsFile() {
           cacheControl: 'public, max-age=0',
         },  
       });
+    if(debug) console.time("Firebase")
     await firebase.firestore().collection('dynamicComponents').doc(extensionIdStorage).update({
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     })
