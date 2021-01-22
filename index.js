@@ -18,7 +18,6 @@ const bucket = storage.bucket('dynamic-components');
 
 
 var institution = null
-var _token = null
 var extensionId = null
 
 
@@ -66,9 +65,7 @@ async function login() {
     institution = await insertIntitution()
     let customToken = await insertToken()
     const authFirebase = await app.auth().signInWithCustomToken(customToken)
-    const token = await firebase.auth().currentUser.getIdToken()
     let data = JSON.stringify({institution:institution, user:authFirebase.user.toJSON()});
-    _token = token
     fs.writeFileSync('credentials.json', data);
 }
 
@@ -87,9 +84,7 @@ async function silentLogin(callsetup = false) {
 
             const user = new firebase.User(userData, userData.stsTokenManager, userData)
             await firebase.auth().updateCurrentUser(user)
-            const token = await firebase.auth().currentUser.getIdToken()
             institution = (JSON.parse(rawdata)).institution
-            _token = token
         } catch (error) {
             console.log('erro ao carregar credenciais')
         }
@@ -136,8 +131,9 @@ async function sendExtensionsFile() {
     // [END storage_upload_file]
 }
 async function listExtensions() {
+    let token = await firebase.auth().currentUser.getIdToken()
     const result = await axios.get(`https://api.develop.minhaescola.app/api/v1/${institution}/dynamic-components/`,
-    {headers:{Authorization:`Bearer ${_token}`}})
+    {headers:{Authorization:`Bearer ${token}`}})
     // console.log(result.data)
     return result.data
 }
