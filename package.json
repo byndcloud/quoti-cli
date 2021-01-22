@@ -1,0 +1,31 @@
+{
+  "name": "quoti-extensions-env",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "serve": "nodemon -e vue index.js",
+    "login": "node index.js login",
+    "setup": "node index.js setup"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/byndcloud/quoti-extensions-env-js.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/byndcloud/quoti-extensions-env-js/issues"
+  },
+  "homepage": "https://github.com/byndcloud/quoti-extensions-env-js#readme",
+  "dependencies": {
+    "@google-cloud/storage": "^5.7.2",
+    "axios": "^0.21.1",
+    "cli-select": "^1.1.2",
+    "express": "^4.17.1",
+    "firebase": "^8.2.3",
+    "md5": "^2.3.0",
+    "nodemon": "^2.0.7"
+  }
+}
