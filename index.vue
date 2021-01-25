@@ -3,12 +3,12 @@
     v-model="tab"
     align-with-title
   >
-    <v-tabs-slider color="blue"></v-tabs-slider>
+    <v-tabs-slider color="black"></v-tabs-slider>
     <v-tab :key="'1'">
-      <span> Usando API Quoti7 </span>
+      <span> Usando API Quoti  </span>
     </v-tab>
     <v-tab :key="'2'">
-      <span> Usando o Firebase </span>
+      <span> Usando Firebase Quoti </span>
     </v-tab>
     <v-tabs-items v-model="tab">
       <v-tab-item :key="'1'">
@@ -44,12 +44,10 @@
             <v-data-table
               :headers="headers"
               :items="usersComputed"
-              :items-per-page="5"
               class="elevation-1"
             >
               <template v-slot:item.anotacoes="{ item }">
                 <v-btn :loading="false"  @click="openDialog(item)" icon>
-                  <!-- <v-icon mdi-file-download-outline></v-icon> -->
                   Add anotação
                 </v-btn>
 
@@ -58,26 +56,46 @@
           </v-col>
           <v-col cols="12">
             <v-alert
-              color="green"
+              color="black"
               type="warning"
             >Esse é um template exemplo de como podemos consultar
-             dados de todos os usuários cadastrados na Organização. Consulte o código para saber mais.</v-alert>
+             dados de todos os usuários cadastrados na Organização usando a API Quoti. Consulte o código para saber mais.</v-alert>
           </v-col>
 
         </v-row>
       </v-tab-item>
       <v-tab-item :key="'2'">
-        <v-col cols="12">
+        <v-row v-if="itemFirebaseComputed.length > 0">
+          <v-col cols="12">
+            <v-data-table
+              :headers="headersFirebase"
+              :items="itemFirebaseComputed"
+              class="elevation-1"
+            >
+              <template v-slot:item.delete="{ item }">
+                <v-btn :loading="isDeleting[item.id]"  @click="apagarItem(item)" icon>
+                  Apagar
+                </v-btn>
+
+              </template>
+            </v-data-table>
+          </v-col>
+          <v-col cols="12">
+            <v-alert
+              color="black"
+              type="warning"
+            >Esse é um template exemplo de como podemos consultar e deletar
+              dados do Firebase Quoti. Experimente usar a tela anterior para adicionar ou editar anotações.</v-alert>
+            
+          </v-col>
+        </v-row>
+        <v-row v-else>
           <v-alert
-            color="green"
+            class="mt-10"
+            color="black"
             type="warning"
-          >Esse é um template exemplo de como podemos consultar, adicionar, editar e deletar
-            dados do firebase. Consulte o código para saber mais.</v-alert>
-          <v-treeview
-            open-all
-            :items="itemsFirebase"
-          ></v-treeview>
-        </v-col>
+          > Ainda não possui nenhuma anotacão salva. Experimente usar a tela anterior para cadastrar novas anotações</v-alert>
+        </v-row>
       </v-tab-item>
     </v-tabs-items>
   </v-tabs>
@@ -96,98 +114,83 @@ const Quoti = {
   postApi: Post,
   notificationsApi: Notifications
 }
-
+// tudo que estiver dentro da tag script e fora de e xport  default{} será desconsiderado
+let variavelDesconsiderada = 'Sou uma variável declarada fora de e xport default e portanto não tenho utilidade'
+// Objeto Quoti para o desenvolvedor acessar as ferramentas do Quoti
 export default {
-  props: {
-    date: String,
-    dateTitle: String,
-    group: Object,
-    person: Object,
-    reportType: String,
-    step: Number
-  },
+  
   data () {
     return {
       tab: null,
       dialog: false,
       anotacao:'',
-      itemsFirebase: [
-        {
-          id: 15,
-          name: 'Downloads :',
-          children: [
-            { id: 16, name: 'October : pdf' },
-            { id: 17, name: 'November : pdf' },
-            { id: 18, name: 'Tutorial : html' },
-          ],
-        },
-        {
-          id: 19,
-          name: 'Videos :',
-          children: [
-            {
-              id: 20,
-              name: 'Tutorials :',
-              children: [
-                { id: 21, name: 'Basic layouts : mp4' },
-                { id: 22, name: 'Advanced techniques : mp4' },
-                { id: 23, name: 'All about app : dir' },
-              ],
-            },
-            { id: 24, name: 'Intro : mov' },
-            { id: 25, name: 'Conference introduction : avi' },
-          ],
-        },
-      ],
       headers: [
         { text: 'Usuário', align: 'start', value: 'name' },
         { text: 'CPF', value: 'cpf' },
         { text: 'Type', value: 'type' },
         { text: 'Anotações',align: 'center',value: 'anotacoes'},
       ],
-      users: ''    
+      headersFirebase: [
+        { text: 'Usuário', align: 'start', value: 'name' },
+        { text: 'Anotações',align: 'center',value: 'anotacoes'},
+        { text: 'Excluir',align: 'right',value: 'delete'},
+      ],
+      users: '',
+      itemFirebase: [],
+      isDeleting: {}
     }
   },
   computed: {
     usersComputed: function () {
       return this?.users ? this.users : []
+    },
+    itemFirebaseComputed: function () {
+      return this.itemFirebase
     } 
   },
   methods: {
     openDialog(item){
+      this.anotacao = ''
       this.userSelected = item
-      console.log("add firebase")
-      console.log(item)
       this.dialog = true
     },
-    async salvandoAnotacoes(item){
-      console.log("salvou firebase")
-      Quoti.firestoreData.collection("Anotacoes").add({
-        id: this.userSelected.id,
+    async salvandoAnotacoes(){
+      const id = this.userSelected.id
+      const name = this.userSelected.name
+      Quoti.firestoreData.collection("Anotacoes").doc(`${id}`).set({
         anotacoes: this.anotacao,
-        
       }).then( (docRef) => {
-        console.log("Document written with ID: ", docRef.id);
         this.dialog = false
+        let itemUpdated = this.itemFirebase.find(element => element.id == id);
+        if(itemUpdated) itemUpdated.anotacoes = this.anotacao
+        else this.itemFirebase.push({name: name, anotacoes: this.anotacao, id: id})
       })
-      
+    },
+    async apagarItem(item){
+      console.log(item)
+      this.$set(this.isDeleting, item.id, true)
+      await Quoti.firestoreData.collection("Anotacoes").doc(`${item.id}`).delete()
+      const index = this.itemFirebase.findIndex(element => {
+        return element.id == item.id
+      });
+      if (index > -1) {
+        this.itemFirebase.splice(index, 1);
+      }
+      this.$set(this.isDeleting, item.id, false)
     }
   },
   async created() {
-    console.log('The this is: ', this)
-    console.log('The Quoti axios: ', Quoti.axios)
-    console.log('The Quoti moment: ', Quoti.moment)
-    //usando userApi
+    //usando API Quoti
     const result = await Quoti.userApi.list({
       types: undefined
     })
-    console.log(this.users)
     this.users = result
-    console.log(result)
-    console.log(this.users)
-
-    // usando o firebase
-    
+    //usando o Firebase Quoti
+    const resultFirebase = await Quoti.firestoreData.collection("Anotacoes").get()
+    this.itemFirebase = resultFirebase.docs.map(doc =>{
+      let name = this.users.find(element => element.id == doc.id).name;
+      return {name: name, anotacoes: doc.data().anotacoes, id: doc.id}
+    })
   }
 }
 </script>
