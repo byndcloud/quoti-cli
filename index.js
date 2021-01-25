@@ -102,9 +102,6 @@ async function silentLogin(callsetup = false) {
     }
     
 }
-async function getUploadFileName() {
-    return encodeURI(`${institution}/dev/idExtension${extensionId}.vue`)
-}
 async function sendExtensionsFile() {
     const result = await axios.get(`http://localhost:1235/sendmodifications`)
 }
@@ -114,6 +111,9 @@ async function listExtensions() {
     {headers:{Authorization:`Bearer ${token}`}})
     // console.log(result.data)
     return result.data
+}
+async function getUploadFileNameDeploy(currentTime) {
+    return encodeURI(`${institution}/${md5(currentTime)}.vue`)
 }
 async function setup() {
     await silentLogin('setup')
@@ -133,15 +133,48 @@ async function setup() {
     console.log("\n\n\t\tAgora execure npm run serve")
 
 }
+async function deploy(){
+    console.log('deploy na aplicação')
+    await silentLogin('setup')
+    const currentTime = await firebase.firestore.Timestamp.now().toMillis()
+    console.log(currentTime)
+    let filename = await getUploadFileNameDeploy('asdsad')
+    console.log(filename);
+    let url = `https://storage.cloud.google.com/dynamic-components/${filename}`
+    await bucket.upload('./index.vue', {
+        destination: filename,
+        gzip: true,
+        metadata: {
+          cacheControl: 'public, max-age=0',    
+        },  
+      });
+    let token = await firebase.auth().currentUser.getIdToken()
+    const result = await axios.put(
+        `http://localhost:8081/api/v1/${institution}/dynamic-components/${extensionId}`,
+        {   
+            url: url,
+            version: currentTime,
+            fileVuePrefix: filename,
+            id: extensionId   
+        },
+        {headers:{Authorization:`Bearer ${token}`}}) 
+    console.log(result)
+    await firebase.firestore().collection('dynamicComponents').doc(extensionIdStorage).update({
+        updatedAtToDeploy: currentTime
+    })  
+    console.log('Deploy feito')
+    process.exit(0)
+
+}
 (function () {
     if(Args[0] === "setup")
         setup()
-    else if (Args[0] === "atualizar")
-        login()
     else if (Args[0] === "login")
         login()
     else if (Args[0] === "silent-login")
         silentLogin()
+    else if (Args[0] === "deploy")
+        deploy()
     else 
         sendExtensionsFile()
         
