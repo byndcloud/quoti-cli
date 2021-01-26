@@ -1,7 +1,6 @@
 
 const { default: axios } = require('axios')
 const md5 = require('md5')
-const silentLogin = require('./auth')
 const { firebase } = require('../firebase')
 const { bucket } = require('../storage')
 
@@ -11,7 +10,6 @@ async function getUploadFileNameDeploy (institution, currentTime) {
 
 module.exports = async function (extensionIdStorage, institution, extensionId) {
   console.log('deploy na aplicação')
-  await silentLogin('setup')
   const currentTime = await firebase.firestore.Timestamp.now().toMillis()
   console.log(currentTime)
   let filename = await getUploadFileNameDeploy('asdsad')

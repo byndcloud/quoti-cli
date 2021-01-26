@@ -21,14 +21,14 @@ async function sendExtensionsFile () {
 
 (async function () {
   // TODO: Add option to choose extension
+  await silentLogin()
   if (Args[0] === 'init') {
-    await silentLogin(true)
     await setExtension()
   } else if (Args[0] === 'set-extension') {
-    setExtension()
+    await setExtension()
   } else if (Args[0] === 'deploy') {
-    deploy()
+    await deploy()
   } else {
-    sendExtensionsFile()
+    await sendExtensionsFile()
   }
 })()
