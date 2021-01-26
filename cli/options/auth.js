@@ -1,17 +1,17 @@
+const credentials = require('../credentials')
 const { app } = require('../firebase')
 const readline = require('readline')
 const { firebase } = require('../firebase')
-const fs = require('fs')
 
 async function login () {
   const institution = await insertIntitution()
-  let customToken = await insertToken()
+  const customToken = await insertToken()
   const authFirebase = await app.auth().signInWithCustomToken(customToken)
-  let data = JSON.stringify({
+  const data = {
     institution: institution,
     user: authFirebase.user.toJSON()
-  })
-  fs.writeFileSync('credentials.json', data)
+  }
+  credentials.save(data)
 }
 
 async function insertIntitution () {
@@ -41,13 +41,11 @@ async function insertToken () {
 }
 
 async function silentLogin () {
-  if (!fs.existsSync('./credentials.json')) {
-    console.log('fazendo login')
+  if (!credentials.exists()) {
     await login()
   } else {
     try {
-      const rawdata = fs.readFileSync('./credentials.json')
-      const userData = JSON.parse(rawdata).user
+      const userData = credentials.user
       const user = new firebase.User(
         userData,
         userData.stsTokenManager,
@@ -55,6 +53,7 @@ async function silentLogin () {
       )
       await firebase.auth().updateCurrentUser(user)
     } catch (error) {
+      console.error(error)
       console.log('erro ao carregar credenciais')
     }
   }
