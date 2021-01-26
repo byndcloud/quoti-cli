@@ -1,4 +1,4 @@
-const { app } = require('./firebase')
+const { app } = require('../firebase')
 const readline = require('readline')
 const fs = require('fs')
 
@@ -28,10 +28,15 @@ async function insertToken () {
   })
 }
 
-module.exports = async function () {
+async function login () {
   const institution = await insertIntitution()
   let customToken = await insertToken()
   const authFirebase = await app.auth().signInWithCustomToken(customToken)
-  let data = JSON.stringify({ institution: institution, user: authFirebase.user.toJSON() })
+  let data = JSON.stringify({
+    institution: institution,
+    user: authFirebase.user.toJSON()
+  })
   fs.writeFileSync('credentials.json', data)
 }
+
+module.exports = login

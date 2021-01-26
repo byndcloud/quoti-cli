@@ -1,5 +1,4 @@
-const { Storage } = require('@google-cloud/storage');
+const { Storage } = require('@google-cloud/storage')
 // Instantiate a storage client
-export const storage = new Storage();
-export const bucket = storage.bucket('dynamic-components');
-
+exports.storage = new Storage()
+exports.bucket = this.storage.bucket('dynamic-components')

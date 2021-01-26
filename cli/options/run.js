@@ -61,14 +61,18 @@ async function silentLogin (callsetup = false) {
   } else {
     try {
       rawdata = fs.readFileSync('credentials.json')
-      const userData = (JSON.parse(rawdata)).user
-      extensionId = (JSON.parse(rawdata)).extensionId
-      extensionValue = (JSON.parse(rawdata)).extensionValue
-      extensionIdStorage = (JSON.parse(rawdata)).extensionStorageId
+      const userData = JSON.parse(rawdata).user
+      extensionId = JSON.parse(rawdata).extensionId
+      extensionValue = JSON.parse(rawdata).extensionValue
+      extensionIdStorage = JSON.parse(rawdata).extensionStorageId
 
-      const user = new firebase.User(userData, userData.stsTokenManager, userData)
+      const user = new firebase.User(
+        userData,
+        userData.stsTokenManager,
+        userData
+      )
       await firebase.auth().updateCurrentUser(user)
-      institution = (JSON.parse(rawdata)).institution
+      institution = JSON.parse(rawdata).institution
     } catch (error) {
       console.log('erro ao carregar credenciais')
     }
@@ -76,7 +80,9 @@ async function silentLogin (callsetup = false) {
   if (callsetup) {
     return extensionId
   } else if (!extensionId) {
-    console.log('\n\n\tVocê já estar logado. Agora execute npm run setup para selecionar uma extensão')
+    console.log(
+      '\n\n\tVocê já estar logado. Agora execute npm run setup para selecionar uma extensão'
+    )
     process.exit(0)
   } else {
     console.log('Você está trabalhando na extensão ', extensionValue)
@@ -86,7 +92,7 @@ async function getUploadFileName () {
   return encodeURI(`${institution}/dev/idExtension${extensionId}.vue`)
 }
 async function sendExtensionsFile () {
-  var debug = Args.findIndex(a => a == 'debug') > -1
+  var debug = Args.findIndex(a => a === 'debug') > -1
   console.log('Chamando a API')
   // Create a new blob in the bucket and upload the file data.
   // Uploads a local file to the bucket
@@ -101,9 +107,13 @@ async function sendExtensionsFile () {
   })
   if (debug) console.timeEnd('Upload')
   if (debug) console.time('Firebase')
-  await firebase.firestore().collection('dynamicComponents').doc(extensionIdStorage).update({
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-  })
+  await firebase
+    .firestore()
+    .collection('dynamicComponents')
+    .doc(extensionIdStorage)
+    .update({
+      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    })
   if (debug) console.timeEnd('Firebase')
   console.log(`${filename} uploaded to ${'dynamic-components'}.`)
   // [END storage_upload_file]
