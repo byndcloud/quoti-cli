@@ -35,10 +35,8 @@ class Credentials {
   }
 
   save (data) {
-    if (!data) {
-      data = this
-    }
     try {
+      Object.assign(this, data)
       fs.writeFileSync(credentialsPath, JSON.stringify(data, null, 2))
     } catch (e) {
       console.error(e)

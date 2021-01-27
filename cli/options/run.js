@@ -1,6 +1,6 @@
 const express = require('express')
 const app = express()
-const { exec, spawn } = require('child_process')
+const { exec } = require('child_process')
 const port = 1235
 
 app.get('/sendmodifications', async (req, res) => {
@@ -22,13 +22,10 @@ app.listen(port, async () => {
 
 var firebase = require('firebase/app')
 const fs = require('fs')
-const readline = require('readline')
 
 require('firebase/auth')
 require('firebase/firestore')
-const md5 = require('md5')
-const axios = require('axios')
-const cliSelect = require('cli-select')
+
 const { Storage } = require('@google-cloud/storage')
 // Instantiate a storage client
 const storage = new Storage()
@@ -96,7 +93,7 @@ async function sendExtensionsFile () {
   console.log('Chamando a API')
   // Create a new blob in the bucket and upload the file data.
   // Uploads a local file to the bucket
-  let filename = await getUploadFileName()
+  const filename = await getUploadFileName()
   if (debug) console.time('Upload')
   await bucket.upload('./index.vue', {
     destination: filename,

@@ -4,7 +4,7 @@ const cliSelect = require('cli-select')
 const credentials = require('../credentials')
 
 async function listExtensions (institution) {
-  let token = await firebase.auth().currentUser.getIdToken()
+  const token = await firebase.auth().currentUser.getIdToken()
   const result = await axios.get(
     `https://api.develop.minhaescola.app/api/v1/${institution}/dynamic-components/`,
     {
