@@ -1,4 +1,4 @@
-exports.firebase = require('firebase/app')
+const firebase = require('firebase/app')
 require('firebase/auth')
 require('firebase/firestore')
 
@@ -13,4 +13,5 @@ const firebaseConfig = {
 }
 
 // Initialize Firebase
-exports.app = this.firebase.initializeApp(firebaseConfig)
+exports.firebase = firebase
+exports.app = firebase.initializeApp(firebaseConfig)

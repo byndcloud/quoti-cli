@@ -34,10 +34,10 @@ class Credentials {
     return credentials
   }
 
-  save (data) {
+  save (data = {}) {
     try {
       Object.assign(this, data)
-      fs.writeFileSync(credentialsPath, JSON.stringify(data, null, 2))
+      fs.writeFileSync(credentialsPath, JSON.stringify(this, null, 2))
     } catch (e) {
       console.error(e)
       throw new Error('Error saving credentials file')

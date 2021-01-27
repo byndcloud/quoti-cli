@@ -6,7 +6,7 @@ const { default: Command } = require('@oclif/command')
 
 class SelectExtensionCommand extends Command {
   async run () {
-    const extensions = await listExtensions(credentials.institution)
+    const extensions = await this.listExtensions(credentials.institution)
     const mappedExt = extensions.map(el => el.title)
     const choose = await cliSelect({ values: mappedExt }) // TODO: Replace cliSelect with an oclif plugin
     credentials.extensionId = extensions[choose.id].id

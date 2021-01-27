@@ -1,7 +1,7 @@
-const Auth = require("../services/auth");
+const Auth = require('../services/auth')
 
 module.exports = async function (options) {
   console.log(`Login hook started`)
-  await Auth.silentLogin();
+  await Auth.silentLogin()
   console.log(`Login hook finished`)
-};
+}
