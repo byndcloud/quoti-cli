@@ -68,4 +68,9 @@ DeployCommand.args = [
   }
 ]
 
+DeployCommand.description = `Deploy your extension
+...
+Deploy specify document to your application
+`
+
 module.exports = DeployCommand
