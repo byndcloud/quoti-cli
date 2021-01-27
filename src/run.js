@@ -107,7 +107,7 @@ async function sendExtensionsFile () {
   await firebase
     .firestore()
     .collection('dynamicComponents')
-    .doc(extensionIdStorage)
+    .doc(credentials.extensionIdStorage)
     .update({
       updatedAt: firebase.firestore.FieldValue.serverTimestamp()
     })

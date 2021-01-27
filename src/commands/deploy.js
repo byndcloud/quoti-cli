@@ -8,6 +8,7 @@ const { default: Command } = require('@oclif/command')
 
 class DeployCommand extends Command {
   async run () {
+    await credentials.load()
     console.log('deploy na aplicação', credentials)
     const currentTime = new Date().getTime()
     console.log(currentTime)
@@ -16,11 +17,13 @@ class DeployCommand extends Command {
 
     const url = `https://storage.cloud.google.com/dynamic-components/${filename}`
 
-    if (!fs.existsSync('./index.vue')) {
-      throw new Error('File index.vue not found')
+    const { args } = this.parse(DeployCommand)
+
+    if (!fs.existsSync(args.filePath)) {
+      throw new Error(`File ${args.filePath} not found`)
     }
 
-    await bucket.upload('./index.vue', {
+    await bucket.upload(args.filePath, {
       destination: filename,
       gzip: true,
       metadata: {
@@ -29,7 +32,7 @@ class DeployCommand extends Command {
     })
     const token = await firebase.auth().currentUser.getIdToken()
     const result = await axios.put(
-      `http://localhost:8081/api/v1/${credentials.institution}/dynamic-components/${credentials.extensionId}`,
+      `https://api.develop.minhaescola.app/api/v1/${credentials.institution}/dynamic-components/${credentials.extensionId}`,
       {
         url: url,
         version: currentTime,
@@ -42,12 +45,11 @@ class DeployCommand extends Command {
     await firebase
       .firestore()
       .collection('dynamicComponents')
-      .doc(credentials.extensionIdStorage)
+      .doc(credentials.extensionStorageId)
       .update({
         updatedAtToDeploy: currentTime
       })
     console.log('Deploy feito')
-    process.exit(0)
   }
 
   getUploadFileNameDeploy (currentTime) {
@@ -56,5 +58,14 @@ class DeployCommand extends Command {
 }
 
 // TODO: Add documentation and flags specifications
+
+DeployCommand.args = [
+  {
+    name: 'filePath',
+    required: false,
+    description: 'The path to a file to deploy',
+    default: './src/index.vue'
+  }
+]
 
 module.exports = DeployCommand

@@ -30,4 +30,5 @@ class SelectExtensionCommand extends Command {
   }
 }
 
+// TODO: Find a way to customize command name
 module.exports = SelectExtensionCommand

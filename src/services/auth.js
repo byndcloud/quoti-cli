@@ -44,6 +44,7 @@ class Auth {
   async silentLogin () {
     if (!credentials.exists()) {
       await this.login()
+      credentials.load()
     } else {
       credentials.load()
       try {
