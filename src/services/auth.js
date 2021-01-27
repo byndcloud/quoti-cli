@@ -45,6 +45,7 @@ class Auth {
     if (!credentials.exists()) {
       await this.login()
     } else {
+      credentials.load()
       try {
         const userData = credentials.user
         const user = new firebase.User(
