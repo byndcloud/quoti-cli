@@ -1,15 +1,4 @@
 {
-  "compilerOptions": {        
-    "baseUrl": ".",
-    "paths": {
-      "@/logger": [
-        "src/config/logger.js"
-      ],
-      "@/*": [
-        "src/*"
-      ]
-    }
-  },
   "typeRoots": [
     "./@types",
     "./node_modules/@types"
