@@ -1,12 +1,11 @@
 {
   "name": "cliv2",
-  "description": "A Quoti Extensions LCI",
-  "version": "0.0.0",
+  "description": "A Quoti Extensions CLI",
+  "version": "0.0.1",
   "author": "Nathan @nmf2",
   "bin": {
     "qt": "./bin/run"
   },
-  "bugs": "https://github.com/nmf2/cliv2/issues",
   "dependencies": {
     "@oclif/command": "^1.8.0",
     "@oclif/config": "^1.17.0",
@@ -42,7 +41,10 @@
     "bin": "qt",
     "plugins": [
       "@oclif/plugin-help"
-    ]
+    ],
+    "hooks": {
+      "prerun": "./src/hooks/login"
+    }
   },
   "repository": "nmf2/cliv2",
   "scripts": {
