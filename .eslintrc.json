@@ -17,6 +17,10 @@
     "no-unused-vars": ["warn"],
     "arrow-parens": ["error", "as-needed", {
       "requireForBlockBody": false
-    }]
+    }],
+    "prefer-const": ["warn", {
+      "destructuring": "any",
+      "ignoreReadBeforeAssign": false
+  }]
   }
 }
