@@ -71,5 +71,9 @@ ServeCommand.args = [
     default: './src/index.vue'
   }
 ]
+ServeCommand.description = `Create local serve and Upload file automatically
+...
+A local serve to upload your file automatically
+`
 // TODO: Find a way to customize command name
 module.exports = ServeCommand
