@@ -29,6 +29,6 @@ class SelectExtensionCommand extends Command {
     return result.data
   }
 }
-
+SelectExtensionCommand.description = `Select your extension to work`
 // TODO: Find a way to customize command name
 module.exports = SelectExtensionCommand
