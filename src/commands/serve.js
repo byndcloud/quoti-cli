@@ -3,41 +3,52 @@ const { firebase } = require('../config/firebase')
 const credentials = require('../config/credentials')
 const fs = require('fs')
 const { default: Command } = require('@oclif/command')
-const { spawn } = require('child_process')
+const { spawn, exec } = require('child_process')
 const express = require('express')
 const chalk = require('chalk')
 const app = express()
 const port = 1235
-
+let allowRequest = true
 class ServeCommand extends Command {
   async run () {
     await credentials.load()
     const { args } = this.parse(ServeCommand)
-    app.get('/sendmodifications', async (req, res) => {
-      await this.sendExtensionsFile(args.filePath)
+    app.put('/sendmodifications', async (req, res) => {
+      if (allowRequest) {
+        allowRequest = false
+        this.sendExtensionsFile(args.filePath)
+      }
       res.status(200).send()
     })
 
     app.listen(port, async () => {
-      console.log(`Example app listening at http://localhost:${port}`)
+      console.log(`App listening at http://localhost:${port}`)
       // await silentLogin()
       const spawnResult = spawn('nodemon', [
         '-e', 'vue',
+        '--watch', args.filePath,
         `${__dirname}/../scriptNodemon.js`
       ])
       spawnResult.stdout.on('data', msg => {
-        console.log(msg.toString())
+        if (!msg.toString().includes('nodemon')) { console.log(msg.toString()) }
+        // console.log(msg.toString())
       })
+      // exec(`nodemon -e vue --watch ${args.filePath} ${__dirname}/../scriptNodemon.js`, (err, stdout, stderr) => {
+      //   if (err) {
+      //     console.error(err)
+      //     return
+      //   }
+      //   console.log(stdout)
+      // })
     })
   }
-
   async getUploadFileName () {
     return encodeURI(
       `${credentials.institution}/dev/idExtension${credentials.extensionId}.vue`
     )
   }
   async sendExtensionsFile (path) {
-    console.log('Chamando a API')
+    console.log('Sending file to Quoti...')
     if (!credentials.extensionId) {
       console.log(chalk.yellow('Please select your extension. Try run qt selectExtension'))
       process.exit(0)
@@ -62,7 +73,8 @@ class ServeCommand extends Command {
       .update({
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       })
-    console.log(`${filename} uploaded to ${'dynamic-components'}.`)
+    console.log(chalk.blue(`${filename} uploaded to ${'dynamic-components'}.`))
+    allowRequest = true
   }
 }
 
