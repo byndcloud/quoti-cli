@@ -1,20 +1,18 @@
-const { default: axios } = require('axios')
-const md5 = require('md5')
 const fs = require('fs')
 const { firebase } = require('../config/firebase')
-const { bucket } = require('../config/storage')
 const credentials = require('../config/credentials')
 const { default: Command } = require('@oclif/command')
 const readline = require('readline')
 var http = require('https')
+const api = require('../config/axios')
 
 class DownloadCurrentVersion extends Command {
   async run () {
     await credentials.load()
     const { args } = this.parse(DownloadCurrentVersion)
     const token = await firebase.auth().currentUser.getIdToken()
-    const result = await axios.get(
-      `http://localhost:8081/api/v1/${credentials.institution}/dynamic-components/url-file-active/${credentials.extensionId}`,
+    const result = await api.axios.get(
+      `/${credentials.institution}/dynamic-components/url-file-active/${credentials.extensionId}`,
       {
         headers: {
           Authorization: `Bearer ${token}`

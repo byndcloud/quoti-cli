@@ -1,5 +1,3 @@
-const { default: axios } = require('axios')
-const md5 = require('md5')
 const { bucket } = require('../config/storage')
 const { firebase } = require('../config/firebase')
 const credentials = require('../config/credentials')

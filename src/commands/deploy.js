@@ -1,10 +1,10 @@
-const { default: axios } = require('axios')
 const md5 = require('md5')
 const fs = require('fs')
 const { firebase } = require('../config/firebase')
 const { bucket } = require('../config/storage')
 const credentials = require('../config/credentials')
 const { default: Command } = require('@oclif/command')
+const api = require('../config/axios')
 
 class DeployCommand extends Command {
   async run () {
@@ -31,8 +31,8 @@ class DeployCommand extends Command {
       }
     })
     const token = await firebase.auth().currentUser.getIdToken()
-    const result = await axios.put(
-      `https://api.develop.minhaescola.app/api/v1/${credentials.institution}/dynamic-components/${credentials.extensionId}`,
+    const result = await api.axios.put(
+      `/${credentials.institution}/dynamic-components/${credentials.extensionId}`,
       {
         url: url,
         version: currentTime,

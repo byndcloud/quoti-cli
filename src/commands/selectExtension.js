@@ -1,8 +1,9 @@
-const { default: axios } = require('axios')
 const { firebase } = require('../config/firebase')
 const cliSelect = require('cli-select')
 const credentials = require('../config/credentials')
 const { default: Command } = require('@oclif/command')
+const chalk = require('chalk')
+const api = require('../config/axios')
 
 class SelectExtensionCommand extends Command {
   async run () {
@@ -13,13 +14,12 @@ class SelectExtensionCommand extends Command {
     credentials.extensionStorageId = extensions[choose.id].storeId
     credentials.extensionValue = choose.value
     credentials.save()
-    console.log('\n\n\t\tAgora execure npm run serve')
+    console.log(chalk.yellow('Now run qt serve'))
   }
-
   async listExtensions (institution) {
     const token = await firebase.auth().currentUser.getIdToken()
-    const result = await axios.get(
-      `https://api.develop.minhaescola.app/api/v1/${institution}/dynamic-components/`,
+    const result = await api.axios.get(
+      `/${institution}/dynamic-components/`,
       {
         headers: {
           Authorization: `Bearer ${token}`
