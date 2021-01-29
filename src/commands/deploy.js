@@ -4,17 +4,14 @@ const { firebase } = require('../config/firebase')
 const { bucket } = require('../config/storage')
 const credentials = require('../config/credentials')
 const { default: Command } = require('@oclif/command')
+const chalk = require('chalk')
 const api = require('../config/axios')
 
 class DeployCommand extends Command {
   async run () {
     await credentials.load()
-    console.log('deploy na aplicação', credentials)
-    const currentTime = new Date().getTime()
-    console.log(currentTime)
+    const currentTime = await firebase.firestore.Timestamp.fromDate(new Date()).toMillis()
     const filename = this.getUploadFileNameDeploy(currentTime.toString())
-    console.log(filename)
-
     const url = `https://storage.cloud.google.com/dynamic-components/${filename}`
 
     const { args } = this.parse(DeployCommand)
@@ -41,7 +38,6 @@ class DeployCommand extends Command {
       },
       { headers: { Authorization: `Bearer ${token}` } }
     )
-    console.log(result)
     await firebase
       .firestore()
       .collection('dynamicComponents')
@@ -49,7 +45,7 @@ class DeployCommand extends Command {
       .update({
         updatedAtToDeploy: currentTime
       })
-    console.log('Deploy feito')
+    console.log(chalk.green('Deploy done!'))
   }
 
   getUploadFileNameDeploy (currentTime) {
