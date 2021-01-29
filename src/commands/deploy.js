@@ -16,8 +16,12 @@ class DeployCommand extends Command {
 
     const { args } = this.parse(DeployCommand)
 
-    if (!fs.existsSync(args.filePath)) {
-      throw new Error(`File ${args.filePath} not found`)
+    if (!credentials.extensionId) {
+      console.log(chalk.yellow('Please select your extension. Try run qt selectExtension'))
+      process.exit(0)
+    } else if (!fs.existsSync(args.filePath)) {
+      console.log(chalk.red(`File ${args.filePath} not found`))
+      process.exit(0)
     }
 
     await bucket.upload(args.filePath, {
@@ -46,6 +50,7 @@ class DeployCommand extends Command {
         updatedAtToDeploy: currentTime
       })
     console.log(chalk.green('Deploy done!'))
+    process.exit(0)
   }
 
   getUploadFileNameDeploy (currentTime) {
