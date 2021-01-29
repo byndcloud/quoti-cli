@@ -1,9 +1,11 @@
 const { bucket } = require('../config/storage')
 const { firebase } = require('../config/firebase')
 const credentials = require('../config/credentials')
+const fs = require('fs')
 const { default: Command } = require('@oclif/command')
 const { spawn } = require('child_process')
 const express = require('express')
+const chalk = require('chalk')
 const app = express()
 const port = 1235
 
@@ -37,7 +39,10 @@ class ServeCommand extends Command {
   async sendExtensionsFile (path) {
     console.log('Chamando a API')
     if (!credentials.extensionId) {
-      console.log('Please select your extension. Try run qt selectExtension')
+      console.log(chalk.yellow('Please select your extension. Try run qt selectExtension'))
+      process.exit(0)
+    } else if (!fs.existsSync(path)) {
+      console.log(chalk.red(`File ${path} not found`))
       process.exit(0)
     }
     // Create a new blob in the bucket and upload the file data.
