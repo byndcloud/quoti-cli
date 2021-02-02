@@ -13,6 +13,7 @@ let allowRequest = true
 class ServeCommand extends Command {
   async run () {
     await credentials.load()
+    await manifest.load()
     const { args } = this.parse(ServeCommand)
     app.put('/sendmodifications', async (req, res) => {
       if (allowRequest) {
