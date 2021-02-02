@@ -1,6 +1,7 @@
 const { bucket } = require('../config/storage')
 const { firebase } = require('../config/firebase')
 const credentials = require('../config/credentials')
+const manifest = require('../config/manifest')
 const fs = require('fs')
 const { default: Command } = require('@oclif/command')
 const { spawn, exec } = require('child_process')
@@ -44,12 +45,12 @@ class ServeCommand extends Command {
   }
   async getUploadFileName () {
     return encodeURI(
-      `${credentials.institution}/dev/idExtension${credentials.extensionId}.vue`
+      `${credentials.institution}/dev/idExtension${manifest.extensionId}.vue`
     )
   }
   async sendExtensionsFile (path) {
     console.log('Sending file to Quoti...')
-    if (!credentials.extensionId) {
+    if (!manifest.extensionId) {
       console.log(chalk.yellow('Please select your extension. Try run qt selectExtension'))
       process.exit(0)
     } else if (!fs.existsSync(path)) {
@@ -69,7 +70,7 @@ class ServeCommand extends Command {
     await firebase
       .firestore()
       .collection('dynamicComponents')
-      .doc(credentials.extensionStorageId)
+      .doc(manifest.extensionStorageId)
       .update({
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       })

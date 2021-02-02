@@ -1,6 +1,7 @@
 const { firebase } = require('../config/firebase')
 const cliSelect = require('cli-select')
 const credentials = require('../config/credentials')
+const manifest = require('../config/manifest')
 const { default: Command } = require('@oclif/command')
 const chalk = require('chalk')
 const api = require('../config/axios')
@@ -22,10 +23,10 @@ class SelectExtensionCommand extends Command {
 
           return value
         } }) // TODO: Replace cliSelect with an oclif plugin
-      credentials.extensionId = extensions[choose.id].id
-      credentials.extensionStorageId = extensions[choose.id].storeId
-      credentials.extensionValue = choose.value
-      credentials.save()
+      manifest.extensionId = extensions[choose.id].id
+      manifest.extensionStorageId = extensions[choose.id].storeId
+      manifest.extensionValue = choose.value
+      manifest.save()
       console.log(chalk.green(`Your extension is ${choose.value}`))
       console.log(chalk.yellow('Now run qt serve'))
     } catch (error) {

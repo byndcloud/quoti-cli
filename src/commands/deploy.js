@@ -2,6 +2,7 @@ const md5 = require('md5')
 const fs = require('fs')
 const { firebase } = require('../config/firebase')
 const { bucket } = require('../config/storage')
+const manifest = require('../config/manifest')
 const credentials = require('../config/credentials')
 const { default: Command } = require('@oclif/command')
 const chalk = require('chalk')
@@ -11,6 +12,7 @@ const readline = require('readline')
 class DeployCommand extends Command {
   async run () {
     await credentials.load()
+    await manifest.load()
     try {
       const currentTime = await firebase.firestore.Timestamp.fromDate(new Date()).toMillis()
       const versionName = await this.inputVersionName() || currentTime
@@ -19,7 +21,7 @@ class DeployCommand extends Command {
 
       const { args } = this.parse(DeployCommand)
 
-      if (!credentials.extensionId) {
+      if (!manifest.extensionId) {
         console.log(chalk.yellow('Please select your extension. Try run qt selectExtension'))
         process.exit(0)
       } else if (!fs.existsSync(args.filePath)) {
@@ -36,19 +38,19 @@ class DeployCommand extends Command {
       })
       const token = await firebase.auth().currentUser.getIdToken()
       await api.axios.put(
-        `/${credentials.institution}/dynamic-components/${credentials.extensionId}`,
+        `/${credentials.institution}/dynamic-components/${manifest.extensionId}`,
         {
           url: url,
           version: versionName,
           fileVuePrefix: filename,
-          id: credentials.extensionId
+          id: manifest.extensionId
         },
         { headers: { Authorization: `Bearer ${token}` } }
       )
       await firebase
         .firestore()
         .collection('dynamicComponents')
-        .doc(credentials.extensionStorageId)
+        .doc(manifest.extensionStorageId)
         .update({
           updatedAtToDeploy: currentTime
         })

@@ -2,6 +2,7 @@ const fs = require('fs')
 const chalk = require('chalk')
 const { firebase } = require('../config/firebase')
 const credentials = require('../config/credentials')
+const manifest = require('../config/manifest')
 const { default: Command } = require('@oclif/command')
 const readline = require('readline')
 var http = require('https')
@@ -10,11 +11,12 @@ const api = require('../config/axios')
 class DownloadCurrentVersion extends Command {
   async run () {
     await credentials.load()
+    await manifest.load()
     try {
       const { args } = this.parse(DownloadCurrentVersion)
       const token = await firebase.auth().currentUser.getIdToken()
       const result = await api.axios.get(
-        `/${credentials.institution}/dynamic-components/url-file-active/${credentials.extensionId}`,
+        `/${credentials.institution}/dynamic-components/url-file-active/${manifest.extensionId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`
