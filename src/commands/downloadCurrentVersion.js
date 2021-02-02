@@ -1,4 +1,5 @@
 const fs = require('fs')
+const chalk = require('chalk')
 const { firebase } = require('../config/firebase')
 const credentials = require('../config/credentials')
 const { default: Command } = require('@oclif/command')
@@ -9,31 +10,36 @@ const api = require('../config/axios')
 class DownloadCurrentVersion extends Command {
   async run () {
     await credentials.load()
-    const { args } = this.parse(DownloadCurrentVersion)
-    const token = await firebase.auth().currentUser.getIdToken()
-    const result = await api.axios.get(
-      `/${credentials.institution}/dynamic-components/url-file-active/${credentials.extensionId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`
+    try {
+      const { args } = this.parse(DownloadCurrentVersion)
+      const token = await firebase.auth().currentUser.getIdToken()
+      const result = await api.axios.get(
+        `/${credentials.institution}/dynamic-components/url-file-active/${credentials.extensionId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
         }
+      )
+      let confirmSave = true
+      if (fs.existsSync(args.filePath)) {
+        confirmSave = await this.isReplaceFile(args.filePath)
       }
-    )
-    let confirmSave = true
-    if (fs.existsSync(args.filePath)) {
-      confirmSave = await this.isReplaceFile()
-    }
-    if (confirmSave) this.downloadFile(result.data.url, args.filePath)
 
-    return result.data
+      if (confirmSave) this.downloadFile(result.data.url, args.filePath)
+      console.log(chalk.green(`File saved in ${args.filePath}`))
+      return result.data
+    } catch (error) {
+      console.log(chalk.red(`${error}`))
+    }
   }
-  async isReplaceFile () {
+  async isReplaceFile (path) {
     const rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout
     })
     return new Promise((resolve, reject) => {
-      rl.question('Already there is file with this name. Do you want replace? Yes/No ', answer => {
+      rl.question(`Already there is file with this name in ${path}. Do you want replace? Yes/No `, answer => {
         rl.close()
         if (
           answer.toLowerCase() === 's' ||
@@ -43,7 +49,7 @@ class DownloadCurrentVersion extends Command {
         ) {
           resolve(true)
         } else {
-          console.log('operation canceled')
+          console.log(chalk.red('operation canceled'))
           resolve(false)
         }
       })
@@ -63,7 +69,6 @@ class DownloadCurrentVersion extends Command {
     })
   }
 }
-
 // TODO: Add documentation and flags specifications
 
 DownloadCurrentVersion.args = [
