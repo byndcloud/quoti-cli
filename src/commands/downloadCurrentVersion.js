@@ -11,8 +11,8 @@ const api = require('../config/axios')
 class DownloadCurrentVersion extends Command {
   async run () {
     await credentials.load()
-    await manifest.load()
     try {
+      await manifest.load()
       const { args } = this.parse(DownloadCurrentVersion)
       const token = await firebase.auth().currentUser.getIdToken()
       const result = await api.axios.get(

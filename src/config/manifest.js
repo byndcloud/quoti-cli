@@ -10,7 +10,7 @@ class Manifest {
   load () {
     if (!this.exists()) {
       console.log(manifestPath)
-      throw new Error("manifest file doesn't exist")
+      throw new Error("Manifest file doesn't exist. Please run qt selectExtension")
     }
 
     let raw

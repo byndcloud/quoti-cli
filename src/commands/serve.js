@@ -13,28 +13,29 @@ let allowRequest = true
 class ServeCommand extends Command {
   async run () {
     await credentials.load()
-    await manifest.load()
-    const { args } = this.parse(ServeCommand)
-    app.put('/sendmodifications', async (req, res) => {
-      if (allowRequest) {
-        allowRequest = false
-        this.sendExtensionsFile(args.filePath)
-      }
-      res.status(200).send()
-    })
-
-    app.listen(port, async () => {
-      console.log(`App listening at http://localhost:${port}`)
-      // await silentLogin()
-      const spawnResult = spawn('nodemon', [
-        '-e', 'vue',
-        '--watch', args.filePath,
-        `${__dirname}/../scriptNodemon.js`
-      ])
-      spawnResult.stdout.on('data', msg => {
-        if (!msg.toString().includes('nodemon')) { console.log(msg.toString()) }
-        // console.log(msg.toString())
+    try {
+      await manifest.load()
+      const { args } = this.parse(ServeCommand)
+      app.put('/sendmodifications', async (req, res) => {
+        if (allowRequest) {
+          allowRequest = false
+          this.sendExtensionsFile(args.filePath)
+        }
+        res.status(200).send()
       })
+
+      app.listen(port, async () => {
+        console.log(`App listening at http://localhost:${port}`)
+        // await silentLogin()
+        const spawnResult = spawn('nodemon', [
+          '-e', 'vue',
+          '--watch', args.filePath,
+          `${__dirname}/../scriptNodemon.js`
+        ])
+        spawnResult.stdout.on('data', msg => {
+          if (!msg.toString().includes('nodemon')) { console.log(msg.toString()) }
+        // console.log(msg.toString())
+        })
       // exec(`nodemon -e vue --watch ${args.filePath} ${__dirname}/../scriptNodemon.js`, (err, stdout, stderr) => {
       //   if (err) {
       //     console.error(err)
@@ -42,7 +43,10 @@ class ServeCommand extends Command {
       //   }
       //   console.log(stdout)
       // })
-    })
+      })
+    } catch (error) {
+      console.log(chalk.red(`${error}`))
+    }
   }
   async getUploadFileName () {
     return encodeURI(

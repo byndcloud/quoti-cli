@@ -12,8 +12,8 @@ const readline = require('readline')
 class DeployCommand extends Command {
   async run () {
     await credentials.load()
-    await manifest.load()
     try {
+      await manifest.load()
       const currentTime = await firebase.firestore.Timestamp.fromDate(new Date()).toMillis()
       const versionName = await this.inputVersionName() || currentTime
       const filename = this.getUploadFileNameDeploy(currentTime.toString())
