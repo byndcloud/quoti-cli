@@ -1,7 +1,7 @@
 {
   "name": "quoti-cli",
   "description": "A Quoti Extensions CLI",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "author": "Nathan @nmf2",
   "bin": {
     "qt": "./bin/run"
@@ -61,7 +61,7 @@
       "prerun": "./src/hooks/login"
     }
   },
-  "repository": "nmf2/cliv2",
+  "repository": "/byndcloud/quoti-cli",
   "scripts": {
     "postpack": "rm -f oclif.manifest.json",
     "posttest": "eslint .",

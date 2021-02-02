@@ -1,12 +1,7 @@
-cliv2
+Quoti ClI
 =====
 
 A Quoti Extensions LCI
-
-[![oclif](https://img.shields.io/badge/cli-oclif-brightgreen.svg)](https://oclif.io)
-[![Version](https://img.shields.io/npm/v/cliv2.svg)](https://npmjs.org/package/cliv2)
-[![Downloads/week](https://img.shields.io/npm/dw/cliv2.svg)](https://npmjs.org/package/cliv2)
-[![License](https://img.shields.io/npm/l/cliv2.svg)](https://github.com/nmf2/cliv2/blob/master/package.json)
 
 <!-- toc -->
 * [Usage](#usage)
@@ -15,11 +10,11 @@ A Quoti Extensions LCI
 # Usage
 <!-- usage -->
 ```sh-session
-$ npm install -g cliv2
+$ npm install -g quoti-cli
 $ qt COMMAND
 running command...
 $ qt (-v|--version|version)
-cliv2/0.0.0 linux-x64 node-v14.15.4
+quoti-cli/0.0.4 linux-x64 node-v14.15.0
 $ qt --help [COMMAND]
 USAGE
   $ qt COMMAND
@@ -28,26 +23,46 @@ USAGE
 <!-- usagestop -->
 # Commands
 <!-- commands -->
-* [`qt hello`](#qt-hello)
+* [`qt deploy [FILEPATH]`](#qt-deploy-filepath)
+* [`qt downloadCurrentVersion [FILEPATH]`](#qt-downloadcurrentversion-filepath)
 * [`qt help [COMMAND]`](#qt-help-command)
+* [`qt selectExtension`](#qt-selectextension)
+* [`qt serve [FILEPATH]`](#qt-serve-filepath)
 
-## `qt hello`
+## `qt deploy [FILEPATH]`
 
-Describe the command here
+Deploy your extension
 
 ```
 USAGE
-  $ qt hello
+  $ qt deploy [FILEPATH]
 
-OPTIONS
-  -n, --name=name  name to print
+ARGUMENTS
+  FILEPATH  [default: ./src/index.vue] The path to a file to deploy
 
 DESCRIPTION
   ...
-  Extra documentation goes here
+  Deploy specify document to your application
 ```
 
-_See code: [src/commands/hello.js](https://github.com/nmf2/cliv2/blob/v0.0.0/src/commands/hello.js)_
+_See code: [src/commands/deploy.js](https://github.com/nmf2/cliv2/blob/v0.0.4/src/commands/deploy.js)_
+
+## `qt downloadCurrentVersion [FILEPATH]`
+
+Download your extension active
+
+```
+USAGE
+  $ qt downloadCurrentVersion [FILEPATH]
+
+ARGUMENTS
+  FILEPATH  [default: ./src/index.vue] Download current version
+
+DESCRIPTION
+  ...
+```
+
+_See code: [src/commands/downloadCurrentVersion.js](https://github.com/nmf2/cliv2/blob/v0.0.4/src/commands/downloadCurrentVersion.js)_
 
 ## `qt help [COMMAND]`
 
@@ -65,4 +80,33 @@ OPTIONS
 ```
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v3.2.1/src/commands/help.ts)_
+
+## `qt selectExtension`
+
+Select your extension to work
+
+```
+USAGE
+  $ qt selectExtension
+```
+
+_See code: [src/commands/selectExtension.js](https://github.com/nmf2/cliv2/blob/v0.0.4/src/commands/selectExtension.js)_
+
+## `qt serve [FILEPATH]`
+
+Create local serve and Upload file automatically
+
+```
+USAGE
+  $ qt serve [FILEPATH]
+
+ARGUMENTS
+  FILEPATH  [default: ./src/index.vue] The path to a file to deploy
+
+DESCRIPTION
+  ...
+  A local serve to upload your file automatically
+```
+
+_See code: [src/commands/serve.js](https://github.com/nmf2/cliv2/blob/v0.0.4/src/commands/serve.js)_
 <!-- commandsstop -->
