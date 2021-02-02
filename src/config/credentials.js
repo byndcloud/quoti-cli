@@ -1,48 +1,14 @@
+const chalk = require('chalk')
+const JSONManager = require('./JSONManager')
 const fs = require('fs')
 
-const credentialsPath = './credentials.json'
-
-class Credentials {
-  exists () {
-    return fs.existsSync(credentialsPath)
-  }
-
-  load () {
-    if (!this.exists()) {
-      throw new Error("Credentials file doesn't exist")
-    }
-
-    let raw
-    try {
-      raw = fs.readFileSync(credentialsPath)
-    } catch (e) {
-      // TODO: Auto remove on build?
-      console.error(e)
-      throw new Error(`Error reading credentials file ${credentialsPath}`)
-    }
-
-    let credentials
-    try {
-      credentials = JSON.parse(raw)
-    } catch (e) {
-      console.error(e)
-      throw new Error(`Error parsing credentials file: ${credentialsPath}`)
-    }
-
-    Object.assign(this, credentials)
-
-    return credentials
-  }
-
-  save (data = {}) {
-    try {
-      Object.assign(this, data)
-      fs.writeFileSync(credentialsPath, JSON.stringify(this, null, 2))
-    } catch (e) {
-      console.error(e)
-      throw new Error('Error saving credentials file')
-    }
-  }
+try {
+  fs.mkdirSync('~/.config/quoti-cli/', { recursive: true })
+} catch (e) {
+  console.error(
+    chalk.red("Couldn't create folder at ~/.config/quoti-cli/, message:")
+  )
+  console.error(chalk.red(e))
 }
 
-module.exports = new Credentials()
+module.exports = new JSONManager('~/.config/quoti-cli/credentials.json')
