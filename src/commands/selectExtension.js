@@ -7,26 +7,30 @@ const api = require('../config/axios')
 
 class SelectExtensionCommand extends Command {
   async run () {
-    const extensions = await this.listExtensions(credentials.institution)
-    const mappedExt = extensions.map(el => el.title)
-    console.log(chalk.bgMagentaBright('Choose your extension to work'))
-    const choose = await cliSelect({
-      unselected: '○',
-      selected: '●',
-      values: mappedExt,
-      valueRenderer: (value, selected) => {
-        if (selected) {
-          return chalk.bgMagenta(value)
-        }
+    try {
+      const extensions = await this.listExtensions(credentials.institution)
+      const mappedExt = extensions.map(el => el.title)
+      console.log(chalk.bgMagentaBright('Choose your extension to work'))
+      const choose = await cliSelect({
+        unselected: '○',
+        selected: '●',
+        values: mappedExt,
+        valueRenderer: (value, selected) => {
+          if (selected) {
+            return chalk.bgMagenta(value)
+          }
 
-        return value
-      } }) // TODO: Replace cliSelect with an oclif plugin
-    credentials.extensionId = extensions[choose.id].id
-    credentials.extensionStorageId = extensions[choose.id].storeId
-    credentials.extensionValue = choose.value
-    credentials.save()
-    console.log(chalk.yellow(`Your extension is ${choose.value}`))
-    console.log(chalk.yellow('Now run qt serve'))
+          return value
+        } }) // TODO: Replace cliSelect with an oclif plugin
+      credentials.extensionId = extensions[choose.id].id
+      credentials.extensionStorageId = extensions[choose.id].storeId
+      credentials.extensionValue = choose.value
+      credentials.save()
+      console.log(chalk.green(`Your extension is ${choose.value}`))
+      console.log(chalk.yellow('Now run qt serve'))
+    } catch (error) {
+      console.log(chalk.red(error))
+    }
   }
   async listExtensions (institution) {
     const token = await firebase.auth().currentUser.getIdToken()
