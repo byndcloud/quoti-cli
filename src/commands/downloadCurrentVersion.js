@@ -49,6 +49,7 @@ class DownloadCurrentVersion extends Command {
         pathFile = path + '/index.vue'
       }
     }
+    console.log(pathFile)
     if (fs.existsSync(pathFile)) {
       const rl = readline.createInterface({
         input: process.stdin,
@@ -70,6 +71,8 @@ class DownloadCurrentVersion extends Command {
           }
         })
       })
+    } else {
+      return pathFile
     }
   }
   async downloadFile (url, dest, callback) {
