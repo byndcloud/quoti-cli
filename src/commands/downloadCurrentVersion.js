@@ -27,36 +27,50 @@ class DownloadCurrentVersion extends Command {
           }
         }
       )
-      let confirmSave = true
-      confirmSave = await this.isReplaceFile(args.filePath)
-      if (confirmSave) this.downloadFile(result.data.url, args.filePath)
-      console.log(chalk.green(`File saved in ${args.filePath}`))
+      let pathFile = true
+      pathFile = await this.isReplaceFile(args.filePath)
+      if (pathFile) {
+        await this.downloadFile(result.data.url, pathFile)
+        console.log(chalk.green(`File saved in ${args.filePath}`))
+      }
       return result.data
     } catch (error) {
       console.log(chalk.red(`${error}`))
     }
   }
   async isReplaceFile (path) {
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
-    })
-    return new Promise((resolve, reject) => {
-      rl.question(`Already there is file with this name in ${path}. Do you want replace? Yes/No `, answer => {
-        rl.close()
-        if (
-          answer.toLowerCase() === 's' ||
-          answer.toLowerCase() === 'sim' ||
-          answer.toLowerCase() === 'yes' ||
-          answer.toLowerCase() === 'y'
-        ) {
-          resolve(true)
-        } else {
-          console.log(chalk.red('operation canceled'))
-          resolve(false)
-        }
+    let pathFile
+    if (path.includes('.vue')) {
+      pathFile = path
+    } else {
+      if (path.slice(-1)[0] === '/') {
+        pathFile = path + 'index.vue'
+      } else {
+        pathFile = path + '/index.vue'
+      }
+    }
+    if (fs.existsSync(pathFile)) {
+      const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
       })
-    })
+      return new Promise((resolve, reject) => {
+        rl.question(`Already there is file with this name in ${pathFile}. Do you want replace? Yes/No `, answer => {
+          rl.close()
+          if (
+            answer.toLowerCase() === 's' ||
+            answer.toLowerCase() === 'sim' ||
+            answer.toLowerCase() === 'yes' ||
+            answer.toLowerCase() === 'y'
+          ) {
+            resolve(pathFile)
+          } else {
+            console.log(chalk.red('operation canceled'))
+            resolve(false)
+          }
+        })
+      })
+    }
   }
   async downloadFile (url, dest, callback) {
     var file = fs.createWriteStream(dest)
