@@ -61,7 +61,7 @@
       "prerun": "./src/hooks/login"
     }
   },
-  "repository": "/byndcloud/quoti-cli",
+  "repository": "https://github.com/byndcloud/quoti-cli",
   "scripts": {
     "postpack": "rm -f oclif.manifest.json",
     "posttest": "eslint .",

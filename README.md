@@ -14,7 +14,7 @@ $ npm install -g quoti-cli
 $ qt COMMAND
 running command...
 $ qt (-v|--version|version)
-quoti-cli/0.0.4 linux-x64 node-v14.15.0
+quoti-cli/0.0.5 linux-x64 node-v14.15.0
 $ qt --help [COMMAND]
 USAGE
   $ qt COMMAND
@@ -45,7 +45,7 @@ DESCRIPTION
   Deploy specify document to your application
 ```
 
-_See code: [src/commands/deploy.js](https://github.com/nmf2/cliv2/blob/v0.0.4/src/commands/deploy.js)_
+_See code: [src/commands/deploy.js](https://github.com/byndcloud/quoti-cli/blob/v0.0.5/src/commands/deploy.js)_
 
 ## `qt downloadCurrentVersion [FILEPATH]`
 
@@ -62,7 +62,7 @@ DESCRIPTION
   ...
 ```
 
-_See code: [src/commands/downloadCurrentVersion.js](https://github.com/nmf2/cliv2/blob/v0.0.4/src/commands/downloadCurrentVersion.js)_
+_See code: [src/commands/downloadCurrentVersion.js](https://github.com/byndcloud/quoti-cli/blob/v0.0.5/src/commands/downloadCurrentVersion.js)_
 
 ## `qt help [COMMAND]`
 
@@ -90,7 +90,7 @@ USAGE
   $ qt selectExtension
 ```
 
-_See code: [src/commands/selectExtension.js](https://github.com/nmf2/cliv2/blob/v0.0.4/src/commands/selectExtension.js)_
+_See code: [src/commands/selectExtension.js](https://github.com/byndcloud/quoti-cli/blob/v0.0.5/src/commands/selectExtension.js)_
 
 ## `qt serve [FILEPATH]`
 
@@ -108,5 +108,5 @@ DESCRIPTION
   A local serve to upload your file automatically
 ```
 
-_See code: [src/commands/serve.js](https://github.com/nmf2/cliv2/blob/v0.0.4/src/commands/serve.js)_
+_See code: [src/commands/serve.js](https://github.com/byndcloud/quoti-cli/blob/v0.0.5/src/commands/serve.js)_
 <!-- commandsstop -->
