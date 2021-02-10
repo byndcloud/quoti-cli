@@ -14,6 +14,10 @@ class DownloadCurrentVersion extends Command {
     try {
       await manifest.load()
       const { args } = this.parse(DownloadCurrentVersion)
+      if (!fs.existsSync(args.filePath)) {
+        console.log(chalk.red(`Path ${args.filePath} not is directory`))
+        process.exit(0)
+      }
       const token = await firebase.auth().currentUser.getIdToken()
       const result = await api.axios.get(
         `/${credentials.institution}/dynamic-components/url-file-active/${manifest.extensionId}`,
@@ -24,10 +28,7 @@ class DownloadCurrentVersion extends Command {
         }
       )
       let confirmSave = true
-      if (fs.existsSync(args.filePath)) {
-        confirmSave = await this.isReplaceFile(args.filePath)
-      }
-
+      confirmSave = await this.isReplaceFile(args.filePath)
       if (confirmSave) this.downloadFile(result.data.url, args.filePath)
       console.log(chalk.green(`File saved in ${args.filePath}`))
       return result.data
