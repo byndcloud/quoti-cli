@@ -15,7 +15,7 @@ class DownloadCurrentVersion extends Command {
       await manifest.load()
       const { args } = this.parse(DownloadCurrentVersion)
       if (!fs.existsSync(args.filePath)) {
-        console.log(chalk.red(`Path ${args.filePath} not is directory`))
+        console.log(chalk.red(`Path ${args.filePath} is not directory`))
         process.exit(0)
       }
       const token = await firebase.auth().currentUser.getIdToken()
