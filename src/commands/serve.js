@@ -13,6 +13,10 @@ class ServeCommand extends Command {
     try {
       const { args } = this.parse(ServeCommand)
       console.log(`Changes saved in ${args.filePath} will be displayed on the develop page`)
+      if (!manifest.exists()) {
+        console.log(chalk.yellow('Please select your extension. Try run qt selectExtension'))
+        process.exit(0)
+      }
       await manifest.load()
       nodemon(
         `-e vue --watch ${args.filePath} `,
