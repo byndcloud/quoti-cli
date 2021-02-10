@@ -13,6 +13,10 @@ class DeployCommand extends Command {
   async run () {
     await credentials.load()
     try {
+      if (!manifest.exists()) {
+        console.log(chalk.yellow('Please select your extension. Try run qt selectExtension'))
+        process.exit(0)
+      }
       await manifest.load()
       const currentTime = await firebase.firestore.Timestamp.fromDate(new Date()).toMillis()
       const versionName = await this.inputVersionName() || currentTime

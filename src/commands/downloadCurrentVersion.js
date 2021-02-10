@@ -12,6 +12,10 @@ class DownloadCurrentVersion extends Command {
   async run () {
     await credentials.load()
     try {
+      if (!manifest.exists()) {
+        console.log(chalk.yellow('Please select your extension. Try run qt selectExtension'))
+        process.exit(0)
+      }
       await manifest.load()
       const { args } = this.parse(DownloadCurrentVersion)
       if (!fs.existsSync(args.filePath)) {
