@@ -13,8 +13,15 @@ class ServeCommand extends Command {
     try {
       const { args } = this.parse(ServeCommand)
       console.log(`Changes saved in ${args.filePath} will be displayed on the develop page`)
+      console.log(chalk.green(`Waiting for changes ...`))
+
       if (!manifest.exists()) {
         console.log(chalk.yellow('Please select your extension. Try run qt selectExtension'))
+        process.exit(0)
+      }
+      // if (!fs.existsSync(args.filePath) || args.filePath.slice(-4) !== '.vue') {
+      if (!fs.existsSync(args.filePath) || args.filePath.slice(-4) !== '.vue') {
+        console.log(chalk.red(`Path ${args.filePath} is not directory or file is not .vue`))
         process.exit(0)
       }
       await manifest.load()
