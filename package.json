@@ -1,7 +1,7 @@
 {
   "name": "quoti-cli",
   "description": "A Quoti Extensions CLI",
-  "version": "0.0.6",
+  "version": "0.0.8",
   "author": "Nathan @nmf2",
   "bin": {
     "qt": "./bin/run"
@@ -12,6 +12,7 @@
     "@oclif/config": "^1.17.0",
     "@oclif/plugin-help": "^3.2.1",
     "axios": "^0.21.1",
+    "chokidar": "^3.5.1",
     "cli-select": "^1.1.2",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
