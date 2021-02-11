@@ -1,4 +1,3 @@
-var nodemon = require('nodemon')
 const { bucket } = require('../config/storage')
 const { firebase } = require('../config/firebase')
 const credentials = require('../config/credentials')
@@ -6,6 +5,7 @@ const manifest = require('../config/manifest')
 const fs = require('fs')
 const { default: Command } = require('@oclif/command')
 const chalk = require('chalk')
+const chokidar = require('chokidar')
 
 class ServeCommand extends Command {
   async run () {
@@ -21,23 +21,26 @@ class ServeCommand extends Command {
       }
       // if (!fs.existsSync(args.filePath) || args.filePath.slice(-4) !== '.vue') {
       if (!fs.existsSync(args.filePath) || args.filePath.slice(-4) !== '.vue') {
-        console.log(chalk.red(`Path ${args.filePath} is not directory or file is not .vue`))
+        console.log(chalk.red(`Path ${args.filePath} is not valid directory`))
         process.exit(0)
       }
       await manifest.load()
-      nodemon(
-        `-e vue --watch ${args.filePath} `,
-        {
-          script: 'app.js',
-          ext: 'js json'
-        })
-      nodemon.on('restart', files => {
+      chokidar.watch(args.filePath).on('all', (event, path) => {
         console.log(`Uploading file ${args.filePath}...`)
         this.sendExtensionsFile(args.filePath)
-      }).on('quit', function () {
-        console.log('')
-        process.exit()
       })
+      // nodemon(`-e vue --watch ${args.filePath} -V`)
+      // nodemon.on('restart', files => {
+      //  this.sendExtensionsFile(args.filePath)
+      // }).on('quit', function () {
+      //   console.log('saiu')
+      //   process.exit()
+      // }).on('crash', function (e) {
+      //   console.log('crash', e)
+      //   process.exit()
+      // }).on('start', function (e) {
+      //   console.log('start', e)
+      // })
     } catch (error) {
       console.log(chalk.red(`${error}`))
     }
