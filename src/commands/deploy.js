@@ -1,6 +1,6 @@
 const md5 = require('md5')
 const fs = require('fs')
-const { firebase } = require('../config/firebase')
+const { firebase, appExtension } = require('../config/firebase')
 const { bucket } = require('../config/storage')
 const manifest = require('../config/manifest')
 const credentials = require('../config/credentials')
@@ -51,7 +51,7 @@ class DeployCommand extends Command {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       )
-      await firebase
+      await appExtension
         .firestore()
         .collection('dynamicComponents')
         .doc(manifest.extensionStorageId)

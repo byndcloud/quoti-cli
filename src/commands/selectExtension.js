@@ -1,4 +1,4 @@
-const { firebase } = require('../config/firebase')
+const { app } = require('../config/firebase')
 const cliSelect = require('cli-select')
 const credentials = require('../config/credentials')
 const manifest = require('../config/manifest')
@@ -34,7 +34,7 @@ class SelectExtensionCommand extends Command {
     }
   }
   async listExtensions (institution) {
-    const token = await firebase.auth().currentUser.getIdToken()
+    const token = await app.auth().currentUser.getIdToken()
     const result = await api.axios.get(
       `/${institution}/dynamic-components/`,
       {

@@ -1,5 +1,5 @@
 const { bucket } = require('../config/storage')
-const { firebase } = require('../config/firebase')
+const { firebase, appExtension } = require('../config/firebase')
 const credentials = require('../config/credentials')
 const manifest = require('../config/manifest')
 const fs = require('fs')
@@ -68,7 +68,7 @@ class ServeCommand extends Command {
         cacheControl: 'public, max-age=0'
       }
     })
-    await firebase
+    await appExtension
       .firestore()
       .collection('dynamicComponents')
       .doc(manifest.extensionStorageId)
