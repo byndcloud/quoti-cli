@@ -8,8 +8,13 @@ const { default: Command } = require('@oclif/command')
 const chalk = require('chalk')
 const api = require('../config/axios')
 const readline = require('readline')
+const ExtensionService = require('../services/extension')
 
 class DeployCommand extends Command {
+  constructor () {
+    super(arguments)
+    this.extensionService = new ExtensionService()
+  }
   async run () {
     await credentials.load()
     try {
@@ -25,21 +30,8 @@ class DeployCommand extends Command {
 
       const { args } = this.parse(DeployCommand)
 
-      if (!manifest.extensionId) {
-        console.log(chalk.yellow('Please select your extension. Try run qt selectExtension'))
-        process.exit(0)
-      } else if (!fs.existsSync(args.filePath)) {
-        console.log(chalk.red(`File ${args.filePath} not found`))
-        process.exit(0)
-      }
+      await this.extensionService.upload(args.filePath, filename)
 
-      await bucket.upload(args.filePath, {
-        destination: filename,
-        gzip: true,
-        metadata: {
-          cacheControl: 'public, max-age=0'
-        }
-      })
       const token = await firebase.auth().currentUser.getIdToken()
       await api.axios.put(
         `/${credentials.institution}/dynamic-components/${manifest.extensionId}`,
@@ -51,13 +43,6 @@ class DeployCommand extends Command {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       )
-      await appExtension
-        .firestore()
-        .collection('dynamicComponents')
-        .doc(manifest.extensionStorageId)
-        .update({
-          updatedAtToDeploy: currentTime
-        })
       console.log(chalk.green('Deploy done!'))
       process.exit(0)
     } catch (error) {

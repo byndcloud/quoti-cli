@@ -1,10 +1,13 @@
 const express = require('express')
+const ExtensionService = require('./services/extension')
 const app = express()
 const { exec } = require('child_process')
 const port = 1235
 
+const extensionService = new ExtensionService()
+
 app.get('/sendmodifications', async (req, res) => {
-  await sendExtensionsFile()
+  await extensionService.upload('./index.vue', getUploadFileName())
   res.status(200).send()
 })
 
@@ -27,6 +30,7 @@ require('firebase/auth')
 require('firebase/firestore')
 
 const { Storage } = require('@google-cloud/storage')
+
 // Instantiate a storage client
 const storage = new Storage()
 const bucket = storage.bucket('dynamic-components')
@@ -85,33 +89,6 @@ async function silentLogin (callsetup = false) {
     console.log('Você está trabalhando na extensão ', extensionValue)
   }
 }
-async function getUploadFileName () {
+function getUploadFileName () {
   return encodeURI(`${institution}/dev/idExtension${extensionId}.vue`)
-}
-async function sendExtensionsFile () {
-  var debug = Args.findIndex(a => a === 'debug') > -1
-  console.log('Chamando a API')
-  // Create a new blob in the bucket and upload the file data.
-  // Uploads a local file to the bucket
-  const filename = await getUploadFileName()
-  if (debug) console.time('Upload')
-  await bucket.upload('./index.vue', {
-    destination: filename,
-    gzip: true,
-    metadata: {
-      cacheControl: 'public, max-age=0'
-    }
-  })
-  if (debug) console.timeEnd('Upload')
-  if (debug) console.time('Firebase')
-  await firebase
-    .firestore()
-    .collection('dynamicComponents')
-    .doc(credentials.extensionIdStorage)
-    .update({
-      updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-    })
-  if (debug) console.timeEnd('Firebase')
-  console.log(`${filename} uploaded to ${'dynamic-components'}.`)
-  // [END storage_upload_file]
 }
