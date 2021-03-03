@@ -1,4 +1,5 @@
 const fs = require('fs')
+const { omit } = require('lodash')
 
 class JSONManager {
   constructor (jsonPath) {
@@ -43,7 +44,7 @@ class JSONManager {
   save (data = {}) {
     try {
       Object.assign(this, data)
-      fs.writeFileSync(this.path, JSON.stringify(this, null, 2))
+      fs.writeFileSync(this.path, JSON.stringify(omit(this, 'path'), null, 2))
     } catch (e) {
       console.error(e)
       throw new Error(`Error saving file ${this.path}`)
