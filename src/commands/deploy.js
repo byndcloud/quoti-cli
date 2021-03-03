@@ -1,7 +1,5 @@
 const md5 = require('md5')
-const fs = require('fs')
-const { firebase, appExtension } = require('../config/firebase')
-const { bucket } = require('../config/storage')
+const { firebase } = require('../config/firebase')
 const manifest = require('../config/manifest')
 const credentials = require('../config/credentials')
 const { default: Command } = require('@oclif/command')

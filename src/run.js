@@ -82,7 +82,7 @@ async function silentLogin (callsetup = false) {
     return extensionId
   } else if (!extensionId) {
     console.log(
-      '\n\n\tVocê já estar logado. Agora execute npm run setup para selecionar uma extensão'
+      '\n\n\tVocê já está logado'
     )
     process.exit(0)
   } else {
