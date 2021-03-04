@@ -10,7 +10,7 @@ const ExtensionService = require('../services/extension')
 
 class DeployCommand extends Command {
   constructor () {
-    super(arguments)
+    super(...arguments)
     this.extensionService = new ExtensionService()
   }
   async run () {
@@ -28,7 +28,12 @@ class DeployCommand extends Command {
 
       const { args } = this.parse(DeployCommand)
 
-      await this.extensionService.upload(args.filePath, filename)
+      let extensionPath = args.filePath
+      if (manifest.type === 'build') {
+        extensionPath = await this.extensionService.build(args.filePath)
+      }
+
+      await this.extensionService.upload(extensionPath, filename)
 
       const token = await firebase.auth().currentUser.getIdToken()
       await api.axios.put(
@@ -69,9 +74,8 @@ class DeployCommand extends Command {
 DeployCommand.args = [
   {
     name: 'filePath',
-    required: false,
-    description: 'The path to a file to deploy',
-    default: './src/index.vue'
+    required: true,
+    description: 'The path to a file to deploy'
   }
 ]
 

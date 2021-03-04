@@ -3,8 +3,10 @@ const manifest = require('../config/manifest')
 const { bucket } = require('../config/storage')
 const { firebase, appExtension } = require('../config/firebase')
 const fs = require('fs')
+const path = require('path')
 const VueCliService = require('@vue/cli-service')
 const vueCliService = new VueCliService(process.cwd())
+
 class ExtensionService {
   async upload (localPath, remotePath) {
     if (!manifest.extensionId) {
@@ -33,15 +35,22 @@ class ExtensionService {
     console.log(chalk.blue(`File ${localPath} uploaded.`))
   }
 
-  async build () {
+  async build (entry) {
     vueCliService.init('production')
+    const dest = 'dist/'
+    const name = `${manifest.extensionId}`
+    console.log(`dest, credentials`)
     await vueCliService.run('build', {
+      mode: 'production',
+      modern: true,
       target: 'lib',
       formats: 'umd-min',
-      dest: 'dist/builtComponent',
-      name: 'BuiltComponent',
-      entry: '/home/nmf2/vue-test/test/src/App.vue'
+      dest,
+      name,
+      entry
     })
+
+    return path.join(process.cwd(), dest, `${name}.umd.min.js`)
   }
 }
 

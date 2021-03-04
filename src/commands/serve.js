@@ -10,7 +10,7 @@ const ExtensionService = require('../services/extension')
 
 class ServeCommand extends Command {
   constructor () {
-    super(arguments)
+    super(...arguments)
     this.extensionService = new ExtensionService()
   }
   async run () {
