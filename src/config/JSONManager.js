@@ -10,6 +10,14 @@ class JSONManager {
     }
   }
 
+  delete () {
+    if (!this.exists()) {
+      return false
+    }
+    fs.rmSync(this.path)
+    return true
+  }
+
   exists () {
     return fs.existsSync(this.path)
   }
