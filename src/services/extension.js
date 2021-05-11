@@ -10,7 +10,9 @@ const vueCliService = new VueCliService(process.cwd())
 class ExtensionService {
   async upload (localPath, remotePath) {
     if (!manifest.extensionId) {
-      console.log(chalk.yellow('Please select your extension. Try run qt selectExtension'))
+      console.log(
+        chalk.yellow('Please select your extension. Try run qt selectExtension')
+      )
       process.exit(0)
     } else if (!fs.existsSync(localPath)) {
       console.log(chalk.red(`File ${localPath} not found`))
@@ -47,7 +49,8 @@ class ExtensionService {
       formats: 'umd-min',
       dest,
       name,
-      entry
+      entry,
+      'inline-vue': true
     })
 
     return path.join(process.cwd(), dest, `${name}.umd.min.js`)
