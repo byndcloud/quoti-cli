@@ -23,7 +23,7 @@ class DeployCommand extends Command {
       await manifest.load()
       const currentTime = await firebase.firestore.Timestamp.fromDate(new Date()).toMillis()
       const versionName = await this.inputVersionName() || currentTime
-      const filename = this.getUploadFileNameDeploy(currentTime.toString())
+      const filename = this.getUploadFileNameDeploy(currentTime.toString(), manifest.type === 'build')
       const url = `https://storage.cloud.google.com/dynamic-components/${filename}`
 
       const { args } = this.parse(DeployCommand)
@@ -64,8 +64,8 @@ class DeployCommand extends Command {
       })
     })
   }
-  getUploadFileNameDeploy (currentTime) {
-    return encodeURI(`${credentials.institution}/${md5(currentTime)}.vue`)
+  getUploadFileNameDeploy (currentTime, isBuild) {
+    return encodeURI(`${credentials.institution}/${md5(currentTime)}.${isBuild ? 'js' : 'vue'}`)
   }
 }
 

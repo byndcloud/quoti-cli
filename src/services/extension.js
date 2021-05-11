@@ -38,7 +38,7 @@ class ExtensionService {
   async build (entry) {
     vueCliService.init('production')
     const dest = 'dist/'
-    const name = `${manifest.extensionId}`
+    const name = `dc_${manifest.extensionId}`
     console.log(`dest, credentials`)
     await vueCliService.run('build', {
       mode: 'production',
