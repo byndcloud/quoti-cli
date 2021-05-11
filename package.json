@@ -22,7 +22,8 @@
     "express": "^4.17.1",
     "firebase": "^8.2.3",
     "lodash": "^4.17.21",
-    "md5": "^2.3.0"
+    "md5": "^2.3.0",
+    "vue-template-compiler": "^2.6.12"
   },
   "devDependencies": {
     "@oclif/dev-cli": "^1.26.0",
