@@ -30,9 +30,12 @@ class ServeCommand extends Command {
         process.exit(0)
       }
       await manifest.load()
-      chokidar.watch(args.filePath).on('all', (event, path) => {
-        console.log(`Uploading file ${args.filePath}...`)
-        this.extensionService.upload(args.filePath, this.getUploadFileName())
+      chokidar.watch(args.filePath).on('all', async (event, path) => {
+        console.log(`Building extension...`)
+        await this.extensionService.build(args.filePath)
+        console.log(`Uploading file ${args.distPath}...`)
+        this.extensionService.upload(args.distPath, this.getUploadFileName())
+        console.log(`Upload finished ${this.getUploadFileName()}...`)
       })
       // nodemon(`-e vue --watch ${args.filePath} -V`)
       // nodemon.on('restart', files => {
@@ -52,7 +55,7 @@ class ServeCommand extends Command {
   }
   getUploadFileName () {
     return encodeURI(
-      `${credentials.institution}/dev/idExtension${manifest.extensionId}.vue`
+      `${credentials.institution}/dev/idExtension${manifest.extensionId}.min.js`
     )
   }
 }
@@ -61,8 +64,14 @@ ServeCommand.args = [
   {
     name: 'filePath',
     required: false,
+    description: 'The path to a file to build',
+    default: './src/App.vue'
+  },
+  {
+    name: 'distPath',
+    required: false,
     description: 'The path to a file to deploy',
-    default: './src/index.vue'
+    default: './dist/dc_100000.umd.min.js'
   }
 ]
 ServeCommand.description = `Create local serve and Upload file automatically
