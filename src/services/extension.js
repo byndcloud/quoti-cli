@@ -37,13 +37,13 @@ class ExtensionService {
     console.log(chalk.blue(`File ${localPath} uploaded.`))
   }
 
-  async build (entry) {
-    vueCliService.init('production')
+  async build (entry, { mode = 'production' }) {
+    vueCliService.init(mode)
     const dest = 'dist/'
     const name = `dc_${manifest.extensionId}`
     console.log(`dest, credentials`)
     await vueCliService.run('build', {
-      mode: 'production',
+      mode,
       modern: true,
       target: 'lib',
       formats: 'umd-min',
