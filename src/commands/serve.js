@@ -1,5 +1,3 @@
-const { bucket } = require('../config/storage')
-const { firebase, appExtension } = require('../config/firebase')
 const credentials = require('../config/credentials')
 const manifest = require('../config/manifest')
 const fs = require('fs')
@@ -7,6 +5,7 @@ const { default: Command } = require('@oclif/command')
 const chalk = require('chalk')
 const chokidar = require('chokidar')
 const ExtensionService = require('../services/extension')
+const { debounce } = require('lodash')
 
 class ServeCommand extends Command {
   constructor () {
@@ -45,8 +44,9 @@ class ServeCommand extends Command {
 
       const filesToWatch = [args.filePath, '*.js', './**/*.vue', './**/*.js']
 
-      chokidar.watch(filesToWatch).on('change', this.build(args))
-      chokidar.watch(filesToWatch).on('ready', this.build(args))
+      const debouncedBuild = debounce(this.build(args), 800)
+      chokidar.watch(filesToWatch).on('change', debouncedBuild)
+      chokidar.watch(filesToWatch).on('ready', debouncedBuild)
     } catch (error) {
       console.log(chalk.red(`${error}`))
     }
