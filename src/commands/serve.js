@@ -13,6 +13,18 @@ class ServeCommand extends Command {
     super(...arguments)
     this.extensionService = new ExtensionService()
   }
+  build (args) {
+    return async (event, path) => {
+      console.log(`Building extension...`)
+      await this.extensionService.build(args.filePath, { mode: 'staging' })
+
+      const distPath = `./dist/dc_${manifest.extensionId}.umd.min.js`
+
+      console.log(`Uploading file ${distPath}...`)
+      this.extensionService.upload(distPath, this.getUploadFileName())
+      console.log(`Upload finished ${this.getUploadFileName()}...`)
+    }
+  }
   async run () {
     await credentials.load()
     try {
@@ -30,28 +42,11 @@ class ServeCommand extends Command {
         process.exit(0)
       }
       await manifest.load()
-      chokidar.watch(args.filePath).on('all', async (event, path) => {
-        console.log(`Building extension...`)
-        await this.extensionService.build(args.filePath, { mode: 'staging' })
 
-        const distPath = `./dist/dc_${manifest.extensionId}.umd.min.js`
+      const filesToWatch = [args.filePath, '*.js', './**/*.vue', './**/*.js']
 
-        console.log(`Uploading file ${distPath}...`)
-        this.extensionService.upload(distPath, this.getUploadFileName())
-        console.log(`Upload finished ${this.getUploadFileName()}...`)
-      })
-      // nodemon(`-e vue --watch ${args.filePath} -V`)
-      // nodemon.on('restart', files => {
-      //  this.sendExtensionsFile(args.filePath)
-      // }).on('quit', function () {
-      //   console.log('saiu')
-      //   process.exit()
-      // }).on('crash', function (e) {
-      //   console.log('crash', e)
-      //   process.exit()
-      // }).on('start', function (e) {
-      //   console.log('start', e)
-      // })
+      chokidar.watch(filesToWatch).on('change', this.build(args))
+      chokidar.watch(filesToWatch).on('ready', this.build(args))
     } catch (error) {
       console.log(chalk.red(`${error}`))
     }
