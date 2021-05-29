@@ -20,8 +20,7 @@ class ServeCommand extends Command {
       const distPath = `./dist/dc_${manifest.extensionId}.umd.min.js`
 
       console.log(`Uploading file ${distPath}...`)
-      this.extensionService.upload(distPath, this.getUploadFileName())
-      console.log(`Upload finished ${this.getUploadFileName()}...`)
+      await this.extensionService.upload(distPath, this.getUploadFileName())
     }
   }
   async run () {
