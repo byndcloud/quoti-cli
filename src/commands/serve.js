@@ -1,5 +1,3 @@
-const { bucket } = require('../config/storage')
-const { firebase, appExtension } = require('../config/firebase')
 const credentials = require('../config/credentials')
 const manifest = require('../config/manifest')
 const fs = require('fs')
@@ -7,11 +5,24 @@ const { default: Command } = require('@oclif/command')
 const chalk = require('chalk')
 const chokidar = require('chokidar')
 const ExtensionService = require('../services/extension')
+const { debounce } = require('lodash')
 
 class ServeCommand extends Command {
   constructor () {
     super(...arguments)
     this.extensionService = new ExtensionService()
+  }
+  build (args) {
+    return async (event, path) => {
+      console.log(`Building extension...`)
+      await this.extensionService.build(args.filePath, { mode: 'staging' })
+
+      const distPath = `./dist/dc_${manifest.extensionId}.umd.min.js`
+
+      console.log(`Uploading file ${distPath}...`)
+      this.extensionService.upload(distPath, this.getUploadFileName())
+      console.log(`Upload finished ${this.getUploadFileName()}...`)
+    }
   }
   async run () {
     await credentials.load()
@@ -30,28 +41,12 @@ class ServeCommand extends Command {
         process.exit(0)
       }
       await manifest.load()
-      chokidar.watch(args.filePath).on('all', async (event, path) => {
-        console.log(`Building extension...`)
-        await this.extensionService.build(args.filePath, { mode: 'staging' })
 
-        const distPath = `./dist/dc_${manifest.extensionId}.umd.min.js`
+      const filesToWatch = [args.filePath, '*.js', './**/*.vue', './**/*.js']
 
-        console.log(`Uploading file ${distPath}...`)
-        this.extensionService.upload(distPath, this.getUploadFileName())
-        console.log(`Upload finished ${this.getUploadFileName()}...`)
-      })
-      // nodemon(`-e vue --watch ${args.filePath} -V`)
-      // nodemon.on('restart', files => {
-      //  this.sendExtensionsFile(args.filePath)
-      // }).on('quit', function () {
-      //   console.log('saiu')
-      //   process.exit()
-      // }).on('crash', function (e) {
-      //   console.log('crash', e)
-      //   process.exit()
-      // }).on('start', function (e) {
-      //   console.log('start', e)
-      // })
+      const debouncedBuild = debounce(this.build(args), 800)
+      chokidar.watch(filesToWatch).on('change', debouncedBuild)
+      chokidar.watch(filesToWatch).on('ready', debouncedBuild)
     } catch (error) {
       console.log(chalk.red(`${error}`))
     }
