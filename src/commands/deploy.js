@@ -75,7 +75,8 @@ DeployCommand.args = [
   {
     name: 'filePath',
     required: true,
-    description: 'The path to a file to deploy'
+    description: 'The path to a file to deploy',
+    default: './src/App.vue'
   }
 ]
 
