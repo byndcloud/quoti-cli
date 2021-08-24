@@ -25,6 +25,7 @@ class SelectExtensionCommand extends Command {
         } }) // TODO: Replace cliSelect with an oclif plugin
       manifest.extensionId = extensions[choose.id].id
       manifest.extensionStorageId = extensions[choose.id].storeId
+      manifest.type = extensions[choose.id].type === 'Com build' ? 'build' : 'noBuild'
       manifest.name = choose.value
       manifest.save()
       console.log(chalk.green(`Your extension is ${choose.value}`))
