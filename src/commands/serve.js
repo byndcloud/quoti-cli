@@ -44,8 +44,8 @@ class ServeCommand extends Command {
       const filesToWatch = [args.filePath, '*.js', './**/*.vue', './**/*.js']
 
       const debouncedBuild = debounce(this.build(args), 800)
-      chokidar.watch(filesToWatch).on('change', debouncedBuild)
-      chokidar.watch(filesToWatch).on('ready', debouncedBuild)
+      chokidar.watch(filesToWatch, { ignored: ['node_modules'] }).on('change', debouncedBuild)
+      chokidar.watch(filesToWatch, { ignored: ['node_modules'] }).on('ready', debouncedBuild)
     } catch (error) {
       console.log(chalk.red(`${error}`))
     }
