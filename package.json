@@ -46,7 +46,7 @@
     "nyc": "^14.1.1"
   },
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=14.0.0"
   },
   "files": [
     "/bin",
@@ -70,7 +70,8 @@
       "@oclif/plugin-help"
     ],
     "hooks": {
-      "prerun": "./src/hooks/login"
+      "prerun": "./src/hooks/login",
+      "init": "./src/hooks/node-version"
     }
   },
   "repository": "https://github.com/byndcloud/quoti-cli",
