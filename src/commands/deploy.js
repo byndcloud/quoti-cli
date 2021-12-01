@@ -7,7 +7,7 @@ const chalk = require('chalk')
 const api = require('../config/axios')
 const readline = require('readline')
 const ExtensionService = require('../services/extension')
-
+const fs = require('fs')
 class DeployCommand extends Command {
   constructor () {
     super(...arguments)
@@ -33,7 +33,7 @@ class DeployCommand extends Command {
         extensionPath = await this.extensionService.build(args.filePath)
       }
 
-      await this.extensionService.upload(extensionPath, filename)
+      await this.extensionService.upload(fs.readFileSync(extensionPath), filename)
 
       const token = await firebase.auth().currentUser.getIdToken()
       await api.axios.put(
