@@ -1,26 +1,24 @@
 const chalk = require('chalk')
 const manifest = require('../config/manifest')
-const { bucket } = require('../config/storage')
-const { firebase, appExtension } = require('../config/firebase')
-const fs = require('fs')
+const { firebase, appExtension, storage } = require('../config/firebase')
 const path = require('path')
 const VueCliService = require('@vue/cli-service')
 const vueCliService = new VueCliService(process.cwd())
 
 class ExtensionService {
-  async upload (localPath, remotePath) {
+  async upload (buffer, remotePath) {
     if (!manifest.extensionId) {
       console.log(
         chalk.yellow('Please select your extension. Try run qt selectExtension')
       )
       process.exit(0)
-    } else if (!fs.existsSync(localPath)) {
-      console.log(chalk.red(`File ${localPath} not found`))
+    } else if (!buffer) {
+      console.log(chalk.red(`Buffer is null!`))
       process.exit(0)
     }
     // Create a new buffer in the bucket and upload the file data.
     // Uploads a local file to the bucket
-    await bucket.upload(localPath, {
+    await storage.ref().child(remotePath).put(buffer, {
       destination: remotePath,
       gzip: true,
       metadata: {
@@ -34,7 +32,7 @@ class ExtensionService {
       .update({
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       })
-    console.log(chalk.blue(`File ${localPath} uploaded.`))
+    console.log(chalk.blue(`File uploaded to ${remotePath}.`))
   }
 
   async build (entry, { mode } = { mode: 'production' }) {

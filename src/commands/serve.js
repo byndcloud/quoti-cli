@@ -12,15 +12,16 @@ class ServeCommand extends Command {
     super(...arguments)
     this.extensionService = new ExtensionService()
   }
-  build (args) {
+  buildAndUpload (args) {
     return async (event, path) => {
-      console.log(`Building extension...`)
-      await this.extensionService.build(args.filePath, { mode: 'staging' })
-
-      const distPath = `./dist/dc_${manifest.extensionId}.umd.min.js`
-
+      let distPath = args.filePath
+      if (manifest.type === 'build') {
+        distPath = `./dist/dc_${manifest.extensionId}.umd.min.js`
+        console.log(`Building extension...`)
+        await this.extensionService.build(args.filePath, { mode: 'staging' })
+      }
       console.log(`Uploading file ${distPath}...`)
-      await this.extensionService.upload(distPath, this.getUploadFileName())
+      await this.extensionService.upload(fs.readFileSync(distPath), this.getUploadFileName())
     }
   }
   async run () {
@@ -43,7 +44,7 @@ class ServeCommand extends Command {
 
       const filesToWatch = [args.filePath, '*.js', './**/*.vue', './**/*.js']
 
-      const debouncedBuild = debounce(this.build(args), 800)
+      const debouncedBuild = debounce(this.buildAndUpload(args), 800)
       chokidar.watch(filesToWatch, { ignored: ['node_modules'] }).on('change', debouncedBuild)
       chokidar.watch(filesToWatch, { ignored: ['node_modules'] }).on('ready', debouncedBuild)
     } catch (error) {
@@ -51,8 +52,14 @@ class ServeCommand extends Command {
     }
   }
   getUploadFileName () {
+    let path = `${credentials.institution}/dev/idExtension${manifest.extensionId}.min`
+    if (manifest.type === 'Com build') {
+      path += '.js'
+    } else {
+      path += '.vue'
+    }
     return encodeURI(
-      `${credentials.institution}/dev/idExtension${manifest.extensionId}.min.js`
+      path
     )
   }
 }
