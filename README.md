@@ -14,7 +14,7 @@ $ npm install -g quoti-cli
 $ qt COMMAND
 running command...
 $ qt (-v|--version|version)
-quoti-cli/0.1.2 linux-x64 node-v14.16.0
+quoti-cli/0.1.4 linux-x64 node-v14.17.6
 $ qt --help [COMMAND]
 USAGE
   $ qt COMMAND
@@ -47,7 +47,7 @@ DESCRIPTION
   Deploy specify document to your application
 ```
 
-_See code: [src/commands/deploy.js](https://github.com/byndcloud/quoti-cli/blob/v0.1.2/src/commands/deploy.js)_
+_See code: [src/commands/deploy.js](https://github.com/byndcloud/quoti-cli/blob/v0.1.4/src/commands/deploy.js)_
 
 ## `qt download-current-version [FILEPATH]`
 
@@ -64,7 +64,7 @@ DESCRIPTION
   ...
 ```
 
-_See code: [src/commands/download-current-version.js](https://github.com/byndcloud/quoti-cli/blob/v0.1.2/src/commands/download-current-version.js)_
+_See code: [src/commands/download-current-version.js](https://github.com/byndcloud/quoti-cli/blob/v0.1.4/src/commands/download-current-version.js)_
 
 ## `qt help [COMMAND]`
 
@@ -92,7 +92,7 @@ USAGE
   $ qt login
 ```
 
-_See code: [src/commands/login.js](https://github.com/byndcloud/quoti-cli/blob/v0.1.2/src/commands/login.js)_
+_See code: [src/commands/login.js](https://github.com/byndcloud/quoti-cli/blob/v0.1.4/src/commands/login.js)_
 
 ## `qt logout`
 
@@ -103,7 +103,7 @@ USAGE
   $ qt logout
 ```
 
-_See code: [src/commands/logout.js](https://github.com/byndcloud/quoti-cli/blob/v0.1.2/src/commands/logout.js)_
+_See code: [src/commands/logout.js](https://github.com/byndcloud/quoti-cli/blob/v0.1.4/src/commands/logout.js)_
 
 ## `qt select-extension`
 
@@ -114,7 +114,7 @@ USAGE
   $ qt select-extension
 ```
 
-_See code: [src/commands/select-extension.js](https://github.com/byndcloud/quoti-cli/blob/v0.1.2/src/commands/select-extension.js)_
+_See code: [src/commands/select-extension.js](https://github.com/byndcloud/quoti-cli/blob/v0.1.4/src/commands/select-extension.js)_
 
 ## `qt serve [FILEPATH]`
 
@@ -132,5 +132,5 @@ DESCRIPTION
   A local serve to upload your file automatically
 ```
 
-_See code: [src/commands/serve.js](https://github.com/byndcloud/quoti-cli/blob/v0.1.2/src/commands/serve.js)_
+_See code: [src/commands/serve.js](https://github.com/byndcloud/quoti-cli/blob/v0.1.4/src/commands/serve.js)_
 <!-- commandsstop -->
