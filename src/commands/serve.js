@@ -53,7 +53,7 @@ class ServeCommand extends Command {
   }
   getUploadFileName () {
     let path = `${credentials.institution}/dev/idExtension${manifest.extensionId}.min`
-    if (manifest.type === 'Com build') {
+    if (manifest.type === 'build') {
       path += '.js'
     } else {
       path += '.vue'
