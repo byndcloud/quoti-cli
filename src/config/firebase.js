@@ -22,7 +22,7 @@ const firebaseExtensionConfig = {
   appId: '1:236379322440:web:ab22dafd9a19814b7a407d'
 }
 
-global.XMLHttpRequest = require('xhr2') // Firebase is for web, not for node. this is a workaround to fix.
+// global.XMLHttpRequest = require('xhr2') // Firebase is for web, not for node. this is a workaround to fix.
 
 // Initialize Firebase
 exports.firebase = firebase
