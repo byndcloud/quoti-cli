@@ -42,7 +42,7 @@ class DeployCommand extends Command {
           url: url,
           version: versionName,
           fileVuePrefix: filename,
-          id: manifest.extensionId
+          activated: true
         },
         { headers: { Authorization: `Bearer ${token}` } }
       )
