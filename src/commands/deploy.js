@@ -1,59 +1,71 @@
-const { default: axios } = require('axios')
 const md5 = require('md5')
-const fs = require('fs')
 const { firebase } = require('../config/firebase')
-const { bucket } = require('../config/storage')
+const manifest = require('../config/manifest')
 const credentials = require('../config/credentials')
 const { default: Command } = require('@oclif/command')
-
+const chalk = require('chalk')
+const api = require('../config/axios')
+const readline = require('readline')
+const ExtensionService = require('../services/extension')
+const fs = require('fs')
 class DeployCommand extends Command {
+  constructor () {
+    super(...arguments)
+    this.extensionService = new ExtensionService()
+  }
   async run () {
     await credentials.load()
-    console.log('deploy na aplicação', credentials)
-    const currentTime = new Date().getTime()
-    console.log(currentTime)
-    const filename = this.getUploadFileNameDeploy(currentTime.toString())
-    console.log(filename)
-
-    const url = `https://storage.cloud.google.com/dynamic-components/${filename}`
-
-    const { args } = this.parse(DeployCommand)
-
-    if (!fs.existsSync(args.filePath)) {
-      throw new Error(`File ${args.filePath} not found`)
-    }
-
-    await bucket.upload(args.filePath, {
-      destination: filename,
-      gzip: true,
-      metadata: {
-        cacheControl: 'public, max-age=0'
+    try {
+      if (!manifest.exists()) {
+        console.log(chalk.yellow('Please select your extension. Try run qt selectExtension'))
+        process.exit(0)
       }
-    })
-    const token = await firebase.auth().currentUser.getIdToken()
-    const result = await axios.put(
-      `https://api.develop.minhaescola.app/api/v1/${credentials.institution}/dynamic-components/${credentials.extensionId}`,
-      {
-        url: url,
-        version: currentTime,
-        fileVuePrefix: filename,
-        id: credentials.extensionId
-      },
-      { headers: { Authorization: `Bearer ${token}` } }
-    )
-    console.log(result)
-    await firebase
-      .firestore()
-      .collection('dynamicComponents')
-      .doc(credentials.extensionStorageId)
-      .update({
-        updatedAtToDeploy: currentTime
-      })
-    console.log('Deploy feito')
-  }
+      await manifest.load()
+      const currentTime = await firebase.firestore.Timestamp.fromDate(new Date()).toMillis()
+      const versionName = await this.inputVersionName() || currentTime
+      const filename = this.getUploadFileNameDeploy(currentTime.toString(), manifest.type === 'build')
+      const url = `https://storage.cloud.google.com/dynamic-components/${filename}`
 
-  getUploadFileNameDeploy (currentTime) {
-    return encodeURI(`${credentials.institution}/${md5(currentTime)}.vue`)
+      const { args } = this.parse(DeployCommand)
+
+      let extensionPath = args.filePath
+      if (manifest.type === 'build') {
+        extensionPath = await this.extensionService.build(args.filePath)
+      }
+
+      await this.extensionService.upload(fs.readFileSync(extensionPath), filename)
+
+      const token = await firebase.auth().currentUser.getIdToken()
+      await api.axios.put(
+        `/${credentials.institution}/dynamic-components/${manifest.extensionId}`,
+        {
+          url: url,
+          version: versionName,
+          fileVuePrefix: filename,
+          activated: true
+        },
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      console.log(chalk.green('Deploy done!'))
+      process.exit(0)
+    } catch (error) {
+      console.log(chalk.red(error))
+    }
+  }
+  async inputVersionName () {
+    const rl = readline.createInterface({
+      input: process.stdin,
+      output: process.stdout
+    })
+    return new Promise((resolve, reject) => {
+      rl.question(`Version Name: `, answer => {
+        rl.close()
+        resolve(answer)
+      })
+    })
+  }
+  getUploadFileNameDeploy (currentTime, isBuild) {
+    return encodeURI(`${credentials.institution}/${md5(currentTime)}.${isBuild ? 'js' : 'vue'}`)
   }
 }
 
@@ -62,9 +74,9 @@ class DeployCommand extends Command {
 DeployCommand.args = [
   {
     name: 'filePath',
-    required: false,
+    required: true,
     description: 'The path to a file to deploy',
-    default: './src/index.vue'
+    default: './src/App.vue'
   }
 ]
 

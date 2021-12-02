@@ -2,9 +2,12 @@ const credentials = require('../config/credentials')
 const { app } = require('../config/firebase')
 const readline = require('readline')
 const { firebase } = require('../config/firebase')
+const logo = require('./logo')
+const chalk = require('chalk')
 
 class Auth {
   async login () {
+    console.log(chalk`${logo}`)
     const institution = await this.insertIntitution()
     const customToken = await this.insertToken()
     const authFirebase = await app.auth().signInWithCustomToken(customToken)

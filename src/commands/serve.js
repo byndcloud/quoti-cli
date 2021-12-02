@@ -1,65 +1,66 @@
-const { default: axios } = require('axios')
-const md5 = require('md5')
-const { bucket } = require('../config/storage')
-const { firebase } = require('../config/firebase')
 const credentials = require('../config/credentials')
+const manifest = require('../config/manifest')
+const fs = require('fs')
 const { default: Command } = require('@oclif/command')
-const { spawn } = require('child_process')
-const express = require('express')
-const app = express()
-const port = 1235
+const chalk = require('chalk')
+const chokidar = require('chokidar')
+const ExtensionService = require('../services/extension')
+const { debounce } = require('lodash')
 
 class ServeCommand extends Command {
+  constructor () {
+    super(...arguments)
+    this.extensionService = new ExtensionService()
+  }
+  buildAndUpload (args) {
+    return async (event, path) => {
+      let distPath = args.filePath
+      if (manifest.type === 'build') {
+        distPath = `./dist/dc_${manifest.extensionId}.umd.min.js`
+        console.log(`Building extension...`)
+        await this.extensionService.build(args.filePath, { mode: 'staging' })
+      }
+      console.log(`Uploading file ${distPath}...`)
+      await this.extensionService.upload(fs.readFileSync(distPath), this.getUploadFileName())
+    }
+  }
   async run () {
     await credentials.load()
-    const { args } = this.parse(ServeCommand)
-    app.get('/sendmodifications', async (req, res) => {
-      await this.sendExtensionsFile(args.filePath)
-      res.status(200).send()
-    })
+    try {
+      const { args } = this.parse(ServeCommand)
+      console.log(`Changes saved in ${args.filePath} will be displayed on the develop page`)
+      console.log(chalk.green(`Waiting for changes ...`))
 
-    app.listen(port, async () => {
-      console.log(`Example app listening at http://localhost:${port}`)
-      // await silentLogin()
-      const spawnResult = spawn('nodemon', [
-        '-e', 'vue',
-        `${__dirname}/../scriptNodemon.js`
-      ])
-      spawnResult.stdout.on('data', msg => {
-        console.log(msg.toString())
-      })
-    })
-  }
-
-  async getUploadFileName () {
-    return encodeURI(
-      `${credentials.institution}/dev/idExtension${credentials.extensionId}.vue`
-    )
-  }
-  async sendExtensionsFile (path) {
-    console.log('Chamando a API')
-    if (!credentials.extensionId) {
-      console.log('Please select your extension. Try run qt selectExtension')
-      process.exit(0)
-    }
-    // Create a new blob in the bucket and upload the file data.
-    // Uploads a local file to the bucket
-    const filename = await this.getUploadFileName()
-    await bucket.upload(path, {
-      destination: filename,
-      gzip: true,
-      metadata: {
-        cacheControl: 'public, max-age=0'
+      if (!manifest.exists()) {
+        console.log(chalk.yellow('Please select your extension. Try run qt selectExtension'))
+        process.exit(0)
       }
-    })
-    await firebase
-      .firestore()
-      .collection('dynamicComponents')
-      .doc(credentials.extensionStorageId)
-      .update({
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      })
-    console.log(`${filename} uploaded to ${'dynamic-components'}.`)
+      // if (!fs.existsSync(args.filePath) || args.filePath.slice(-4) !== '.vue') {
+      if (!fs.existsSync(args.filePath) || args.filePath.slice(-4) !== '.vue') {
+        console.log(chalk.red(`Path ${args.filePath} is not valid directory`))
+        process.exit(0)
+      }
+      await manifest.load()
+
+      const filesToWatch = [args.filePath, '*.js', './**/*.vue', './**/*.js']
+
+      const debouncedBuild = debounce(this.buildAndUpload(args), 800)
+      chokidar.watch(filesToWatch, { ignored: ['node_modules'] }).on('change', debouncedBuild)
+      chokidar.watch(filesToWatch, { ignored: ['node_modules'] }).on('ready', debouncedBuild)
+    } catch (error) {
+      console.log(chalk.red(`${error}`))
+    }
+  }
+  getUploadFileName () {
+    let path = `${credentials.institution}/dev/idExtension${manifest.extensionId}.min`
+    if (manifest.type === 'build') {
+      path += '.js'
+    } else {
+      path += '.vue'
+    }
+    return encodeURI(
+      path
+    )
   }
 }
 
@@ -67,9 +68,13 @@ ServeCommand.args = [
   {
     name: 'filePath',
     required: false,
-    description: 'The path to a file to deploy',
-    default: './src/index.vue'
+    description: 'The path to a file to build',
+    default: './src/App.vue'
   }
 ]
+ServeCommand.description = `Create local serve and Upload file automatically
+...
+A local serve to upload your file automatically
+`
 // TODO: Find a way to customize command name
 module.exports = ServeCommand
