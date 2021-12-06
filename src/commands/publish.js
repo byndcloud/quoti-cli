@@ -7,6 +7,7 @@ const { firebase } = require('../config/firebase')
 const readline = require('readline')
 const moment = require('moment')
 const semver = require('semver')
+const { isYes } = require('../utils/index')
 class PublishCommand extends Command {
   async run () {
     // The login itself is done in the hook so just display a message
@@ -103,12 +104,7 @@ class PublishCommand extends Command {
     return new Promise((resolve, reject) => {
       rl.question(`Publish version ${chalk.blue(version)} created at ${chalk.blue(moment(date).format('LLLL'))} on the marketplace? Yes/No `, answer => {
         rl.close()
-        if (
-          answer.toLowerCase() === 's' ||
-            answer.toLowerCase() === 'sim' ||
-            answer.toLowerCase() === 'yes' ||
-            answer.toLowerCase() === 'y'
-        ) {
+        if (isYes(answer)) {
           resolve(version)
         } else {
           console.log(chalk.red('operation canceled'))
@@ -154,12 +150,7 @@ class PublishCommand extends Command {
     return new Promise((resolve, reject) => {
       rl.question(requestText, answer => {
         rl.close()
-        if (
-          answer.toLowerCase() === 's' ||
-            answer.toLowerCase() === 'sim' ||
-            answer.toLowerCase() === 'yes' ||
-            answer.toLowerCase() === 'y'
-        ) {
+        if (isYes(answer)) {
           resolve(answer)
         } else {
           console.log(chalk.red('operation canceled'))
