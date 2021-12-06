@@ -41,7 +41,15 @@ class PublishCommand extends Command {
         }
       )
       const dynamicComponentFile = data[0]
+      if (!dynamicComponentFile) {
+        this.error('Extension not found. Check if you still have this extension')
+        process.exit(0)
+      }
       const dynamicComponentFileActivated = dynamicComponentFile.DynamicComponentsFiles.find(item => item.activated)
+      if (!dynamicComponentFileActivated) {
+        this.error('No version is active for this extension. To perform the publish we first need to deploy some version')
+        process.exit(0)
+      }
       if (!dynamicComponentFile.marketplaceExtensionId) {
         // publish new extension
         if (this.existIncrementVersion(flags)) { this.warning('Flag [--patch] [--minor] [--major] ignored. You are publishing an extension and therefore the [--patch] [--minor] [--major] flag is unimportant in this scenario. Only use when updating a version of an existing extension') }
