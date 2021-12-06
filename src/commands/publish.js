@@ -81,7 +81,11 @@ class PublishCommand extends Command {
         }
         let versionIncrement
         if (!flags.version) {
-          versionIncrement = Object.keys(flags)[0].toUpperCase()
+          if (Object.keys(flags).length === 0) {
+            versionIncrement = 'PATCH'
+          } else {
+            versionIncrement = Object.keys(flags)[0].toUpperCase()
+          }
         }
         const bodyPublishExtensionVersion = {
           dynamicComponentFileId: dynamicComponentFileActivated.id,
