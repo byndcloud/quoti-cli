@@ -10,8 +10,6 @@ const semver = require('semver')
 const { isYes } = require('../utils/index')
 class PublishCommand extends Command {
   async run () {
-    // The login itself is done in the hook so just display a message
-
     try {
       const { flags } = this.parse(PublishCommand)
       if (flags.version && !semver.valid(flags.version)) {
@@ -51,62 +49,66 @@ class PublishCommand extends Command {
         process.exit(0)
       }
       if (!dynamicComponentFile.marketplaceExtensionId) {
-        // publish new extension
-        if (this.existIncrementVersion(flags)) { this.warning('Flag [--patch] [--minor] [--major] ignored. You are publishing an extension and therefore the [--patch] [--minor] [--major] flag is unimportant in this scenario. Only use when updating a version of an existing extension') }
-        const confirmed = await this.confirmQuestion(`Do you want to publish the "${manifest.name}" extension to the marketplace? Yes/No\n`)
-        if (!confirmed) {
-          process.exit(0)
-        }
-        let version
-        if (!flags.version) {
-          let versionIsValid
-          while (!versionIsValid) {
-            version = await this.getResponseFromUser('Which version do you want to publish the extension? default(0.0.1)\n', '0.0.1')
-            versionIsValid = semver.valid(version)
-            if (!versionIsValid) {
-              this.error(chalk.red(`Version must be in x.x.x format`))
-            }
-          }
-        } else {
-          version = flags.version
-        }
-        const bodyPublishExtension = { dynamicComponentFileId: dynamicComponentFileActivated.id, version }
-        await this.publishExtension(bodyPublishExtension, token)
-        this.success('New extension is published with success')
+        await this.publishExtension(flags, dynamicComponentFileActivated.id, token)
       } else {
-        // publish new version
-        const confirmed = await this.confirmQuestion(`Do you want to publish a new version for extension "${manifest.name}" already published in the marketplace? Yes/No\n`)
-        if (!confirmed) {
-          process.exit(0)
-        }
-        let versionIncrement
-        if (!flags.version) {
-          if (Object.keys(flags).length === 0) {
-            versionIncrement = 'PATCH'
-          } else {
-            versionIncrement = Object.keys(flags)[0].toUpperCase()
-          }
-        }
-        const bodyPublishExtensionVersion = {
-          dynamicComponentFileId: dynamicComponentFileActivated.id,
-          version: flags.version,
-          versionIncrement
-        }
-        try {
-          await this.publishExtensionVersion(bodyPublishExtensionVersion, token)
-        } catch (error) {
-          if (error.response.status === 422) {
-            this.error('Intended version is less than or equal to last version')
-          } else {
-            this.error(error.response)
-          }
-          process.exit(0)
-        }
-        this.success('New version is published with success')
+        await this.publishNewVersion(flags, dynamicComponentFileActivated.id, token)
       }
     } catch (error) {
-      console.log(chalk.red(`${error}`))
+      this.error(`${error}`)
     }
+  }
+  async publishExtension (flags, dynamicComponentFileId, token) {
+    if (this.existIncrementVersion(flags)) { this.warning('Flag [--patch] [--minor] [--major] ignored. You are publishing an extension and therefore the [--patch] [--minor] [--major] flag is unimportant in this scenario. Only use when updating a version of an existing extension') }
+    const confirmed = await this.confirmQuestion(`Do you want to publish the "${manifest.name}" extension to the marketplace? Yes/No\n`)
+    if (!confirmed) {
+      process.exit(0)
+    }
+    let version
+    if (!flags.version) {
+      let versionIsValid
+      while (!versionIsValid) {
+        version = await this.getResponseFromUser('Which version do you want to publish the extension? default(0.0.1)\n', '0.0.1')
+        versionIsValid = semver.valid(version)
+        if (!versionIsValid) {
+          this.error(chalk.red(`Version must be in x.x.x format`))
+        }
+      }
+    } else {
+      version = flags.version
+    }
+    const bodyPublishExtension = { dynamicComponentFileId, version }
+    await this.callEndpointPublishExtension(bodyPublishExtension, token)
+    this.success('New extension is published with success')
+  }
+  async publishNewVersion (flags, dynamicComponentFileId, token) {
+    const confirmed = await this.confirmQuestion(`Do you want to publish a new version for extension "${manifest.name}" already published in the marketplace? Yes/No\n`)
+    if (!confirmed) {
+      process.exit(0)
+    }
+    let versionIncrement
+    if (!flags.version) {
+      if (Object.keys(flags).length === 0) {
+        versionIncrement = 'PATCH'
+      } else {
+        versionIncrement = Object.keys(flags)[0].toUpperCase()
+      }
+    }
+    const bodyPublishExtensionVersion = {
+      dynamicComponentFileId,
+      version: flags.version,
+      versionIncrement
+    }
+    try {
+      await this.callEndpointPublishExtensionVersion(bodyPublishExtensionVersion, token)
+    } catch (error) {
+      if (error.response.status === 422) {
+        this.error('Intended version is less than or equal to last version')
+      } else {
+        this.error(error.response)
+      }
+      process.exit(0)
+    }
+    this.success('New version is published with success')
   }
   async confirmVersion (version, date) {
     const rl = readline.createInterface({
@@ -128,14 +130,14 @@ class PublishCommand extends Command {
   commandSintaxeValid (flags) {
     return Object.keys(flags).length < 2
   }
-  async publishExtensionVersion (body, token) {
+  async callEndpointPublishExtensionVersion (body, token) {
     await api.axios.post(
       `/${credentials.institution}/marketplace/extensions/publish-version`,
       body,
       { headers: { Authorization: `Bearer ${token}` } }
     )
   }
-  async publishExtension (body, token) {
+  async callEndpointPublishExtension (body, token) {
     await api.axios.post(
       `/${credentials.institution}/marketplace/extensions`,
       body,
