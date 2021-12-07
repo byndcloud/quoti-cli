@@ -31,7 +31,7 @@ class PublishCommand extends Command {
       const token = await firebase.auth().currentUser.getIdToken()
 
       const { data } = await api.axios.get(
-        `/${credentials.institution}/dynamic-components?where%5Bid%5D=${manifest.extensionId}`,
+        decodeURIComponent(`/${credentials.institution}/dynamic-components?where[id]=${manifest.extensionId}`),
         {
           headers: {
             Authorization: `Bearer ${token}`
