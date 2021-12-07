@@ -23,7 +23,7 @@ class PublishCommand extends Command {
       }
 
       if (!manifest.exists()) {
-        this.warning('Please select your extension. Try run qt selectExtension')
+        this.warning('Please select your extension. Try run qt select-extension')
         process.exit(0)
       }
 
