@@ -7,7 +7,8 @@ const { firebase } = require('../config/firebase')
 const readline = require('readline')
 const moment = require('moment')
 const semver = require('semver')
-const { isYes } = require('../utils/index')
+const Utils = require('../utils/index')
+
 class PublishCommand extends Command {
   async run () {
     try {
@@ -118,7 +119,7 @@ class PublishCommand extends Command {
     return new Promise((resolve, reject) => {
       rl.question(`Publish version ${chalk.blue(version)} created at ${chalk.blue(moment(date).format('LLLL'))} on the marketplace? Yes/No `, answer => {
         rl.close()
-        if (isYes(answer)) {
+        if (Utils.isYes(answer)) {
           resolve(version)
         } else {
           console.log(chalk.red('operation canceled'))
@@ -164,7 +165,7 @@ class PublishCommand extends Command {
     return new Promise((resolve, reject) => {
       rl.question(requestText, answer => {
         rl.close()
-        if (isYes(answer)) {
+        if (Utils.isYes(answer)) {
           resolve(answer)
         } else {
           console.log(chalk.red('operation canceled'))

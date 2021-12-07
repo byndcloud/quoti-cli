@@ -1,7 +1,7 @@
-class Tools {
+class Utils {
   isYes (text) {
     return ['s', 'sim', 'yes', 'y'].includes(text.toLowerCase())
   }
 }
 
-module.exports = new Tools()
+module.exports = new Utils()
