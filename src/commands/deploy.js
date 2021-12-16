@@ -8,7 +8,7 @@ const readline = require('readline')
 const ExtensionService = require('../services/extension')
 const fs = require('fs')
 const JSONManager = require('../config/JSONManager')
-const { path } = require('../config/credentials')
+const path = require('path')
 
 class DeployCommand extends Command {
   async run () {
