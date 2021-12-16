@@ -1,12 +1,16 @@
 const { app } = require('../config/firebase')
 const cliSelect = require('cli-select')
 const credentials = require('../config/credentials')
-const manifest = require('../config/manifest')
 const { default: Command } = require('@oclif/command')
 const chalk = require('chalk')
 const api = require('../config/axios')
+const JSONManager = require('../config/JSONManager')
 
 class SelectExtensionCommand extends Command {
+  constructor () {
+    super(...arguments)
+    this.manifest = new JSONManager('./manifest.json')
+  }
   async run () {
     try {
       const extensions = await this.listExtensions(credentials.institution)
@@ -22,12 +26,13 @@ class SelectExtensionCommand extends Command {
           }
 
           return value
-        } }) // TODO: Replace cliSelect with an oclif plugin
-      manifest.extensionId = extensions[choose.id].id
-      manifest.extensionStorageId = extensions[choose.id].storeId
-      manifest.type = extensions[choose.id].type === 'Com build' ? 'build' : 'noBuild'
-      manifest.name = choose.value
-      manifest.save()
+        }
+      }) // TODO: Replace cliSelect with an oclif plugin
+      this.manifest.extensionId = extensions[ choose.id ].id
+      this.manifest.extensionStorageId = extensions[ choose.id ].storeId
+      this.manifest.type = extensions[ choose.id ].type === 'Com build' ? 'build' : 'noBuild'
+      this.manifest.name = choose.value
+      this.manifest.save()
       console.log(chalk.green(`Your extension is ${choose.value}`))
       console.log(chalk.yellow('Now run qt serve'))
     } catch (error) {

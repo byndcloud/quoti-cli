@@ -1,13 +1,17 @@
 const chalk = require('chalk')
-const manifest = require('../config/manifest')
+// const manifest = require('../config/manifest')
 const { firebase, appExtension, storage } = require('../config/firebase')
 const path = require('path')
 const VueCliService = require('@vue/cli-service')
 const vueCliService = new VueCliService(process.cwd())
 
 class ExtensionService {
+  constructor (manifest) {
+    if (!manifest) throw new Error('The manifest parameter is required to use the ExtensionService')
+    this.manifest = manifest
+  }
   async upload (buffer, remotePath) {
-    if (!manifest.extensionId) {
+    if (!this.manifest.extensionId) {
       console.log(
         chalk.yellow('Please select your extension. Try run qt selectExtension')
       )
@@ -28,7 +32,7 @@ class ExtensionService {
     await appExtension
       .firestore()
       .collection('dynamicComponents')
-      .doc(manifest.extensionStorageId)
+      .doc(this.manifest.extensionStorageId)
       .update({
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       })
@@ -38,7 +42,7 @@ class ExtensionService {
   async build (entry, { mode } = { mode: 'production' }) {
     vueCliService.init(mode)
     const dest = 'dist/'
-    const name = `dc_${manifest.extensionId}`
+    const name = `dc_${this.manifest.extensionId}`
     console.log(`dest, credentials`)
     await vueCliService.run('build', {
       mode,
