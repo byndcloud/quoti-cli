@@ -11,15 +11,12 @@ const JSONManager = require('../config/JSONManager')
 const { path } = require('../config/credentials')
 
 class DeployCommand extends Command {
-  constructor () {
-    super(...arguments)
-    this.extensionService = new ExtensionService()
-  }
   async run () {
     await credentials.load()
     const { args } = this.parse(DeployCommand)
     const manifestPath = path.resolve(path.dirname(args.filePath), 'manifest.json')
     this.manifest = new JSONManager(manifestPath)
+    this.extensionService = new ExtensionService(this.manifest)
     try {
       if (!this.manifest.exists()) {
         console.log(chalk.yellow('Please select your extension. Try run qt selectExtension in the folder where the extension\'s is'))
