@@ -41,18 +41,10 @@ class ServeCommand extends Command {
       if (!changedFilePath) return
 
       const extensionsEntrypointsToCheck = []
-      const currentExtensionPath = args.filePath
-        ? path.resolve(args.filePath)
-        : null
 
-      if (
-        currentExtensionPath &&
-        !this.extensionsPaths.includes(currentExtensionPath)
-      ) {
-        throw new Error(
-          `O caminho especificado (${args.filePath}) não foi declarado como de uma extensão no package.json em quoti.extensions.`
-        )
-      }
+      const currentExtensionPath = args.entryPointPath
+        ? path.resolve(args.entryPointPath)
+        : null
 
       if (!currentExtensionPath) {
         extensionsEntrypointsToCheck.push(...this.extensionsPaths)
@@ -61,7 +53,6 @@ class ServeCommand extends Command {
       }
 
       const changedFileAbsolutePath = path.resolve(changedFilePath)
-
       const extensionsToUpdate = extensionsEntrypointsToCheck.filter(
         entryPoint => {
           const { arr: dependencies } = getDependencyTree({ entry: entryPoint })
@@ -144,7 +135,16 @@ class ServeCommand extends Command {
     try {
       const { args } = this.parse(ServeCommand)
       const filesToWatch = ['*.js', './**/*.vue', './**/*.js']
-      if (args.filePath) filesToWatch.push(args.filePath)
+
+      if (
+        args.entryPointPath &&
+        !this.extensionsPaths.includes(args.entryPointPath)
+      ) {
+        throw new Error(
+          `O caminho especificado (${args.entryPointPath}) não foi declarado como de uma extensão no package.json em quoti.extensions`
+        )
+      }
+
       const websocketURL =
         process.env.WEBSOCKET_URL || 'wss://develop.ws.quoti.cloud'
       this.socket = new Ws(websocketURL, {
@@ -157,6 +157,12 @@ class ServeCommand extends Command {
       chokidar
         .watch(filesToWatch, { ignored: ['node_modules'] })
         .on('change', debouncedBuild)
+
+      const watchingChangesMessage = args.entryPointPath
+        ? `Waching and serving changes in extension at ${args.entryPointPath}`
+        : 'Waching and serving changes in any extension'
+
+      this.log(chalk.blue(watchingChangesMessage))
     } catch (error) {
       console.log(chalk.red(`${error}`))
     }
@@ -174,9 +180,9 @@ class ServeCommand extends Command {
 
 ServeCommand.args = [
   {
-    name: 'filePath',
+    name: 'entryPointPath',
     required: false,
-    description: 'The path to a file to build'
+    description: "The path to an Extension's entry point"
   }
 ]
 ServeCommand.description = `Create local serve and Upload file automatically
