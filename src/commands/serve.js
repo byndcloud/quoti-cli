@@ -13,18 +13,6 @@ const credentials = require('../config/credentials')
 const ExtensionService = require('../services/extension')
 const JSONManager = require('../config/JSONManager')
 
-const connectionUrl =
-  'wss://connect.websocket.in/v3/1?api_key=oCdCMcMPQpbvNjUIzqtvF1d2X2okWpDQj4AwARJuAgtjhzKxVEjQU6IdCjwm&notify_self'
-
-const options = {
-  headers: {
-    Authorization:
-      'Binary 01100100 01100001 01110110 01101001 01100100 01100101 01110110',
-    Cookie: 'uuid=dev-server-whiskas-sachê'
-  }
-}
-const socket = new Ws(connectionUrl, options)
-
 class ServeCommand extends Command {
   constructor () {
     super(...arguments)
@@ -93,7 +81,7 @@ class ServeCommand extends Command {
       Object.entries(manifests).forEach(([path, manifest]) => {
         if (!manifest?.exists()) {
           throw new Error(
-            `manifest.json não encontrado para a extensão em ${path}`
+            `manifest.json não encontrado para a extensão em ${path}, vá para a pasta da extensão e rode qt select-extension`
           )
         }
       })
@@ -126,7 +114,7 @@ class ServeCommand extends Command {
 
       extensionsData.forEach(extensionData => {
         const message = `Built and uploaded extension ${extensionData.extensionInfo.name}`
-        socket.send(
+        this.socket.send(
           JSON.stringify({
             event: 'reload-extension',
             data: {
@@ -157,6 +145,13 @@ class ServeCommand extends Command {
       const { args } = this.parse(ServeCommand)
       const filesToWatch = ['*.js', './**/*.vue', './**/*.js']
       if (args.filePath) filesToWatch.push(args.filePath)
+      const websocketURL =
+        process.env.WEBSOCKET_URL || 'wss://develop.ws.quoti.cloud'
+      this.socket = new Ws(websocketURL, {
+        Cookie: `uuid=${credentials.user.uid}`
+      })
+
+      this.log(chalk.blue('Connected to websocket!'))
 
       const debouncedBuild = debounce(this.buildAndUpload(args), 800)
       chokidar
