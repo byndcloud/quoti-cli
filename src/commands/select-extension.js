@@ -48,6 +48,21 @@ class SelectExtensionCommand extends Command {
         )
       }
 
+      let filesChoices
+      if (!args.entryPointPath) {
+        filesChoices = this.getFilesAsChoices()
+        if (filesChoices.length === 0) {
+          this.log(
+            chalk.yellow(`
+Couldn't find any .vue files in the current directory to be used as an entry point, you have two options:
+1. You can specify an entry point by passing a path to this command: qt select-extension /path/to/entry/point
+2. Navigate to the same folder as the entry point and run: qt select-extension`
+            )
+          )
+          return
+        }
+      }
+
       const spinner = ora({
         text: 'Fetching extensions',
         spinner: 'dots3'
@@ -67,20 +82,24 @@ class SelectExtensionCommand extends Command {
       }
 
       spinner.succeed('Got extensions list!')
-      const choices = extensions.map(ext => ({ name: ext.title, value: ext }))
+      const extensionsChoices = extensions.map(ext => ({
+        name: ext.title,
+        value: ext
+      }))
+
       const { selectedExtension, selectedEntryPoint } = await inquirer.prompt([
-        {
-          name: 'selectedExtension',
-          message: 'Choose your extension:',
-          type: 'list',
-          choices
-        },
         {
           name: 'selectedEntryPoint',
           message: 'Which file is the entry point (main) to your extension?',
           type: 'list',
-          choices: this.getFilesAsChoices(),
+          choices: filesChoices,
           when: !args.entryPointPath
+        },
+        {
+          name: 'selectedExtension',
+          message: 'Choose your extension:',
+          type: 'list',
+          choices: extensionsChoices
         }
       ])
 
