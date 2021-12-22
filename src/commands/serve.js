@@ -91,11 +91,10 @@ class ServeCommand extends Command {
             )
           }
           console.log(`Uploading file ${distPath}...`)
-          const extensionCode = fs
-            .readFileSync(distPath || changedFilePath)
-            .toString()
+          const fileBuffer = fs.readFileSync(distPath || changedFilePath)
+          const extensionCode = fileBuffer.toString()
 
-          // extensionService.upload(fileBuffer, this.getUploadFileName())
+          extensionService.upload(fileBuffer, this.getUploadFileName(manifest))
           return {
             extensionInfo: manifests[entryPoint],
             code: extensionCode
@@ -104,7 +103,6 @@ class ServeCommand extends Command {
       )
 
       extensionsData.forEach(extensionData => {
-        const message = `Built and uploaded extension ${extensionData.extensionInfo.name}`
         this.socket.send(
           JSON.stringify({
             event: 'reload-extension',
@@ -115,9 +113,17 @@ class ServeCommand extends Command {
                 orgSlug: credentials.institution
               }
             }
-          })
+          }),
+          err => {
+            if (!err) {
+              console.log(chalk.blue('Websocket received extension code!'))
+              return
+            }
+            console.log(chalk.red('Error sending code to websocket'))
+            if (process.env.DEBUG) console.error(err)
+          }
         )
-        console.log(message)
+        console.log(`Built extension ${extensionData.extensionInfo.name}`)
       })
     }
   }
@@ -138,7 +144,7 @@ class ServeCommand extends Command {
 
       if (
         args.entryPointPath &&
-        !this.extensionsPaths.includes(args.entryPointPath)
+        !this.extensionsPaths.includes(path.resolve(args.entryPointPath))
       ) {
         throw new Error(
           `O caminho especificado (${args.entryPointPath}) não foi declarado como de uma extensão no package.json em quoti.extensions`
@@ -150,6 +156,7 @@ class ServeCommand extends Command {
       this.socket = new Ws(websocketURL, {
         Cookie: `uuid=${credentials.user.uid}`
       })
+      this.socket.once('error', err => console.error(err))
 
       this.log(chalk.blue('Connected to websocket!'))
 
@@ -167,9 +174,9 @@ class ServeCommand extends Command {
       console.log(chalk.red(`${error}`))
     }
   }
-  getUploadFileName () {
-    let path = `${credentials.institution}/dev/idExtension${this.manifest.extensionId}.min`
-    if (this.manifest.type === 'build') {
+  getUploadFileName (manifest) {
+    let path = `${credentials.institution}/dev/idExtension${manifest.extensionId}.min`
+    if (manifest.type === 'build') {
       path += '.js'
     } else {
       path += '.vue'
