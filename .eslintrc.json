@@ -2,7 +2,9 @@
   "extends": "standard",
   "parserOptions": {
     "sourceType": "module",
-    "allowImportExportEverywhere": false
+    "allowImportExportEverywhere": false,
+    "ecmaVersion": 2020
+
   },
   "env": {
     "mocha": true

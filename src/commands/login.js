@@ -1,6 +1,6 @@
 const credentials = require('../config/credentials')
 const { default: Command } = require('@oclif/command')
-const { default: chalk } = require('chalk')
+const chalk = require('chalk')
 
 class LoginCommand extends Command {
   async run () {

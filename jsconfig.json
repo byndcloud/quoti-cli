@@ -1,7 +1,10 @@
 {
-  "typeRoots": [
-    "./@types",
-    "./node_modules/@types"
-  ],  
-  "exclude": ["node_modules", "dist", "cloudbuild", "public"]
+  "compilerOptions": {
+    "target": "ES2020",
+    "typeRoots": [
+      "./@types",
+      "./node_modules/@types"
+    ],
+  },
+  "exclude": ["node_modules", "dist", "cloudbuild", "public"],
 }
