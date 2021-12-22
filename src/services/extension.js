@@ -7,11 +7,15 @@ const vueCliService = new VueCliService(process.cwd())
 
 class ExtensionService {
   constructor (manifest) {
-    if (!manifest) throw new Error('The manifest parameter is required to use the ExtensionService')
+    if (!manifest) {
+      throw new Error(
+        'The manifest parameter is required to use the ExtensionService'
+      )
+    }
     this.manifest = manifest
   }
   async upload (buffer, remotePath) {
-    if (!this.manifest.extensionId) {
+    if (!this.manifest.exists()) {
       console.log(
         chalk.yellow('Please select your extension. Try run qt selectExtension')
       )
@@ -22,20 +26,17 @@ class ExtensionService {
     }
     // Create a new buffer in the bucket and upload the file data.
     // Uploads a local file to the bucket
-    await storage.ref().child(remotePath).put(buffer, {
-      destination: remotePath,
-      gzip: true,
-      metadata: {
-        cacheControl: 'public, max-age=0'
-      }
-    })
-    await appExtension
-      .firestore()
-      .collection('dynamicComponents')
-      .doc(this.manifest.extensionStorageId)
-      .update({
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+    await storage
+      .ref()
+      .child(remotePath)
+      .put(buffer, {
+        destination: remotePath,
+        gzip: true,
+        metadata: {
+          cacheControl: 'public, max-age=0'
+        }
       })
+
     console.log(chalk.blue(`File uploaded to ${remotePath}.`))
   }
 
