@@ -2,21 +2,25 @@ const fs = require('fs')
 const chalk = require('chalk')
 const { firebase } = require('../config/firebase')
 const credentials = require('../config/credentials')
-const manifest = require('../config/manifest')
 const { default: Command } = require('@oclif/command')
 const readline = require('readline')
 var http = require('https')
 const api = require('../config/axios')
+const JSONManager = require('../config/JSONManager')
 
 class DownloadCurrentVersion extends Command {
+  constructor () {
+    super(...arguments)
+    this.manifest = new JSONManager('./manifest.json')
+  }
   async run () {
     await credentials.load()
     try {
-      if (!manifest.exists()) {
+      if (!this.manifest.exists()) {
         console.log(chalk.yellow('Please select your extension. Try run qt selectExtension'))
         process.exit(0)
       }
-      await manifest.load()
+      await this.manifest.load()
       const { args } = this.parse(DownloadCurrentVersion)
       if (!fs.existsSync(args.filePath)) {
         console.log(chalk.red(`Path ${args.filePath} is not directory`))
@@ -24,7 +28,7 @@ class DownloadCurrentVersion extends Command {
       }
       const token = await firebase.auth().currentUser.getIdToken()
       const result = await api.axios.get(
-        `/${credentials.institution}/dynamic-components/url-file-active/${manifest.extensionId}`,
+        `/${credentials.institution}/dynamic-components/url-file-active/${this.manifest.extensionId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`
@@ -47,7 +51,7 @@ class DownloadCurrentVersion extends Command {
     if (path.includes('.vue')) {
       pathFile = path
     } else {
-      if (path.slice(-1)[0] === '/') {
+      if (path.slice(-1)[ 0 ] === '/') {
         pathFile = path + 'index.vue'
       } else {
         pathFile = path + '/index.vue'
