@@ -54,7 +54,8 @@ class SelectExtensionCommand extends Command {
       const { selectedEntryPoint } = await inquirer.prompt([
         {
           name: 'selectedEntryPoint',
-          message: 'Which file is the entry point (main file) to your extension?',
+          message:
+            'Which file is the entry point (main file) to your extension?',
           type: 'file-tree-selection',
           validate: file => file.endsWith('.vue'),
           hideRoot: true,
@@ -98,6 +99,12 @@ class SelectExtensionCommand extends Command {
       const absoluteExtensionPath = path.resolve(
         args.entryPointPath || selectedEntryPoint
       )
+
+      if (selectedExtension.type === 'Com build' && !this.packageJsonPath) {
+        throw new Error(
+          `The selected extension requires building so you must have a package.json file at the root of your project. Try running npm init at the root of the project or using a template.`
+        )
+      }
 
       if (this.packageJsonPath) {
         await this.addExtensionToPackageJson(absoluteExtensionPath)
