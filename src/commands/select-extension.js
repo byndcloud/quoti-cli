@@ -130,7 +130,7 @@ class SelectExtensionCommand extends Command {
     const manifest = new JSONManager(manifestPath)
 
     manifest.extensionId = extensionData.id
-    manifest.extensionStorageId = extensionData
+    manifest.extensionStorageId = extensionData.extensionStorageId
     manifest.type = extensionData.type === 'Com build' ? 'build' : 'noBuild'
     manifest.name = extensionData.title
 
