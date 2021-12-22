@@ -1,7 +1,7 @@
 {
   "name": "quoti-cli",
   "description": "A Quoti Extensions CLI",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "author": "Nathan @nmf2",
   "preferGlobal": true,
   "bin": {
@@ -11,6 +11,7 @@
     "@google-cloud/storage": "^5.7.2",
     "@oclif/command": "^1.8.16",
     "@oclif/config": "^1.17.0",
+    "@oclif/plugin-help": "^5.1.10",
     "@vue/cli-plugin-babel": "^4.5.15",
     "@vue/cli-plugin-eslint": "^4.5.15",
     "@vue/cli-plugin-typescript": "^4.5.15",
@@ -87,7 +88,6 @@
   "scripts": {
     "postpack": "rm -f oclif.manifest.json",
     "posttest": "eslint .",
-    "prepack": "oclif-dev manifest && oclif-dev readme",
     "test": "nyc mocha --forbid-only \"test/**/*.test.js\"",
     "version": "oclif-dev readme && git add README.md"
   }
