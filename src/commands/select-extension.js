@@ -5,6 +5,7 @@ const { union } = require('lodash')
 const inquirer = require('inquirer')
 const readJSON = require('json-file-plus')
 const readPkgSync = require('read-pkg-up').sync
+const inquirerFileTreeSelection = require('inquirer-file-tree-selection-prompt')
 
 const { merge } = require('lodash')
 const { readdirSync, existsSync } = require('fs')
@@ -15,6 +16,8 @@ const { app } = require('../config/firebase')
 const credentials = require('../config/credentials')
 const api = require('../config/axios')
 const JSONManager = require('../config/JSONManager')
+
+inquirer.registerPrompt('file-tree-selection', inquirerFileTreeSelection)
 
 class SelectExtensionCommand extends Command {
   constructor () {
@@ -48,20 +51,16 @@ class SelectExtensionCommand extends Command {
         )
       }
 
-      let filesChoices
-      if (!args.entryPointPath) {
-        filesChoices = this.getFilesAsChoices()
-        if (filesChoices.length === 0) {
-          this.log(
-            chalk.yellow(`
-Couldn't find any .vue files in the current directory to be used as an entry point, you have two options:
-1. You can specify an entry point by passing a path to this command: qt select-extension /path/to/entry/point
-2. Navigate to the same folder as the entry point and run: qt select-extension`
-            )
-          )
-          return
+      const { selectedEntryPoint } = await inquirer.prompt([
+        {
+          name: 'selectedEntryPoint',
+          message: 'Which file is the entry point (main file) to your extension?',
+          type: 'file-tree-selection',
+          validate: file => file.endsWith('.vue'),
+          hideRoot: true,
+          when: !args.entryPointPath
         }
-      }
+      ])
 
       const spinner = ora({
         text: 'Fetching extensions',
@@ -87,14 +86,7 @@ Couldn't find any .vue files in the current directory to be used as an entry poi
         value: ext
       }))
 
-      const { selectedExtension, selectedEntryPoint } = await inquirer.prompt([
-        {
-          name: 'selectedEntryPoint',
-          message: 'Which file is the entry point (main) to your extension?',
-          type: 'list',
-          choices: filesChoices,
-          when: !args.entryPointPath
-        },
+      const { selectedExtension } = await inquirer.prompt([
         {
           name: 'selectedExtension',
           message: 'Choose your extension:',
@@ -111,7 +103,10 @@ Couldn't find any .vue files in the current directory to be used as an entry poi
         await this.addExtensionToPackageJson(absoluteExtensionPath)
       }
 
-      this.upsertManifest(absoluteExtensionPath, selectedExtension)
+      this.upsertManifest(
+        path.resolve(path.dirname(absoluteExtensionPath), 'manifest.json'),
+        selectedExtension
+      )
 
       console.log(chalk.green('Extension selected! \\o/'))
       console.log(
@@ -124,10 +119,8 @@ Couldn't find any .vue files in the current directory to be used as an entry poi
     }
   }
 
-  upsertManifest (extensionPath, extensionData) {
-    const manifest = new JSONManager(
-      path.resolve(path.dirname(extensionPath), 'manifest.json')
-    )
+  upsertManifest (manifestPath, extensionData) {
+    const manifest = new JSONManager(manifestPath)
 
     manifest.extensionId = extensionData.id
     manifest.extensionStorageId = extensionData
