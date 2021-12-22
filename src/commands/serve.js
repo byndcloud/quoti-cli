@@ -12,6 +12,7 @@ const { default: Command } = require('@oclif/command')
 const credentials = require('../config/credentials')
 const ExtensionService = require('../services/extension')
 const JSONManager = require('../config/JSONManager')
+const socket = require('../config/socket')
 
 class ServeCommand extends Command {
   constructor () {
@@ -61,6 +62,11 @@ class ServeCommand extends Command {
         }
       )
 
+      // Victor: code below suports to extensions wich type is noBuild
+      if (!extensionsToUpdate.length && changedFilePath.includes('.vue')) {
+        extensionsToUpdate.push(changedFilePath)
+      }
+
       const manifests = extensionsToUpdate.reduce(
         (manifestsObj, entryPoint) => {
           manifestsObj[entryPoint] = this.getManifestFromEntryPoint(entryPoint)
@@ -79,7 +85,7 @@ class ServeCommand extends Command {
 
       const extensionsData = await Promise.all(
         extensionsToUpdate.map(async entryPoint => {
-          let distPath = null
+          let distPath = entryPoint
           const manifest = manifests[entryPoint]
           const extensionService = new ExtensionService(manifest)
           if (manifest.type === 'build') {
@@ -102,28 +108,28 @@ class ServeCommand extends Command {
         })
       )
 
-      extensionsData.forEach(extensionData => {
-        this.socket.send(
-          JSON.stringify({
-            event: 'reload-extension',
-            data: {
-              ...extensionData,
-              user: {
-                uid: credentials.user.uid,
-                orgSlug: credentials.institution
-              }
-            }
-          }),
-          err => {
-            if (!err) {
-              console.log(chalk.blue('Websocket received extension code!'))
-              return
-            }
-            console.log(chalk.red('Error sending code to websocket'))
-            if (process.env.DEBUG) console.error(err)
-          }
-        )
+      extensionsData.forEach(async extensionData => {
         console.log(`Built extension ${extensionData.extensionInfo.name}`)
+
+        const err = await socket.emit({
+          event: 'reload-extension',
+          data: {
+            ...extensionData,
+            user: {
+              uid: credentials.user.uid,
+              orgSlug: credentials.institution
+            }
+          }
+        })
+
+        if (!err) {
+          console.log(chalk.blue('Quoti received extension code!'))
+          return
+        }
+        console.log(chalk.red('Error sending code to Quoti', err))
+        if (process.env.DEBUG) {
+          console.error(err)
+        }
       })
     }
   }
@@ -151,14 +157,7 @@ class ServeCommand extends Command {
         )
       }
 
-      const websocketURL =
-        process.env.WEBSOCKET_URL || 'wss://develop.ws.quoti.cloud'
-      this.socket = new Ws(websocketURL, {
-        Cookie: `uuid=${credentials.user.uid}`
-      })
-      this.socket.once('error', err => console.error(err))
-
-      this.log(chalk.blue('Connected to websocket!'))
+      this.log(chalk.blue('Connected to Quoti!'))
 
       const debouncedBuild = debounce(this.buildAndUpload(args), 800)
       chokidar
