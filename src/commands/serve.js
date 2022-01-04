@@ -12,11 +12,13 @@ const { default: Command } = require('@oclif/command')
 const credentials = require('../config/credentials')
 const ExtensionService = require('../services/extension')
 const JSONManager = require('../config/JSONManager')
-const socket = require('../config/socket')
+const Socket = require('../config/socket')
 
 class ServeCommand extends Command {
   constructor () {
     super(...arguments)
+
+    this.socket = new Socket()
 
     credentials.load()
 
@@ -111,7 +113,7 @@ class ServeCommand extends Command {
       extensionsData.forEach(async extensionData => {
         console.log(`Built extension ${extensionData.extensionInfo.name}`)
 
-        const err = await socket.emit({
+        const err = await this.socket.emit({
           event: 'reload-extension',
           data: {
             ...extensionData,
