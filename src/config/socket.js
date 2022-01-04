@@ -25,7 +25,7 @@ module.exports = new (class Socket {
     this.connInterval = setInterval(() => {
       if (this.socket !== null) {
         clearInterval(this.connInterval)
-      } else {
+      } else if (credentials?.user?.uid) {
         this.socket = new Ws(socketServerUrl, {
           Cookie: `uuid=${credentials.user.uid}`
         })
