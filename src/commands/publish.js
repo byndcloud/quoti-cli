@@ -1,6 +1,6 @@
 const credentials = require('../config/credentials')
 const { default: Command, flags } = require('@oclif/command')
-const { default: chalk } = require('chalk')
+const chalk = require('chalk')
 const manifest = require('../config/manifest')
 const api = require('../config/axios')
 const { firebase } = require('../config/firebase')
@@ -55,7 +55,7 @@ class PublishCommand extends Command {
         await this.publishNewVersion(flags, dynamicComponentFileActivated.id, token)
       }
     } catch (error) {
-      this.error(`${error}`)
+      this.error(JSON.stringify(error, null, 2))
     }
   }
   async publishExtension (flags, dynamicComponentFileId, token) {
@@ -105,7 +105,7 @@ class PublishCommand extends Command {
       if (error.response.status === 422) {
         this.error('Intended version is less than or equal to last version')
       } else {
-        this.error(error.response)
+        this.error(JSON.stringify(error, null, 2))
       }
       process.exit(0)
     }
