@@ -91,7 +91,10 @@ class ServeCommand extends Command {
           const manifest = manifests[entryPoint]
           const extensionService = new ExtensionService(manifest)
           if (manifest.type === 'build') {
-            distPath = `./dist/dc_${manifest.extensionId}.umd.min.js`
+            if (manifest.extensionUUID === '') {
+              await extensionService.createExtensionUUID()
+            }
+            distPath = `./dist/dc_${manifest.extensionUUID}.umd.min.js`
             console.log(`Building extension...`)
             await extensionService.build(entryPoint, { mode: 'staging' })
             console.log(
