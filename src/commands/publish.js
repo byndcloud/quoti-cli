@@ -13,6 +13,10 @@ class PublishCommand extends Command {
   async run () {
     try {
       const { flags } = this.parse(PublishCommand)
+      if (manifest.extensionUUID === '') {
+        this.error(`For security reasons it is necessary to re-deploy your extension before publishing it on the marketplace. Once deployed, this message will no longer appear, but even with deploy, whenever you want to switch to a version older than today's date, it will be necessary to deploy before.`)
+        process.exit(0)
+      }
       if (flags.version && !semver.valid(flags.version)) {
         this.error(`Version must be in x.x.x format`)
         process.exit(0)
@@ -77,7 +81,7 @@ class PublishCommand extends Command {
     } else {
       version = flags.version
     }
-    const bodyPublishExtension = { dynamicComponentFileId, version }
+    const bodyPublishExtension = { dynamicComponentFileId, version, extensionUUID: manifest.extensionUUID }
     await this.callEndpointPublishExtension(bodyPublishExtension, token)
     this.success('New extension is published with success')
   }
