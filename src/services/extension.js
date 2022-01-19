@@ -61,7 +61,7 @@ class ExtensionService {
   }
 
   async build (entry, { mode } = { mode: 'production' }) {
-    if (this.manifest.extensionUUID === '') {
+    if (!this.manifest.extensionUUID) {
       await this.createExtensionUUID()
     }
     vueCliService.init(mode)

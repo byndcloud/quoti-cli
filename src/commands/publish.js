@@ -13,7 +13,7 @@ class PublishCommand extends Command {
   async run () {
     try {
       const { flags } = this.parse(PublishCommand)
-      if (manifest.extensionUUID === '') {
+      if (!manifest.extensionUUID) {
         this.error(`For security reasons it is necessary to re-deploy your extension before publishing it on the marketplace. Once deployed, this message will no longer appear, but even with deploy, whenever you want to switch to a version older than today's date, it will be necessary to deploy before.`)
         process.exit(0)
       }
