@@ -2,7 +2,7 @@ const chalk = require('chalk')
 const { firebase, storage } = require('../config/firebase')
 const path = require('path')
 const VueCliService = require('@vue/cli-service')
-const { v4: uuidv4 } = require('uuid')
+const { randomUUID } = require('crypto')
 const vueCliService = new VueCliService(process.cwd())
 const api = require('../config/axios')
 const credentials = require('../config/credentials')
@@ -46,7 +46,7 @@ class ExtensionService {
     console.log(chalk.blue(`Creating new extension UUID.`))
     console.log(chalk.yellow(`Whenever you update to a version older than ${new Date()} you must build it first.`))
 
-    const uuid = uuidv4()
+    const uuid = randomUUID()
     await credentials.load()
     const token = await firebase.auth().currentUser.getIdToken()
     const id = this.manifest.extensionId
