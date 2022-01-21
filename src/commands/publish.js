@@ -1,18 +1,46 @@
 const credentials = require('../config/credentials')
 const { default: Command, flags } = require('@oclif/command')
 const chalk = require('chalk')
-const manifest = require('../config/manifest')
 const api = require('../config/axios')
 const { firebase } = require('../config/firebase')
 const readline = require('readline')
 const moment = require('moment')
 const semver = require('semver')
 const Utils = require('../utils/index')
+const { getManifestFromEntryPoint } = require('../utils/index')
+const inquirer = require('inquirer')
+const readPkgSync = require('read-pkg-up').sync
+const path = require('path')
 
 class PublishCommand extends Command {
+  constructor () {
+    super(...arguments)
+
+    credentials.load()
+
+    const pkgInfo = readPkgSync()
+    if (!pkgInfo?.packageJson) {
+      throw new Error(
+        'Nenhum arquivo package.json encontrado, tem certeza que o diretório atual é de um projeto Vue?'
+      )
+    }
+
+    this.projectRoot = path.resolve(path.dirname(pkgInfo.path))
+    this.extensionsPaths = pkgInfo.packageJson.quoti.extensions.map(extPath =>
+      path.resolve(this.projectRoot, extPath)
+    )
+    if (this.extensionsPaths.length === 0) {
+      throw new Error(
+        'Nenhuma extensão declarada no package.json, adicione o entrypoint da sua extensão em um array no path quoti.extensions dentro do package.json'
+      )
+    }
+  }
   async run () {
     try {
-      const { flags } = this.parse(PublishCommand)
+      const { flags, args } = this.parse(PublishCommand)
+      const { entryPointPath } = args
+      const manifest = await this.getManifest(entryPointPath)
+      console.log(manifest)
       if (!manifest.extensionUUID) {
         this.error(`For security reasons it is necessary to re-deploy your extension before publishing it on the marketplace. Once deployed, this message will no longer appear, but even with deploy, whenever you want to switch to a version older than today's date, it will be necessary to deploy before.`)
         process.exit(0)
@@ -27,12 +55,11 @@ class PublishCommand extends Command {
         process.exit(0)
       }
 
-      if (!manifest.exists()) {
+      if (!manifest) {
         this.warning('Please select your extension. Try run qt select-extension')
         process.exit(0)
       }
 
-      await manifest.load()
       const token = await firebase.auth().currentUser.getIdToken()
 
       const { data } = await api.axios.get(
@@ -54,15 +81,15 @@ class PublishCommand extends Command {
         process.exit(0)
       }
       if (!dynamicComponentFile.marketplaceExtensionId) {
-        await this.publishExtension(flags, dynamicComponentFileActivated.id, token)
+        await this.publishExtension(flags, dynamicComponentFileActivated.id, token, manifest)
       } else {
-        await this.publishNewVersion(flags, dynamicComponentFileActivated.id, token)
+        await this.publishNewVersion(flags, dynamicComponentFileActivated.id, token, manifest)
       }
     } catch (error) {
-      this.error(JSON.stringify(error, null, 2))
+      this.error(error)
     }
   }
-  async publishExtension (flags, dynamicComponentFileId, token) {
+  async publishExtension (flags, dynamicComponentFileId, token, manifest) {
     if (this.existIncrementVersion(flags)) { this.warning('Flag [--patch] [--minor] [--major] ignored. You are publishing an extension and therefore the [--patch] [--minor] [--major] flag is unimportant in this scenario. Only use when updating a version of an existing extension') }
     const confirmed = await this.confirmQuestion(`Do you want to publish the "${manifest.name}" extension to the marketplace? Yes/No\n`)
     if (!confirmed) {
@@ -85,7 +112,7 @@ class PublishCommand extends Command {
     await this.callEndpointPublishExtension(bodyPublishExtension, token)
     this.success('New extension is published with success')
   }
-  async publishNewVersion (flags, dynamicComponentFileId, token) {
+  async publishNewVersion (flags, dynamicComponentFileId, token, manifest) {
     const confirmed = await this.confirmQuestion(`Do you want to publish a new version for extension "${manifest.name}" already published in the marketplace? Yes/No\n`)
     if (!confirmed) {
       process.exit(0)
@@ -178,6 +205,30 @@ class PublishCommand extends Command {
       })
     })
   }
+  async getManifest (entryPointPath) {
+    if (entryPointPath) {
+      return getManifestFromEntryPoint(entryPointPath)
+    }
+    const extensionsChoices = this.extensionsPaths.map(e => ({ name: path.relative(
+      './',
+      e
+    ),
+    value: e }))
+    if (extensionsChoices.length > 1) {
+      const { selectedExtensionPublish } = await inquirer.prompt([
+        {
+          name: 'selectedExtensionPublish',
+          message: 'Qual extensão deseja publicar ?',
+          type: 'list',
+          choices: extensionsChoices
+        }
+      ])
+      entryPointPath = selectedExtensionPublish
+    } else {
+      entryPointPath = extensionsChoices[0].value
+    }
+    return getManifestFromEntryPoint(entryPointPath)
+  }
   // todo: ajustar numa próxima task para termos um logger
   success (text) {
     console.log(chalk.blue('SUCCESS: ' + text))
@@ -216,5 +267,12 @@ PublishCommand.flags = {
   })
 
 }
+PublishCommand.args = [
+  {
+    name: 'entryPointPath',
+    required: false,
+    description: "The path to an Extension's entry point"
+  }
+]
 
 module.exports = PublishCommand
