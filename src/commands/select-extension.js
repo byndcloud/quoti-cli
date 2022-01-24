@@ -133,6 +133,7 @@ class SelectExtensionCommand extends Command {
     manifest.extensionStorageId = extensionData.extensionStorageId
     manifest.type = extensionData.type === 'Com build' ? 'build' : 'noBuild'
     manifest.name = extensionData.title
+    manifest.extensionUUID = extensionData.extensionUUID
 
     manifest.save()
 
