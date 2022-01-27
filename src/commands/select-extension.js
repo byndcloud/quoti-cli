@@ -16,8 +16,10 @@ const { app } = require('../config/firebase')
 const credentials = require('../config/credentials')
 const api = require('../config/axios')
 const JSONManager = require('../config/JSONManager')
+const fuzzy = require('fuzzy')
 
 inquirer.registerPrompt('file-tree-selection', inquirerFileTreeSelection)
+inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'))
 
 class SelectExtensionCommand extends Command {
   constructor () {
@@ -90,9 +92,19 @@ class SelectExtensionCommand extends Command {
       const { selectedExtension } = await inquirer.prompt([
         {
           name: 'selectedExtension',
-          message: 'Choose your extension:',
-          type: 'list',
-          choices: extensionsChoices
+          message: 'Escolha sua extensão:',
+          type: 'autocomplete',
+          choices: extensionsChoices,
+          searchText: 'Carregando...',
+          emptyText: 'Nem resultado encontrado para a pesquisa realizada',
+          source: function (answersSoFar, input) {
+            if (input) {
+              const fuzzyResult = fuzzy.filter(input, extensionsChoices.map(e => e.name))
+              return fuzzyResult.map(fr => extensionsChoices[fr.index])
+            } else {
+              return extensionsChoices
+            }
+          }
         }
       ])
 

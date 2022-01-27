@@ -3,10 +3,10 @@ const chalk = require('chalk')
 const { firebase } = require('../config/firebase')
 const credentials = require('../config/credentials')
 const { default: Command } = require('@oclif/command')
-const readline = require('readline')
 var http = require('https')
 const api = require('../config/axios')
 const JSONManager = require('../config/JSONManager')
+const { confirmQuestion } = require('../utils/index')
 
 class DownloadCurrentVersion extends Command {
   constructor () {
@@ -59,26 +59,12 @@ class DownloadCurrentVersion extends Command {
     }
     console.log(pathFile)
     if (fs.existsSync(pathFile)) {
-      const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-      })
-      return new Promise((resolve, reject) => {
-        rl.question(`Already there is file with this name in ${pathFile}. Do you want replace? Yes/No `, answer => {
-          rl.close()
-          if (
-            answer.toLowerCase() === 's' ||
-            answer.toLowerCase() === 'sim' ||
-            answer.toLowerCase() === 'yes' ||
-            answer.toLowerCase() === 'y'
-          ) {
-            resolve(pathFile)
-          } else {
-            console.log(chalk.red('operation canceled'))
-            resolve(false)
-          }
-        })
-      })
+      const confirmReplace = await confirmQuestion(`Já existe um arquivo neste endereço ${pathFile}. Deseja substituir? Sim/Não`)
+      if (confirmReplace) {
+        return pathFile
+      } else {
+        return false
+      }
     } else {
       return pathFile
     }

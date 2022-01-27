@@ -3,11 +3,8 @@ const { default: Command, flags } = require('@oclif/command')
 const chalk = require('chalk')
 const api = require('../config/axios')
 const { firebase } = require('../config/firebase')
-const readline = require('readline')
-const moment = require('moment')
 const semver = require('semver')
-const Utils = require('../utils/index')
-const { getManifestFromEntryPoint } = require('../utils/index')
+const { getManifestFromEntryPoint, confirmQuestion } = require('../utils/index')
 const inquirer = require('inquirer')
 const readPkgSync = require('read-pkg-up').sync
 const path = require('path')
@@ -86,25 +83,33 @@ class PublishCommand extends Command {
         await this.publishNewVersion(flags, dynamicComponentFileActivated.id, token, manifest)
       }
     } catch (error) {
-      this.error(error)
+      this.error(error?.response?.data?.error || error)
     }
   }
   async publishExtension (flags, dynamicComponentFileId, token, manifest) {
     if (this.existIncrementVersion(flags)) { this.warning('Flag [--patch] [--minor] [--major] ignored. You are publishing an extension and therefore the [--patch] [--minor] [--major] flag is unimportant in this scenario. Only use when updating a version of an existing extension') }
-    const confirmed = await this.confirmQuestion(`Do you want to publish the "${manifest.name}" extension to the marketplace? Yes/No\n`)
+    const confirmed = await confirmQuestion(`Deseja publicar a extensão "${manifest.name}" no marketplace? Sim/Não\n`)
     if (!confirmed) {
       process.exit(0)
     }
     let version
     if (!flags.version) {
-      let versionIsValid
-      while (!versionIsValid) {
-        version = await this.getResponseFromUser('Which version do you want to publish the extension? default(0.0.1)\n', '0.0.1')
-        versionIsValid = semver.valid(version)
-        if (!versionIsValid) {
-          this.error(chalk.red(`Version must be in x.x.x format`))
+      const { versionName } = await inquirer.prompt([
+        {
+          name: 'versionName',
+          message:
+              `Escolha uma versão para sua extensão`,
+          type: 'input',
+          validate: input => {
+            if (!semver.valid(input)) {
+              return 'A versão deve está no formato x.x.x'
+            }
+            return true
+          }
+
         }
-      }
+      ])
+      version = versionName
     } else {
       version = flags.version
     }
@@ -113,7 +118,7 @@ class PublishCommand extends Command {
     this.success('New extension is published with success')
   }
   async publishNewVersion (flags, dynamicComponentFileId, token, manifest) {
-    const confirmed = await this.confirmQuestion(`Do you want to publish a new version for extension "${manifest.name}" already published in the marketplace? Yes/No\n`)
+    const confirmed = await confirmQuestion(`Deseja publicar uma nova versão para a extensão "${manifest.name}" já publicada no marketplace? Sim/Não\n`)
     if (!confirmed) {
       process.exit(0)
     }
@@ -142,23 +147,7 @@ class PublishCommand extends Command {
     }
     this.success('New version is published with success')
   }
-  async confirmVersion (version, date) {
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
-    })
-    return new Promise((resolve, reject) => {
-      rl.question(`Publish version ${chalk.blue(version)} created at ${chalk.blue(moment(date).format('LLLL'))} on the marketplace? Yes/No `, answer => {
-        rl.close()
-        if (Utils.isYes(answer)) {
-          resolve(version)
-        } else {
-          console.log(chalk.red('operation canceled'))
-          resolve(false)
-        }
-      })
-    })
-  }
+
   commandSintaxeValid (flags) {
     return Object.keys(flags).length < 2
   }
@@ -176,35 +165,7 @@ class PublishCommand extends Command {
       { headers: { Authorization: `Bearer ${token}` } }
     )
   }
-  async getResponseFromUser (requestText, responseDefault) {
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
-    })
-    return new Promise(resolve => {
-      rl.question(requestText, answer => {
-        rl.close()
-        if (answer) { resolve(answer) } else resolve(responseDefault)
-      })
-    })
-  }
-  async confirmQuestion (requestText, responseText) {
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
-    })
-    return new Promise((resolve, reject) => {
-      rl.question(requestText, answer => {
-        rl.close()
-        if (Utils.isYes(answer)) {
-          resolve(answer)
-        } else {
-          console.log(chalk.red('operation canceled'))
-          resolve(false)
-        }
-      })
-    })
-  }
+
   async getManifest (entryPointPath) {
     if (entryPointPath) {
       return getManifestFromEntryPoint(entryPointPath)

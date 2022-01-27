@@ -4,11 +4,12 @@ const credentials = require('../config/credentials')
 const { default: Command } = require('@oclif/command')
 const chalk = require('chalk')
 const api = require('../config/axios')
-const readline = require('readline')
 const ExtensionService = require('../services/extension')
 const fs = require('fs')
 const JSONManager = require('../config/JSONManager')
 const path = require('path')
+const inquirer = require('inquirer')
+const semver = require('semver')
 
 class DeployCommand extends Command {
   async run () {
@@ -52,16 +53,22 @@ class DeployCommand extends Command {
     }
   }
   async inputVersionName () {
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
-    })
-    return new Promise((resolve, reject) => {
-      rl.question(`Version Name: `, answer => {
-        rl.close()
-        resolve(answer)
-      })
-    })
+    const { versionName } = await inquirer.prompt([
+      {
+        name: 'versionName',
+        message:
+            `Escolha uma versão para sua extensão`,
+        type: 'input',
+        validate: input => {
+          if (!semver.valid(input)) {
+            return 'A versão deve está no formato x.x.x'
+          }
+          return true
+        }
+
+      }
+    ])
+    return versionName
   }
   getUploadFileNameDeploy (currentTime, isBuild) {
     return encodeURI(`${credentials.institution}/${md5(currentTime)}.${isBuild ? 'js' : 'vue'}`)
