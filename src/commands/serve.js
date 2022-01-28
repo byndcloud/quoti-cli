@@ -11,8 +11,8 @@ const { default: Command } = require('@oclif/command')
 
 const credentials = require('../config/credentials')
 const ExtensionService = require('../services/extension')
-const JSONManager = require('../config/JSONManager')
 const Socket = require('../config/socket')
+const { getManifestFromEntryPoint } = require('../utils/index')
 
 class ServeCommand extends Command {
   constructor () {
@@ -71,7 +71,7 @@ class ServeCommand extends Command {
 
       const manifests = extensionsToUpdate.reduce(
         (manifestsObj, entryPoint) => {
-          manifestsObj[entryPoint] = this.getManifestFromEntryPoint(entryPoint)
+          manifestsObj[entryPoint] = getManifestFromEntryPoint(entryPoint)
           return manifestsObj
         },
         {}
@@ -137,15 +137,6 @@ class ServeCommand extends Command {
         }
       })
     }
-  }
-
-  getManifestFromEntryPoint (changedFilePath) {
-    const manifestPath = path.resolve(
-      path.dirname(changedFilePath),
-      'manifest.json'
-    )
-    const manifest = new JSONManager(manifestPath)
-    return manifest
   }
 
   async run () {
