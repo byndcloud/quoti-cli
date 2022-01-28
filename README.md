@@ -14,7 +14,7 @@ $ npm install -g quoti-cli
 $ qt COMMAND
 running command...
 $ qt (-v|--version|version)
-quoti-cli/0.2.4 linux-x64 node-v14.18.2
+quoti-cli/0.2.5 linux-x64 node-v14.18.2
 $ qt --help [COMMAND]
 USAGE
   $ qt COMMAND
@@ -48,7 +48,7 @@ DESCRIPTION
   Deploy specify document to your application
 ```
 
-_See code: [src/commands/deploy.js](https://github.com/byndcloud/quoti-cli/blob/v0.2.4/src/commands/deploy.js)_
+_See code: [src/commands/deploy.js](https://github.com/byndcloud/quoti-cli/blob/v0.2.5/src/commands/deploy.js)_
 
 ## `qt download-current-version [FILEPATH]`
 
@@ -65,24 +65,24 @@ DESCRIPTION
   ...
 ```
 
-_See code: [src/commands/download-current-version.js](https://github.com/byndcloud/quoti-cli/blob/v0.2.4/src/commands/download-current-version.js)_
+_See code: [src/commands/download-current-version.js](https://github.com/byndcloud/quoti-cli/blob/v0.2.5/src/commands/download-current-version.js)_
 
 ## `qt help [COMMAND]`
 
-display help for qt
+Display help for qt.
 
 ```
 USAGE
   $ qt help [COMMAND]
 
 ARGUMENTS
-  COMMAND  command to show help for
+  COMMAND  Command to show help for.
 
 OPTIONS
-  --all  see all commands in CLI
+  -n, --nested-commands  Include all nested commands in the output.
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v3.2.18/src/commands/help.ts)_
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.10/src/commands/help.ts)_
 
 ## `qt login`
 
@@ -93,7 +93,7 @@ USAGE
   $ qt login
 ```
 
-_See code: [src/commands/login.js](https://github.com/byndcloud/quoti-cli/blob/v0.2.4/src/commands/login.js)_
+_See code: [src/commands/login.js](https://github.com/byndcloud/quoti-cli/blob/v0.2.5/src/commands/login.js)_
 
 ## `qt logout`
 
@@ -104,7 +104,7 @@ USAGE
   $ qt logout
 ```
 
-_See code: [src/commands/logout.js](https://github.com/byndcloud/quoti-cli/blob/v0.2.4/src/commands/logout.js)_
+_See code: [src/commands/logout.js](https://github.com/byndcloud/quoti-cli/blob/v0.2.5/src/commands/logout.js)_
 
 ## `qt publish`
 
@@ -121,7 +121,7 @@ OPTIONS
   -v, --version=version  Version of the extension
 ```
 
-_See code: [src/commands/publish.js](https://github.com/byndcloud/quoti-cli/blob/v0.2.4/src/commands/publish.js)_
+_See code: [src/commands/publish.js](https://github.com/byndcloud/quoti-cli/blob/v0.2.5/src/commands/publish.js)_
 
 ## `qt select-extension [ENTRYPOINTPATH]`
 
@@ -139,7 +139,7 @@ OPTIONS
                     build
 ```
 
-_See code: [src/commands/select-extension.js](https://github.com/byndcloud/quoti-cli/blob/v0.2.4/src/commands/select-extension.js)_
+_See code: [src/commands/select-extension.js](https://github.com/byndcloud/quoti-cli/blob/v0.2.5/src/commands/select-extension.js)_
 
 ## `qt serve [ENTRYPOINTPATH]`
 
@@ -157,5 +157,5 @@ DESCRIPTION
   A local serve to upload your file automatically
 ```
 
-_See code: [src/commands/serve.js](https://github.com/byndcloud/quoti-cli/blob/v0.2.4/src/commands/serve.js)_
+_See code: [src/commands/serve.js](https://github.com/byndcloud/quoti-cli/blob/v0.2.5/src/commands/serve.js)_
 <!-- commandsstop -->
