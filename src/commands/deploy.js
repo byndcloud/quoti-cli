@@ -2,7 +2,6 @@ const md5 = require('md5')
 const { firebase } = require('../config/firebase')
 const credentials = require('../config/credentials')
 const { default: Command } = require('@oclif/command')
-const chalk = require('chalk')
 const api = require('../config/axios')
 const ExtensionService = require('../services/extension')
 const fs = require('fs')
@@ -10,8 +9,15 @@ const JSONManager = require('../config/JSONManager')
 const path = require('path')
 const inquirer = require('inquirer')
 const semver = require('semver')
+const Logger = require('../config/logger')
 
 class DeployCommand extends Command {
+  constructor () {
+    super(...arguments)
+    this.logger = Logger.child({
+      tag: 'command/deploy'
+    })
+  }
   async run () {
     await credentials.load()
     const { args } = this.parse(DeployCommand)
@@ -20,7 +26,7 @@ class DeployCommand extends Command {
     this.extensionService = new ExtensionService(this.manifest)
     try {
       if (!this.manifest.exists()) {
-        console.log(chalk.yellow('Please select your extension. Try run qt selectExtension in the folder where the extension\'s is'))
+        this.logger.warning('Por favor selecione sua extensão. Execute qt selectExtension no diretório onde encontra a extensão')
         process.exit(0)
       }
       const currentTime = await firebase.firestore.Timestamp.fromDate(new Date()).toMillis()
@@ -46,10 +52,10 @@ class DeployCommand extends Command {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       )
-      console.log(chalk.green('Deploy done!'))
+      this.logger.success('Deploy feito com sucesso!')
       process.exit(0)
     } catch (error) {
-      console.log(chalk.red(error))
+      this.logger.error(error)
     }
   }
   async inputVersionName () {
@@ -86,9 +92,9 @@ DeployCommand.args = [
   }
 ]
 
-DeployCommand.description = `Deploy your extension
+DeployCommand.description = `Deploy sua extensão
 ...
-Deploy specify document to your application
+Deploy sua extensão
 `
 
 module.exports = DeployCommand

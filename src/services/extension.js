@@ -1,4 +1,3 @@
-const chalk = require('chalk')
 const { firebase, storage } = require('../config/firebase')
 const path = require('path')
 const VueCliService = require('@vue/cli-service')
@@ -6,6 +5,7 @@ const { randomUUID } = require('crypto')
 const vueCliService = new VueCliService(process.cwd())
 const api = require('../config/axios')
 const credentials = require('../config/credentials')
+const Logger = require('../config/logger')
 
 class ExtensionService {
   constructor (manifest) {
@@ -15,15 +15,16 @@ class ExtensionService {
       )
     }
     this.manifest = manifest
+    this.logger = Logger.child({
+      tag: 'command/publish'
+    })
   }
   async upload (buffer, remotePath) {
     if (!this.manifest.exists()) {
-      console.log(
-        chalk.yellow('Please select your extension. Try run qt selectExtension')
-      )
+      this.logger.warning('Por favor selecione sua extensão. Execute qt select-extension')
       process.exit(0)
     } else if (!buffer) {
-      console.log(chalk.red(`Buffer is null!`))
+      this.logger.error('Buffer é null!')
       process.exit(0)
     }
     // Create a new buffer in the bucket and upload the file data.
@@ -38,13 +39,12 @@ class ExtensionService {
           cacheControl: 'public, max-age=0'
         }
       })
-
-    console.log(chalk.blue(`File uploaded to ${remotePath}.`))
+    this.logger.success(`Arquivo carregado para ${remotePath}.`)
   }
 
   async createExtensionUUID () {
-    console.log(chalk.blue(`Creating new extension UUID.`))
-    console.log(chalk.yellow(`Whenever you update to a version older than ${new Date()} you must build it first.`))
+    this.logger.success('Criando nova extension_UUID')
+    this.logger.warning(`Sempre que você atualizar para uma versão anterior a ${new Date()}, você deve compilar primeiro.`)
 
     const uuid = randomUUID()
     await credentials.load()
@@ -67,7 +67,6 @@ class ExtensionService {
     vueCliService.init(mode)
     const dest = 'dist/'
     const name = `dc_${this.manifest.extensionUUID}`
-    console.log(`dest, credentials`)
     await vueCliService.run('build', {
       mode,
       modern: true,

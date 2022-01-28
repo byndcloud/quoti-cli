@@ -1,5 +1,4 @@
 const fs = require('fs')
-const chalk = require('chalk')
 const { firebase } = require('../config/firebase')
 const credentials = require('../config/credentials')
 const { default: Command } = require('@oclif/command')
@@ -7,23 +6,27 @@ var http = require('https')
 const api = require('../config/axios')
 const JSONManager = require('../config/JSONManager')
 const { confirmQuestion } = require('../utils/index')
+const Logger = require('../config/logger')
 
 class DownloadCurrentVersion extends Command {
   constructor () {
     super(...arguments)
     this.manifest = new JSONManager('./manifest.json')
+    this.logger = Logger.child({
+      tag: 'command/download-current-version'
+    })
   }
   async run () {
     await credentials.load()
     try {
       if (!this.manifest.exists()) {
-        console.log(chalk.yellow('Please select your extension. Try run qt selectExtension'))
+        this.logger.warning('Por favor selecione sua extensão. Execute qt selectExtension')
         process.exit(0)
       }
       await this.manifest.load()
       const { args } = this.parse(DownloadCurrentVersion)
       if (!fs.existsSync(args.filePath)) {
-        console.log(chalk.red(`Path ${args.filePath} is not directory`))
+        this.logger.red(`${args.filePath} não é um endereço válido`)
         process.exit(0)
       }
       const token = await firebase.auth().currentUser.getIdToken()
@@ -39,11 +42,11 @@ class DownloadCurrentVersion extends Command {
       pathFile = await this.isReplaceFile(args.filePath)
       if (pathFile) {
         await this.downloadFile(result.data.url, pathFile)
-        console.log(chalk.green(`File saved in ${args.filePath}`))
+        this.logger.blue(`Arquivo salvo em ${args.filePath}`)
       }
       return result.data
     } catch (error) {
-      console.log(chalk.red(`${error}`))
+      this.logger.error(`${error}`)
     }
   }
   async isReplaceFile (path) {
@@ -57,7 +60,7 @@ class DownloadCurrentVersion extends Command {
         pathFile = path + '/index.vue'
       }
     }
-    console.log(pathFile)
+    this.logger.info(pathFile)
     if (fs.existsSync(pathFile)) {
       const confirmReplace = await confirmQuestion(`Já existe um arquivo neste endereço ${pathFile}. Deseja substituir? Sim/Não`)
       if (confirmReplace) {
@@ -94,7 +97,7 @@ DownloadCurrentVersion.args = [
   }
 ]
 
-DownloadCurrentVersion.description = `Download your extension active
+DownloadCurrentVersion.description = `Baixa a versão da extensão ativa
 ...
 
 `

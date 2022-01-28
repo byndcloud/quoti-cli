@@ -63,8 +63,8 @@ class Auth {
         )
         await firebase.auth().updateCurrentUser(user)
       } catch (error) {
-        console.error(error)
-        console.log('erro ao carregar credenciais')
+        this.logger.error(error)
+        this.logger.error('Erro ao carregar credenciais')
       }
     }
   }
