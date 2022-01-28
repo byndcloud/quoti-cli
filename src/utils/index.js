@@ -1,21 +1,21 @@
 const JSONManager = require('../config/JSONManager')
 const path = require('path')
 const inquirer = require('inquirer')
+function isYes (text) {
+  return ['s', 'sim', 'yes', 'y'].includes(text.toLowerCase())
+}
+function isNo (text) {
+  return ['n', 'não', 'nao', 'no'].includes(text.toLowerCase())
+}
 class Utils {
-  isYes (text) {
-    return ['s', 'sim', 'yes', 'y'].includes(text.toLowerCase())
-  }
-  isNo (text) {
-    return ['n', 'não', 'nao', 'no'].includes(text.toLowerCase())
-  }
   async confirmQuestion (text) {
     const { confirmVersion } = await inquirer.prompt([
       {
-        name: 'versionName',
+        name: 'confirmVersion',
         message: text,
         type: 'input',
         validate: input => {
-          if (!this.isYes(input) && !this.isNo(input)) {
+          if (!isYes(input) && !isNo(input)) {
             return 'Só é permitido "Sim" ou "Não" como resposta'
           }
           return true
@@ -23,7 +23,7 @@ class Utils {
 
       }
     ])
-    return confirmVersion
+    return isYes(confirmVersion)
   }
   getManifestFromEntryPoint (entrypointPath) {
     const manifestPath = path.resolve(
