@@ -161,7 +161,7 @@ class ServeCommand extends Command {
 
       const watchingChangesMessage = args.entryPointPath
         ? `Observando e servindo alterações na extensão em ${args.entryPointPath}`
-        : 'Observando e veiculando alterações em qualquer extensão'
+        : 'Observando e servindo alterações em qualquer extensão'
 
       this.logger.info(watchingChangesMessage)
     } catch (error) {
