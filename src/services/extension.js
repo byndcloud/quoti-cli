@@ -1,5 +1,6 @@
 const { firebase, storage } = require('../config/firebase')
 const path = require('path')
+const ora = require('ora')
 const VueCliService = require('@vue/cli-service')
 const { randomUUID } = require('crypto')
 const vueCliService = new VueCliService(process.cwd())
@@ -8,7 +9,7 @@ const credentials = require('../config/credentials')
 const Logger = require('../config/logger')
 
 class ExtensionService {
-  constructor (manifest) {
+  constructor (manifest, { spinnerOptions }) {
     if (!manifest) {
       throw new Error(
         'The manifest parameter is required to use the ExtensionService'
@@ -17,6 +18,10 @@ class ExtensionService {
     this.manifest = manifest
     this.logger = Logger.child({
       tag: 'command/publish'
+    })
+    this.spinner = ora(spinnerOptions || {
+      spinner: 'arrow3',
+      color: 'yellow'
     })
   }
   async upload (buffer, remotePath) {
@@ -27,8 +32,8 @@ class ExtensionService {
       this.logger.error('Buffer é null!')
       process.exit(0)
     }
-    // Create a new buffer in the bucket and upload the file data.
-    // Uploads a local file to the bucket
+
+    this.spinner.start('Fazendo upload...')
     await storage
       .ref()
       .child(remotePath)
@@ -39,7 +44,7 @@ class ExtensionService {
           cacheControl: 'public, max-age=0'
         }
       })
-    this.logger.success(`Arquivo carregado para ${remotePath}.`)
+    this.spinner.succeed('Upload finalizado!')
   }
 
   async createExtensionUUID () {

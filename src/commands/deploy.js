@@ -1,5 +1,6 @@
 const md5 = require('md5')
 const { firebase } = require('../config/firebase')
+const ora = require('ora')
 const credentials = require('../config/credentials')
 const { default: Command } = require('@oclif/command')
 const api = require('../config/axios')
@@ -17,9 +18,14 @@ class DeployCommand extends Command {
     this.logger = Logger.child({
       tag: 'command/deploy'
     })
+    this.spinnerOptions = {
+      spinner: 'arrow3',
+      color: 'yellow'
+    }
+    this.spinner = ora(this.spinnerOptions)
   }
   async run () {
-    await credentials.load()
+    credentials.load()
     const { args } = this.parse(DeployCommand)
     const manifestPath = path.resolve(path.dirname(args.filePath), 'manifest.json')
     this.manifest = new JSONManager(manifestPath)
@@ -27,7 +33,7 @@ class DeployCommand extends Command {
     try {
       if (!this.manifest.exists()) {
         this.logger.warning('Por favor selecione sua extensão. Execute qt selectExtension no diretório onde encontra a extensão')
-        process.exit(0)
+        return
       }
       const currentTime = await firebase.firestore.Timestamp.fromDate(new Date()).toMillis()
       const versionName = await this.inputVersionName() || currentTime
@@ -42,6 +48,7 @@ class DeployCommand extends Command {
       await this.extensionService.upload(fs.readFileSync(extensionPath), filename)
 
       const token = await firebase.auth().currentUser.getIdToken()
+      this.spinner.start('Fazendo deploy...')
       await api.axios.put(
         `/${credentials.institution}/dynamic-components/${this.manifest.extensionId}`,
         {
@@ -52,10 +59,11 @@ class DeployCommand extends Command {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       )
-      this.logger.success('Deploy feito com sucesso!')
-      process.exit(0)
+      this.spinner.succeed('Deploy feito com sucesso!')
     } catch (error) {
-      this.logger.error(error)
+      this.spinner.fail(error.message)
+    } finally {
+      process.exit(0)
     }
   }
   async inputVersionName () {
