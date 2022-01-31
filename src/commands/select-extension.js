@@ -52,7 +52,7 @@ class SelectExtensionCommand extends Command {
 
       if (!this.packageJsonPath) {
         throw new Error(
-          'Para selecionar uma extensão você precisa estar em um projeto Vue com um arquivo package.json'
+          'Para selecionar uma extensão você precisa estar em um projeto Vue com um arquivo package.json. Execute npm init na raiz do projeto ou use um modelo.'
         )
       }
 
