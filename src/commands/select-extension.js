@@ -131,7 +131,7 @@ class SelectExtensionCommand extends Command {
       )
 
       this.logger.success('Extensão selecionada! \\o/')
-      this.logger.success('Verifique se você está na raiz do seu projeto e execute qt serve')
+      this.logger.success('Para desenvolver, execute qt serve para fazer deploy execute qt deploy')
     } catch (error) {
       this.logger.error(error)
       if (process.env.DEBUG) console.error(error)
