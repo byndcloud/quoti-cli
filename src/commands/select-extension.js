@@ -86,7 +86,7 @@ class SelectExtensionCommand extends Command {
         return
       }
 
-      spinner.succeed('Lista de extensões obtidas')
+      spinner.succeed('Lista de extensões obtida')
       const extensionsChoices = extensions.map(ext => ({
         name: ext.title,
         value: ext
