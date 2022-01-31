@@ -50,9 +50,9 @@ class SelectExtensionCommand extends Command {
         throw new Error(`O arquivo de ponto de entrada de extensão deve ser um arquivo .vue`)
       }
 
-      if (!this.packageJsonPath && flags.build === true) {
+      if (!this.packageJsonPath) {
         throw new Error(
-          'Para selecionar uma extensão com build você precisa estar em um projeto Vue com um arquivo package.json'
+          'Para selecionar uma extensão você precisa estar em um projeto Vue com um arquivo package.json'
         )
       }
 
