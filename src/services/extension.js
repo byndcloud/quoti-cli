@@ -33,7 +33,7 @@ class ExtensionService {
       process.exit(0)
     }
 
-    this.spinner.start('Fazendo upload...')
+    this.spinner.start(`Fazendo da extensão ${this.manifest.name} upload...`)
     try {
       await storage
         .ref()
@@ -45,7 +45,7 @@ class ExtensionService {
             cacheControl: 'public, max-age=0'
           }
         })
-      this.spinner.succeed('Upload finalizado!')
+      this.spinner.succeed(`Upload da extensão ${this.manifest.name} finalizado!`)
     } catch (error) {
       this.spinner.fail('Erro durante o upload')
       throw new Error(error)
@@ -76,7 +76,7 @@ class ExtensionService {
     }
     try {
       vueCliService.init(mode)
-      this.spinner.start('Fazendo build...')
+      this.spinner.start(`Fazendo build da extensão ${this.manifest.name} ...`)
       const dest = 'dist/'
       const name = `dc_${this.manifest.extensionUUID}`
       await vueCliService.run('build', {
@@ -89,7 +89,7 @@ class ExtensionService {
         entry,
         'inline-vue': true
       })
-      this.spinner.succeed('Build finalizado')
+      this.spinner.succeed(`Build da extensão ${this.manifest.name} finalizado`)
       return path.join(process.cwd(), dest, `${name}.umd.min.js`)
     } catch (error) {
       this.spinner.fail('Erro durante o build')
