@@ -69,10 +69,32 @@ class ExtensionService {
     this.manifest.save()
     return uuid
   }
-
+  async getExtension (extensionId) {
+    const token = await firebase.auth().currentUser.getIdToken()
+    const url = `${credentials.institution}/dynamic-components?where[id]=${extensionId}`
+    const path = encodeURI(url)
+    const { data } = await api.axios.get(
+      path,
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    if (data.length === 1) {
+      return data[0]
+    } else if (data.length === 0) {
+      this.logger.error('Verifique se realmente possui esta extensão')
+      process.exit(0)
+    } else {
+      throw new Error('Existe mais de uma extensão com o mesmo id')
+    }
+  }
   async build (entry, { mode } = { mode: 'production' }) {
     if (!this.manifest.extensionUUID) {
-      await this.createExtensionUUID()
+      const extension = await this.getExtension(this.manifest.extensionId)
+      if (this.extension?.extensionUUID) {
+        this.manifest.extensionUUID = extension.extensionUUID
+        this.manifest.save()
+      } else {
+        await this.createExtensionUUID()
+      }
     }
     try {
       vueCliService.init(mode)
