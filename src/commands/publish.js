@@ -105,7 +105,7 @@ class PublishCommand extends Command {
           type: 'input',
           validate: input => {
             if (!semver.valid(input)) {
-              return 'A versão deve está no formato x.x.x'
+              return 'A versão deve estar no formato x.x.x'
             }
             return true
           }
