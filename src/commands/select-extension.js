@@ -82,7 +82,7 @@ class SelectExtensionCommand extends Command {
       })
 
       if (extensions.length === 0) {
-        spinner.fail('Não podemos encontrar nenhuma extensão.')
+        spinner.fail('Não encontramos nenhuma extensão.')
         return
       }
 
