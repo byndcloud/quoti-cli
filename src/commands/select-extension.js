@@ -1,6 +1,5 @@
 const path = require('path')
 const ora = require('ora')
-const chalk = require('chalk')
 const { union } = require('lodash')
 const inquirer = require('inquirer')
 const readJSON = require('json-file-plus')
@@ -16,12 +15,18 @@ const { app } = require('../config/firebase')
 const credentials = require('../config/credentials')
 const api = require('../config/axios')
 const JSONManager = require('../config/JSONManager')
-
+const fuzzy = require('fuzzy')
+const Logger = require('../config/logger')
 inquirer.registerPrompt('file-tree-selection', inquirerFileTreeSelection)
+inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'))
 
 class SelectExtensionCommand extends Command {
   constructor () {
     super(...arguments)
+
+    this.logger = Logger.child({
+      tag: 'command/publish'
+    })
     const pkgInfo = readPkgSync()
     if (pkgInfo) {
       this.projectRoot = path.resolve(path.dirname(pkgInfo.path))
@@ -37,17 +42,17 @@ class SelectExtensionCommand extends Command {
 
       if (args.entryPointPath && !existsSync(args.entryPointPath)) {
         throw new Error(
-          `The given extension entrypoint file wasn't found at '${args.entryPointPath}', make sure the file exists`
+          `O arquivo de ponto de entrada de extensão fornecido não foi encontrado em '${args.entryPointPath}', certifique-se de que o arquivo existe`
         )
       }
 
       if (args.entryPointPath && !args.entryPointPath.endsWith('.vue')) {
-        throw new Error(`The extension entrypoint file must be a .vue file`)
+        throw new Error(`O arquivo de ponto de entrada de extensão deve ser um arquivo .vue`)
       }
 
-      if (!this.packageJsonPath && flags.build === true) {
+      if (!this.packageJsonPath) {
         throw new Error(
-          'To select an extension with build you have to be in a Vue project with a package.json file'
+          'Para selecionar uma extensão você precisa estar em um projeto Vue com um arquivo package.json. Execute npm init na raiz do projeto ou use um modelo.'
         )
       }
 
@@ -55,7 +60,7 @@ class SelectExtensionCommand extends Command {
         {
           name: 'selectedEntryPoint',
           message:
-            'Which file is the entry point (main file) to your extension?',
+            'Qual é o entry point (arquivo principal) da sua extensão?',
           type: 'file-tree-selection',
           validate: file => file.endsWith('.vue'),
           hideRoot: true,
@@ -64,7 +69,7 @@ class SelectExtensionCommand extends Command {
       ])
 
       const spinner = ora({
-        text: 'Fetching extensions',
+        text: 'Buscando extensões',
         spinner: 'dots3'
       }).start()
 
@@ -72,16 +77,16 @@ class SelectExtensionCommand extends Command {
         credentials.institution,
         flags.build
       ).catch(err => {
-        spinner.fail('Failed loading extensions')
+        spinner.fail('Falha ao carregar extensões')
         throw err
       })
 
       if (extensions.length === 0) {
-        spinner.fail("Couldn't find any extensions")
+        spinner.fail('Não encontramos nenhuma extensão.')
         return
       }
 
-      spinner.succeed('Got extensions list!')
+      spinner.succeed('Lista de extensões obtida')
       const extensionsChoices = extensions.map(ext => ({
         name: ext.title,
         value: ext
@@ -90,9 +95,19 @@ class SelectExtensionCommand extends Command {
       const { selectedExtension } = await inquirer.prompt([
         {
           name: 'selectedExtension',
-          message: 'Choose your extension:',
-          type: 'list',
-          choices: extensionsChoices
+          message: 'Escolha sua extensão:',
+          type: 'autocomplete',
+          choices: extensionsChoices,
+          searchText: 'Carregando...',
+          emptyText: 'Nem resultado encontrado para a pesquisa realizada',
+          source: function (answersSoFar, input) {
+            if (input) {
+              const fuzzyResult = fuzzy.filter(input, extensionsChoices.map(e => e.name))
+              return fuzzyResult.map(fr => extensionsChoices[fr.index])
+            } else {
+              return extensionsChoices
+            }
+          }
         }
       ])
 
@@ -100,9 +115,9 @@ class SelectExtensionCommand extends Command {
         args.entryPointPath || selectedEntryPoint
       )
 
-      if (selectedExtension.type === 'Com build' && !this.packageJsonPath) {
+      if (!this.packageJsonPath) {
         throw new Error(
-          `The selected extension requires building so you must have a package.json file at the root of your project. Try running npm init at the root of the project or using a template.`
+           'Para selecionar uma extensão você precisa estar em um projeto Vue com um arquivo package.json. Execute npm init na raiz do projeto ou use um modelo.'
         )
       }
 
@@ -115,13 +130,10 @@ class SelectExtensionCommand extends Command {
         selectedExtension
       )
 
-      console.log(chalk.green('Extension selected! \\o/'))
-      console.log(
-        chalk.blue("You can now go to your project's root and run"),
-        chalk.yellow('qt serve')
-      )
+      this.logger.success('Extensão selecionada! \\o/')
+      this.logger.success('Para desenvolver, execute qt serve para fazer deploy execute qt deploy')
     } catch (error) {
-      console.log(chalk.red(error))
+      this.logger.error(error)
       if (process.env.DEBUG) console.error(error)
     }
   }
@@ -205,7 +217,7 @@ SelectExtensionCommand.args = [
   {
     name: 'entryPointPath',
     required: false,
-    description: "The path to the Extension's entry point"
+    description: 'Endereço do entry point (arquivo principal) da extensão'
   }
 ]
 
@@ -214,11 +226,11 @@ SelectExtensionCommand.flags = {
     allowNo: true,
     char: 'b',
     description:
-      "Specify that you're selecting an extension **with** build, use --no-build for extensions without build",
+      'Use build se você está selecionando uma extensão com build ou use no-build se você está selecionando uma extensão sem build',
     exclusive: []
   })
 }
 
-SelectExtensionCommand.description = `Select your extension to work`
+SelectExtensionCommand.description = `Selecione sua extensão para desenvolvimento`
 
 module.exports = SelectExtensionCommand

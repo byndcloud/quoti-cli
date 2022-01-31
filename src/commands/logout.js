@@ -1,18 +1,24 @@
 const credentials = require('../config/credentials')
 const { default: Command } = require('@oclif/command')
-const chalk = require('chalk')
+const Logger = require('../config/logger')
 
 class LogoutCommand extends Command {
+  constructor () {
+    super(...arguments)
+    this.logger = Logger.child({
+      tag: 'command/download-current-version'
+    })
+  }
   async run () {
     try {
       const loggedOut = credentials.delete()
       if (loggedOut) {
-        this.log(chalk.blue('Logged out!'))
+        this.logger.success('Usuário deslogado')
       } else {
-        this.log(chalk.blue('Already logged out.'))
+        this.logger.success('Usuário já realizou logout.')
       }
     } catch (error) {
-      this.error(chalk.red(error))
+      this.logger.error(error)
     }
   }
 }

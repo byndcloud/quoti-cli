@@ -1,7 +1,5 @@
 const fs = require('fs')
-const Ws = require('ws')
 const path = require('path')
-const chalk = require('chalk')
 const chokidar = require('chokidar')
 const readPkgSync = require('read-pkg-up').sync
 const getDependencyTree = require('get-dependency-tree')
@@ -13,11 +11,13 @@ const credentials = require('../config/credentials')
 const ExtensionService = require('../services/extension')
 const Socket = require('../config/socket')
 const { getManifestFromEntryPoint } = require('../utils/index')
-
+const Logger = require('../config/logger')
 class ServeCommand extends Command {
   constructor () {
     super(...arguments)
-
+    this.logger = Logger.child({
+      tag: 'command/publish'
+    })
     this.socket = new Socket()
 
     credentials.load()
@@ -59,7 +59,6 @@ class ServeCommand extends Command {
       const extensionsToUpdate = extensionsEntrypointsToCheck.filter(
         entryPoint => {
           const { arr: dependencies } = getDependencyTree({ entry: entryPoint })
-          // console.log(`entry`, entryPoint, dependencies)
           return dependencies.includes(changedFileAbsolutePath)
         }
       )
@@ -95,13 +94,13 @@ class ServeCommand extends Command {
               await extensionService.createExtensionUUID()
             }
             distPath = `./dist/dc_${manifest.extensionUUID}.umd.min.js`
-            console.log(`Building extension...`)
+            this.logger.info(`Realizando build da extensão...`)
             await extensionService.build(entryPoint, { mode: 'staging' })
-            console.log(
-              `Built extension ${entryPoint.replace(this.projectRoot, '')}`
+            this.logger.info(
+              `Build extensão ${entryPoint.replace(this.projectRoot, '')} finalizado com sucesso!`
             )
           }
-          console.log(`Uploading file ${distPath}...`)
+          this.logger.info(`Fazendo upload do arquivo ${distPath} para o Quoti...`)
           const fileBuffer = fs.readFileSync(distPath || changedFilePath)
           const extensionCode = fileBuffer.toString()
 
@@ -114,7 +113,7 @@ class ServeCommand extends Command {
       )
 
       extensionsData.forEach(async extensionData => {
-        console.log(`Built extension ${extensionData.extensionInfo.name}`)
+        this.logger.info(`Extensão ${extensionData.extensionInfo.name} com build feita`)
 
         const err = await this.socket.emit({
           event: 'reload-extension',
@@ -128,10 +127,10 @@ class ServeCommand extends Command {
         })
 
         if (!err) {
-          console.log(chalk.blue('Quoti received extension code!'))
+          this.logger.success('Quoti recebeu o código da extensão!')
           return
         }
-        console.log(chalk.red('Error sending code to Quoti', err))
+        this.logger.error(`Erro ao enviar extensão para o Quoti ${err}`)
         if (process.env.DEBUG) {
           console.error(err)
         }
@@ -153,7 +152,7 @@ class ServeCommand extends Command {
         )
       }
 
-      this.log(chalk.blue('Connected to Quoti!'))
+      this.logger.info('Conectado ao Quoti!')
 
       const debouncedBuild = debounce(this.buildAndUpload(args), 800)
       chokidar
@@ -161,12 +160,12 @@ class ServeCommand extends Command {
         .on('change', debouncedBuild)
 
       const watchingChangesMessage = args.entryPointPath
-        ? `Waching and serving changes in extension at ${args.entryPointPath}`
-        : 'Waching and serving changes in any extension'
+        ? `Observando e servindo alterações na extensão em ${args.entryPointPath}`
+        : 'Observando e servindo alterações em qualquer extensão'
 
-      this.log(chalk.blue(watchingChangesMessage))
+      this.logger.info(watchingChangesMessage)
     } catch (error) {
-      console.log(chalk.red(`${error}`))
+      this.logger.error(`${error}`)
     }
   }
   getUploadFileName (manifest) {
@@ -184,11 +183,11 @@ ServeCommand.args = [
   {
     name: 'entryPointPath',
     required: false,
-    description: "The path to an Extension's entry point"
+    description: 'Endereço do entry point (arquivo principal) da extensão'
   }
 ]
-ServeCommand.description = `Create local serve and Upload file automatically
+ServeCommand.description = `Cria um serve local e realiza upload automaticamente para o Quoti
 ...
-A local serve to upload your file automatically
+Cria um serve local e realiza upload automaticamente para o Quoti
 `
 module.exports = ServeCommand

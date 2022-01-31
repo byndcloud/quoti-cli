@@ -1,17 +1,23 @@
 const credentials = require('../config/credentials')
 const { default: Command } = require('@oclif/command')
-const chalk = require('chalk')
 
+const Logger = require('../config/logger')
 class LoginCommand extends Command {
+  constructor () {
+    super(...arguments)
+    this.logger = Logger.child({
+      tag: 'command/login'
+    })
+  }
   async run () {
     // The login itself is done in the hook so just display a message
     if (credentials.exists()) {
-      this.log(chalk.blue('Logged in!'))
+      this.logger.success('Usuário com login realizado')
     } else {
-      this.log(chalk.red('Log in error:'))
+      this.logger.red('Erro no login')
     }
   }
 }
-LoginCommand.description = `Login to a Quoti organization`
+LoginCommand.description = `Realiza login em uma organização do Quoti`
 
 module.exports = LoginCommand

@@ -1,26 +1,39 @@
 const md5 = require('md5')
 const { firebase } = require('../config/firebase')
+const ora = require('ora')
 const credentials = require('../config/credentials')
 const { default: Command } = require('@oclif/command')
-const chalk = require('chalk')
 const api = require('../config/axios')
-const readline = require('readline')
 const ExtensionService = require('../services/extension')
 const fs = require('fs')
 const JSONManager = require('../config/JSONManager')
 const path = require('path')
+const inquirer = require('inquirer')
+const semver = require('semver')
+const Logger = require('../config/logger')
 
 class DeployCommand extends Command {
+  constructor () {
+    super(...arguments)
+    this.logger = Logger.child({
+      tag: 'command/deploy'
+    })
+    this.spinnerOptions = {
+      spinner: 'arrow3',
+      color: 'yellow'
+    }
+    this.spinner = ora(this.spinnerOptions)
+  }
   async run () {
-    await credentials.load()
+    credentials.load()
     const { args } = this.parse(DeployCommand)
     const manifestPath = path.resolve(path.dirname(args.filePath), 'manifest.json')
     this.manifest = new JSONManager(manifestPath)
     this.extensionService = new ExtensionService(this.manifest)
     try {
       if (!this.manifest.exists()) {
-        console.log(chalk.yellow('Please select your extension. Try run qt selectExtension in the folder where the extension\'s is'))
-        process.exit(0)
+        this.logger.warning('Por favor selecione sua extensão. Execute qt selectExtension no diretório onde encontra a extensão')
+        return
       }
       const currentTime = await firebase.firestore.Timestamp.fromDate(new Date()).toMillis()
       const versionName = await this.inputVersionName() || currentTime
@@ -35,6 +48,7 @@ class DeployCommand extends Command {
       await this.extensionService.upload(fs.readFileSync(extensionPath), filename)
 
       const token = await firebase.auth().currentUser.getIdToken()
+      this.spinner.start('Fazendo deploy...')
       await api.axios.put(
         `/${credentials.institution}/dynamic-components/${this.manifest.extensionId}`,
         {
@@ -45,23 +59,30 @@ class DeployCommand extends Command {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       )
-      console.log(chalk.green('Deploy done!'))
-      process.exit(0)
+      this.spinner.succeed('Deploy feito com sucesso!')
     } catch (error) {
-      console.log(chalk.red(error))
+      this.spinner.fail(error.message)
+    } finally {
+      process.exit(0)
     }
   }
   async inputVersionName () {
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
-    })
-    return new Promise((resolve, reject) => {
-      rl.question(`Version Name: `, answer => {
-        rl.close()
-        resolve(answer)
-      })
-    })
+    const { versionName } = await inquirer.prompt([
+      {
+        name: 'versionName',
+        message:
+            `Escolha uma versão para sua extensão`,
+        type: 'input',
+        validate: input => {
+          if (!semver.valid(input)) {
+            return 'A versão deve está no formato x.x.x'
+          }
+          return true
+        }
+
+      }
+    ])
+    return versionName
   }
   getUploadFileNameDeploy (currentTime, isBuild) {
     return encodeURI(`${credentials.institution}/${md5(currentTime)}.${isBuild ? 'js' : 'vue'}`)
@@ -79,9 +100,9 @@ DeployCommand.args = [
   }
 ]
 
-DeployCommand.description = `Deploy your extension
+DeployCommand.description = `Deploy sua extensão
 ...
-Deploy specify document to your application
+Deploy sua extensão
 `
 
 module.exports = DeployCommand

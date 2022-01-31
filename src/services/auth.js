@@ -1,14 +1,14 @@
 const credentials = require('../config/credentials')
 const { app } = require('../config/firebase')
-const readline = require('readline')
 const { firebase } = require('../config/firebase')
 const logo = require('./logo')
 const chalk = require('chalk')
+const inquirer = require('inquirer')
 
 class Auth {
   async login () {
     console.log(chalk`${logo}`)
-    const institution = await this.insertIntitution()
+    const institution = await this.insertOrgSLug()
     const customToken = await this.insertToken()
     const authFirebase = await app.auth().signInWithCustomToken(customToken)
     const data = {
@@ -18,30 +18,34 @@ class Auth {
     credentials.save(data)
   }
 
-  async insertIntitution () {
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
-    })
-    return new Promise((resolve, reject) => {
-      rl.question('Qual sua instituição? ', answer => {
-        rl.close()
-        resolve(answer)
-      })
-    })
+  async insertOrgSLug () {
+    const { inputOrgSlug } = await inquirer.prompt([
+      {
+        name: 'inputOrgSlug',
+        message: 'Qual sua organização',
+        type: 'input'
+      }
+    ])
+    return inputOrgSlug
   }
 
   async insertToken () {
-    const rl = readline.createInterface({
-      input: process.stdin,
-      output: process.stdout
-    })
-    return new Promise((resolve, reject) => {
-      rl.question('Informe o seu token de login ', answer => {
-        rl.close()
-        resolve(answer)
-      })
-    })
+    const { inputToken } = await inquirer.prompt([
+      {
+        name: 'inputToken',
+        message:
+          'Informe seu token de login',
+        type: 'input',
+        transformer: input => {
+          if (!input) {
+            return ''
+          } else {
+            return '********...'
+          }
+        }
+      }
+    ])
+    return inputToken
   }
 
   async silentLogin () {
@@ -59,8 +63,8 @@ class Auth {
         )
         await firebase.auth().updateCurrentUser(user)
       } catch (error) {
-        console.error(error)
-        console.log('erro ao carregar credenciais')
+        this.logger.error(error)
+        this.logger.error('Erro ao carregar credenciais')
       }
     }
   }
