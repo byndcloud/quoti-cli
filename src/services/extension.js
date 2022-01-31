@@ -89,8 +89,8 @@ class ExtensionService {
         entry,
         'inline-vue': true
       })
-      await path.join(process.cwd(), dest, `${name}.umd.min.js`)
       this.spinner.succeed('Build finalizado')
+      return path.join(process.cwd(), dest, `${name}.umd.min.js`)
     } catch (error) {
       this.spinner.fail('Erro durante o build')
       throw new Error(error)
