@@ -97,10 +97,10 @@ class ServeCommand extends Command {
             this.logger.info(`Realizando build da extensão...`)
             await extensionService.build(entryPoint, { mode: 'staging' })
             this.logger.info(
-              `Build extensão ${entryPoint.replace(this.projectRoot, '')}`
+              `Build extensão ${entryPoint.replace(this.projectRoot, '')} finalizado com sucesso!`
             )
           }
-          this.logger.info(`Carregando arquivo ${distPath} para o Quoti...`)
+          this.logger.info(`Fazendo upload do arquivo ${distPath} para o Quoti...`)
           const fileBuffer = fs.readFileSync(distPath || changedFilePath)
           const extensionCode = fileBuffer.toString()
 
@@ -130,7 +130,7 @@ class ServeCommand extends Command {
           this.logger.success('Quoti recebeu o código da extensão!')
           return
         }
-        this.logger.error(`Erro ao enviar código para o Quoti ${err}`)
+        this.logger.error(`Erro ao enviar extensão para o Quoti ${err}`)
         if (process.env.DEBUG) {
           console.error(err)
         }
