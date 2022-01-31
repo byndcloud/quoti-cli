@@ -9,7 +9,7 @@ const credentials = require('../config/credentials')
 const Logger = require('../config/logger')
 
 class ExtensionService {
-  constructor (manifest, { spinnerOptions }) {
+  constructor (manifest, { spinnerOptions } = {}) {
     if (!manifest) {
       throw new Error(
         'The manifest parameter is required to use the ExtensionService'
@@ -34,17 +34,22 @@ class ExtensionService {
     }
 
     this.spinner.start('Fazendo upload...')
-    await storage
-      .ref()
-      .child(remotePath)
-      .put(buffer, {
-        destination: remotePath,
-        gzip: true,
-        metadata: {
-          cacheControl: 'public, max-age=0'
-        }
-      })
-    this.spinner.succeed('Upload finalizado!')
+    try {
+      await storage
+        .ref()
+        .child(remotePath)
+        .put(buffer, {
+          destination: remotePath,
+          gzip: true,
+          metadata: {
+            cacheControl: 'public, max-age=0'
+          }
+        })
+      this.spinner.succeed('Upload finalizado!')
+    } catch (error) {
+      this.spinner.fail('Erro durante o upload')
+      throw new Error(error)
+    }
   }
 
   async createExtensionUUID () {
@@ -69,21 +74,27 @@ class ExtensionService {
     if (!this.manifest.extensionUUID) {
       await this.createExtensionUUID()
     }
-    vueCliService.init(mode)
-    const dest = 'dist/'
-    const name = `dc_${this.manifest.extensionUUID}`
-    await vueCliService.run('build', {
-      mode,
-      modern: true,
-      target: 'lib',
-      formats: 'umd-min',
-      dest,
-      name,
-      entry,
-      'inline-vue': true
-    })
-
-    return path.join(process.cwd(), dest, `${name}.umd.min.js`)
+    try {
+      vueCliService.init(mode)
+      this.spinner.start('Fazendo build...')
+      const dest = 'dist/'
+      const name = `dc_${this.manifest.extensionUUID}`
+      await vueCliService.run('build', {
+        mode,
+        modern: true,
+        target: 'lib',
+        formats: 'umd-min',
+        dest,
+        name,
+        entry,
+        'inline-vue': true
+      })
+      await path.join(process.cwd(), dest, `${name}.umd.min.js`)
+      this.spinner.succeed('Build finalizado')
+    } catch (error) {
+      this.spinner.fail('Erro durante o build')
+      throw new Error(error)
+    }
   }
 }
 
