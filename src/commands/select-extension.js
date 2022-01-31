@@ -115,7 +115,7 @@ class SelectExtensionCommand extends Command {
         args.entryPointPath || selectedEntryPoint
       )
 
-      if (selectedExtension.type === 'Com build' && !this.packageJsonPath) {
+      if (!this.packageJsonPath) {
         throw new Error(
           `A extensão selecionada requer compilação, portanto, você deve ter um arquivo package.json na raiz do seu projeto. Tente executar npm init na raiz do projeto ou usar um modelo.`
         )
