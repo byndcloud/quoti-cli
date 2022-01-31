@@ -69,7 +69,7 @@ class SelectExtensionCommand extends Command {
       ])
 
       const spinner = ora({
-        text: 'Pesquisando extensões',
+        text: 'Buscando extensões',
         spinner: 'dots3'
       }).start()
 
