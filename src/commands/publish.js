@@ -142,7 +142,7 @@ class PublishCommand extends Command {
       await this.callEndpointPublishExtensionVersion(bodyPublishExtensionVersion, token)
     } catch (error) {
       if (error.response.status === 422) {
-        this.logger.error('Versão informada é menor ou igual a última versão')
+        this.logger.error('A versão informada é menor ou igual à última versão. Por favor, insira uma versão maior.')
       } else {
         this.logger.error(JSON.stringify(error, null, 2))
       }
