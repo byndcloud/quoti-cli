@@ -104,7 +104,7 @@ class ServeCommand extends Command {
           }
           const fileBuffer = fs.readFileSync(distPath || changedFilePath)
           const extensionCode = fileBuffer.toString()
-          await extensionService.upload(fileBuffer, this.getUploadFileName(manifest))
+          extensionService.upload(fileBuffer, this.getUploadFileName(manifest))
           return {
             extensionInfo: manifests[entryPoint],
             code: extensionCode
