@@ -33,7 +33,7 @@ class ExtensionService {
       process.exit(0)
     }
 
-    this.spinner.start(`Fazendo da extensão ${this.manifest.name} upload...`)
+    this.spinner.start(`Fazendo upload da extensão ${this.manifest.name}...`)
     try {
       await storage
         .ref()
