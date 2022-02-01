@@ -47,7 +47,9 @@ class SelectExtensionCommand extends Command {
       }
 
       if (args.entryPointPath && !args.entryPointPath.endsWith('.vue')) {
-        throw new Error(`O arquivo de ponto de entrada de extensão deve ser um arquivo .vue`)
+        throw new Error(
+          `O arquivo de ponto de entrada de extensão deve ser um arquivo .vue`
+        )
       }
 
       if (!this.packageJsonPath) {
@@ -59,8 +61,7 @@ class SelectExtensionCommand extends Command {
       const { selectedEntryPoint } = await inquirer.prompt([
         {
           name: 'selectedEntryPoint',
-          message:
-            'Qual é o entry point (arquivo principal) da sua extensão?',
+          message: 'Qual é o entry point (arquivo principal) da sua extensão?',
           type: 'file-tree-selection',
           validate: file => file.endsWith('.vue'),
           hideRoot: true,
@@ -102,7 +103,10 @@ class SelectExtensionCommand extends Command {
           emptyText: 'Nem resultado encontrado para a pesquisa realizada',
           source: function (answersSoFar, input) {
             if (input) {
-              const fuzzyResult = fuzzy.filter(input, extensionsChoices.map(e => e.name))
+              const fuzzyResult = fuzzy.filter(
+                input,
+                extensionsChoices.map(e => e.name)
+              )
               return fuzzyResult.map(fr => extensionsChoices[fr.index])
             } else {
               return extensionsChoices
@@ -131,7 +135,9 @@ class SelectExtensionCommand extends Command {
       )
 
       this.logger.success('Extensão selecionada! \\o/')
-      this.logger.success('Para desenvolver, execute qt serve para fazer deploy execute qt deploy')
+      this.logger.success(
+        'Para desenvolver, execute qt serve para fazer deploy execute qt deploy'
+      )
     } catch (error) {
       this.logger.error(error)
       if (process.env.DEBUG) console.error(error)
@@ -152,27 +158,32 @@ class SelectExtensionCommand extends Command {
     return manifest
   }
 
+  convertPathToPOSIX (targetPath) {
+    return targetPath.split(path.sep).join(path.posix.sep)
+  }
   async addExtensionToPackageJson (absoluteExtensionPath) {
     const extensionPathRelativeToProjectRoot = path.relative(
       this.projectRoot,
       absoluteExtensionPath
     )
-
+    const extensionPathRelativeToProjectRootPOSIX = this.convertPathToPOSIX(
+      extensionPathRelativeToProjectRoot
+    )
     const packageJsonEditor = await readJSON(path.resolve(this.packageJsonPath))
 
     const currentQuotiInfo = merge(
       { extensions: [] },
       await packageJsonEditor.get('quoti')
     )
-
-    currentQuotiInfo.extensions = union(currentQuotiInfo.extensions, [
-      extensionPathRelativeToProjectRoot
-    ])
-
-    packageJsonEditor.set({
-      quoti: currentQuotiInfo
+    currentQuotiInfo.extensions = currentQuotiInfo?.extensions?.map(item => {
+      return this.convertPathToPOSIX(item)
     })
-
+    currentQuotiInfo.extensions = union(currentQuotiInfo.extensions, [
+      extensionPathRelativeToProjectRootPOSIX
+    ])
+    if (packageJsonEditor?.data?.quoti?.extensions) {
+      packageJsonEditor.data.quoti.extensions = currentQuotiInfo.extensions
+    }
     await packageJsonEditor.save()
   }
 
