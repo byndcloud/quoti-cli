@@ -12,9 +12,15 @@ const ExtensionService = require('../services/extension')
 const Socket = require('../config/socket')
 const { getManifestFromEntryPoint } = require('../utils/index')
 const Logger = require('../config/logger')
+const ora = require('ora')
 class ServeCommand extends Command {
   constructor () {
     super(...arguments)
+    this.spinnerOptions = {
+      spinner: 'arrow3',
+      color: 'yellow'
+    }
+    this.spinner = ora(this.spinnerOptions)
     this.logger = Logger.child({
       tag: 'command/publish'
     })
@@ -94,16 +100,10 @@ class ServeCommand extends Command {
               await extensionService.createExtensionUUID()
             }
             distPath = `./dist/dc_${manifest.extensionUUID}.umd.min.js`
-            this.logger.info(`Realizando build da extensão...`)
             await extensionService.build(entryPoint, { mode: 'staging' })
-            this.logger.info(
-              `Build extensão ${entryPoint.replace(this.projectRoot, '')} finalizado com sucesso!`
-            )
           }
-          this.logger.info(`Fazendo upload do arquivo ${distPath} para o Quoti...`)
           const fileBuffer = fs.readFileSync(distPath || changedFilePath)
           const extensionCode = fileBuffer.toString()
-
           extensionService.upload(fileBuffer, this.getUploadFileName(manifest))
           return {
             extensionInfo: manifests[entryPoint],
@@ -113,8 +113,7 @@ class ServeCommand extends Command {
       )
 
       extensionsData.forEach(async extensionData => {
-        this.logger.info(`Extensão ${extensionData.extensionInfo.name} com build feita`)
-
+        this.spinner.start('Enviando código para o Quoti...')
         const err = await this.socket.emit({
           event: 'reload-extension',
           data: {
@@ -127,9 +126,10 @@ class ServeCommand extends Command {
         })
 
         if (!err) {
-          this.logger.success('Quoti recebeu o código da extensão!')
+          this.spinner.succeed('Quoti recebeu o código da extensão!')
           return
         }
+        this.spinner.fail('Quoti não recebeu o código da extensão!')
         this.logger.error(`Erro ao enviar extensão para o Quoti ${err}`)
         if (process.env.DEBUG) {
           console.error(err)
@@ -160,8 +160,8 @@ class ServeCommand extends Command {
         .on('change', debouncedBuild)
 
       const watchingChangesMessage = args.entryPointPath
-        ? `Observando e servindo alterações na extensão em ${args.entryPointPath}`
-        : 'Observando e servindo alterações em qualquer extensão'
+        ? `Observando alterações na extensão em ${args.entryPointPath}`
+        : 'Observando alterações em qualquer extensão'
 
       this.logger.info(watchingChangesMessage)
     } catch (error) {
