@@ -23,7 +23,12 @@ class DeployCommand extends Command {
       color: 'yellow'
     }
     this.spinner = ora(this.spinnerOptions)
-    this.extensionsPaths = listExtensionsPaths()
+    try {
+      this.extensionsPaths = listExtensionsPaths()
+    } catch (error) {
+      this.logger.error(error)
+      process.exit(0)
+    }
   }
   async run () {
     credentials.load()

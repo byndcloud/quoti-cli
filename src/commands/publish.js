@@ -17,20 +17,18 @@ class PublishCommand extends Command {
       tag: 'command/publish'
     })
 
-    credentials.load()
-
-    const pkgInfo = readPkgSync()
-    if (!pkgInfo?.packageJson) {
-      throw new Error(
-        'Nenhum arquivo package.json encontrado, tem certeza que o diretório atual é de um projeto Vue?'
-      )
-    }
-    this.projectRoot = getProjectRootPath()
-    this.extensionsPaths = listExtensionsPaths()
-    if (this.extensionsPaths.length === 0) {
-      throw new Error(
-        'Nenhuma extensão declarada no package.json, adicione o entrypoint da sua extensão em um array no path quoti.extensions dentro do package.json'
-      )
+    try {
+      credentials.load()
+      this.projectRoot = getProjectRootPath()
+      this.extensionsPaths = listExtensionsPaths()
+      if (this.extensionsPaths.length === 0) {
+        throw new Error(
+          'Nenhuma extensão declarada no package.json, adicione o entrypoint da sua extensão em um array no path quoti.extensions dentro do package.json'
+        )
+      }
+    } catch (error) {
+      this.logger.error(error)
+      process.exit(0)
     }
   }
   async run () {
