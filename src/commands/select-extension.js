@@ -159,7 +159,10 @@ class SelectExtensionCommand extends Command {
   }
 
   convertPathToPOSIX (targetPath) {
-    return targetPath.split(path.sep).join(path.posix.sep)
+    if (targetPath.includes('/')) {
+      return targetPath
+    }
+    return targetPath.replace(/\\/g, '/')
   }
   async addExtensionToPackageJson (absoluteExtensionPath) {
     const extensionPathRelativeToProjectRoot = path.relative(
