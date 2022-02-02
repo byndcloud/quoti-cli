@@ -6,11 +6,11 @@ const { default: Command } = require('@oclif/command')
 const api = require('../config/axios')
 const ExtensionService = require('../services/extension')
 const fs = require('fs')
-const JSONManager = require('../config/JSONManager')
 const path = require('path')
 const inquirer = require('inquirer')
 const semver = require('semver')
 const Logger = require('../config/logger')
+const { getManifestFromEntryPoint, listExtensionsPaths } = require('../utils/index')
 
 class DeployCommand extends Command {
   constructor () {
@@ -23,12 +23,16 @@ class DeployCommand extends Command {
       color: 'yellow'
     }
     this.spinner = ora(this.spinnerOptions)
+    this.extensionsPaths = listExtensionsPaths()
   }
   async run () {
     credentials.load()
     const { args } = this.parse(DeployCommand)
-    const manifestPath = path.resolve(path.dirname(args.filePath), 'manifest.json')
-    this.manifest = new JSONManager(manifestPath)
+    let { entryPointPath } = args
+    if (!entryPointPath) {
+      entryPointPath = await this.getEntryPoint()
+    }
+    this.manifest = getManifestFromEntryPoint(entryPointPath)
     this.extensionService = new ExtensionService(this.manifest)
     try {
       if (!this.manifest.exists()) {
@@ -40,9 +44,9 @@ class DeployCommand extends Command {
       const filename = this.getUploadFileNameDeploy(currentTime.toString(), this.manifest.type === 'build')
       const url = `https://storage.cloud.google.com/dynamic-components/${filename}`
 
-      let extensionPath = args.filePath
+      let extensionPath = entryPointPath
       if (this.manifest.type === 'build') {
-        extensionPath = await this.extensionService.build(args.filePath)
+        extensionPath = await this.extensionService.build(entryPointPath)
       }
 
       await this.extensionService.upload(fs.readFileSync(extensionPath), filename)
@@ -65,6 +69,28 @@ class DeployCommand extends Command {
     } finally {
       process.exit(0)
     }
+  }
+  async getEntryPoint () {
+    let entryPointPath
+    const extensionsChoices = this.extensionsPaths.map(e => ({ name: path.relative(
+      './',
+      e
+    ),
+    value: e }))
+    if (extensionsChoices.length > 1) {
+      const { selectedExtensionPublish } = await inquirer.prompt([
+        {
+          name: 'selectedExtensionPublish',
+          message: 'Qual extensão deseja publicar ?',
+          type: 'list',
+          choices: extensionsChoices
+        }
+      ])
+      entryPointPath = selectedExtensionPublish
+    } else {
+      entryPointPath = extensionsChoices[0].value
+    }
+    return entryPointPath
   }
   async inputVersionName () {
     const { versionName } = await inquirer.prompt([
@@ -93,10 +119,9 @@ class DeployCommand extends Command {
 
 DeployCommand.args = [
   {
-    name: 'filePath',
-    required: true,
-    description: 'The path to a file to deploy',
-    default: './src/App.vue'
+    name: 'entryPointPath',
+    required: false,
+    description: 'Endereço do entry point (arquivo principal) da extensão'
   }
 ]
 

@@ -3,11 +3,13 @@ const path = require('path')
 const ora = require('ora')
 const VueCliService = require('@vue/cli-service')
 const { randomUUID } = require('crypto')
-const vueCliService = new VueCliService(process.cwd())
 const api = require('../config/axios')
 const credentials = require('../config/credentials')
 const Logger = require('../config/logger')
-
+const readPkgSync = require('read-pkg-up').sync
+const pkgInfo = readPkgSync()
+const vueCliService = new VueCliService(path.resolve(path.dirname(pkgInfo.path)))
+const { getProjectRootPath } = require('../utils/index')
 class ExtensionService {
   constructor (manifest, { spinnerOptions } = {}) {
     if (!manifest) {
@@ -113,7 +115,7 @@ class ExtensionService {
         'inline-vue': true
       })
       this.spinner.succeed(`Build da extensão ${this.manifest.name} finalizado`)
-      return path.join(process.cwd(), dest, `${name}.umd.min.js`)
+      return path.join(getProjectRootPath(), dest, `${name}.umd.min.js`)
     } catch (error) {
       this.spinner.fail('Erro durante o build')
       throw new Error(error)
