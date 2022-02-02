@@ -6,9 +6,6 @@ const { randomUUID } = require('crypto')
 const api = require('../config/axios')
 const credentials = require('../config/credentials')
 const Logger = require('../config/logger')
-const readPkgSync = require('read-pkg-up').sync
-const pkgInfo = readPkgSync()
-const vueCliService = new VueCliService(path.resolve(path.dirname(pkgInfo.path)))
 const { getProjectRootPath } = require('../utils/index')
 class ExtensionService {
   constructor (manifest, { spinnerOptions } = {}) {
@@ -25,6 +22,7 @@ class ExtensionService {
       spinner: 'arrow3',
       color: 'yellow'
     })
+    this.vueCliService = new VueCliService(getProjectRootPath())
   }
   async upload (buffer, remotePath) {
     if (!this.manifest.exists()) {
@@ -100,11 +98,11 @@ class ExtensionService {
       }
     }
     try {
-      vueCliService.init(mode)
+      this.vueCliService.init(mode)
       this.spinner.start(`Fazendo build da extensão ${this.manifest.name} ...`)
       const dest = 'dist/'
       const name = `dc_${this.manifest.extensionUUID}`
-      await vueCliService.run('build', {
+      await this.vueCliService.run('build', {
         mode,
         modern: true,
         target: 'lib',
