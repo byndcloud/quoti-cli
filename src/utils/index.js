@@ -1,6 +1,7 @@
 const JSONManager = require('../config/JSONManager')
 const path = require('path')
 const inquirer = require('inquirer')
+const readPkgSync = require('read-pkg-up').sync
 function isYes (text) {
   return ['s', 'sim', 'yes', 'y'].includes(text.toLowerCase())
 }
@@ -32,6 +33,22 @@ class Utils {
     )
     const manifest = new JSONManager(manifestPath)
     return manifest
+  }
+  getProjectRootPath () {
+    const pkgInfo = readPkgSync()
+    return path.resolve(path.dirname(pkgInfo.path))
+  }
+  listExtensionsPaths () {
+    const pkgInfo = readPkgSync()
+    if (!pkgInfo?.packageJson) {
+      throw new Error(
+        'Nenhum arquivo package.json encontrado, tem certeza que o diretório atual é de um projeto Vue?'
+      )
+    }
+    const projectRoot = path.resolve(path.dirname(pkgInfo.path))
+    return pkgInfo.packageJson.quoti.extensions.map(extPath =>
+      path.resolve(projectRoot, extPath)
+    )
   }
 }
 
