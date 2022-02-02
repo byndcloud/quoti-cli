@@ -3,7 +3,7 @@ const { default: Command, flags } = require('@oclif/command')
 const api = require('../config/axios')
 const { firebase } = require('../config/firebase')
 const semver = require('semver')
-const { getManifestFromEntryPoint, confirmQuestion } = require('../utils/index')
+const { getManifestFromEntryPoint, confirmQuestion, listExtensionsPaths, getProjectRootPath } = require('../utils/index')
 const inquirer = require('inquirer')
 const readPkgSync = require('read-pkg-up').sync
 const path = require('path')
@@ -25,11 +25,8 @@ class PublishCommand extends Command {
         'Nenhum arquivo package.json encontrado, tem certeza que o diretório atual é de um projeto Vue?'
       )
     }
-
-    this.projectRoot = path.resolve(path.dirname(pkgInfo.path))
-    this.extensionsPaths = pkgInfo.packageJson.quoti.extensions.map(extPath =>
-      path.resolve(this.projectRoot, extPath)
-    )
+    this.projectRoot = getProjectRootPath()
+    this.extensionsPaths = listExtensionsPaths()
     if (this.extensionsPaths.length === 0) {
       throw new Error(
         'Nenhuma extensão declarada no package.json, adicione o entrypoint da sua extensão em um array no path quoti.extensions dentro do package.json'
