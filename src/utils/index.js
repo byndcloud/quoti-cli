@@ -36,6 +36,12 @@ class Utils {
   }
   getProjectRootPath () {
     const pkgInfo = readPkgSync()
+    if (!pkgInfo) {
+      throw new Error(
+        'Para executar determinado comando você precisa estar em um projeto Vue com um arquivo package.json. Execute npm init na raiz do projeto ou use um modelo.'
+      )
+    }
+
     return path.resolve(path.dirname(pkgInfo.path))
   }
   listExtensionsPaths () {
