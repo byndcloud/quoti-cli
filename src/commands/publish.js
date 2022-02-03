@@ -177,7 +177,7 @@ class PublishCommand extends Command {
       const { selectedExtensionPublish } = await inquirer.prompt([
         {
           name: 'selectedExtensionPublish',
-          message: 'Qual extensão deseja publicar ?',
+          message: 'Qual extensão deseja realizar deploy ?',
           type: 'list',
           choices: extensionsChoices
         }
