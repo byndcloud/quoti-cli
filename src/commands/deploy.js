@@ -49,9 +49,7 @@ class DeployCommand extends Command {
         )
         return
       }
-      const currentTime = await firebase.firestore.Timestamp.fromDate(
-        new Date()
-      ).toMillis()
+      const currentTime = new Date().getTime()
       const versionName = (await this.inputVersionName()) || currentTime
       const filename = this.getUploadFileNameDeploy(
         currentTime.toString(),
