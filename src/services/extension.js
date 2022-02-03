@@ -83,7 +83,8 @@ class ExtensionService {
       this.logger.error('Verifique se realmente possui esta extensão')
       process.exit(0)
     } else {
-      throw new Error('Existe mais de uma extensão com o mesmo id')
+      this.logger.error('Existe mais de uma extensão com o mesmo id')
+      process.exit(0)
     }
   }
   async build (entry, { mode } = { mode: 'production' }) {
