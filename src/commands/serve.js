@@ -65,14 +65,10 @@ class ServeCommand extends Command {
       const extensionsToUpdate = extensionsEntrypointsToCheck.filter(
         entryPoint => {
           const { arr: dependencies } = getDependencyTree({ entry: entryPoint })
+          dependencies.push(entryPoint)
           return dependencies.includes(changedFileAbsolutePath)
         }
       )
-
-      // Victor: code below suports to extensions wich type is noBuild
-      if (!extensionsToUpdate.length && changedFilePath.includes('.vue')) {
-        extensionsToUpdate.push(changedFilePath)
-      }
 
       const manifests = extensionsToUpdate.reduce(
         (manifestsObj, entryPoint) => {
