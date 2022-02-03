@@ -38,7 +38,7 @@ class DeployCommand extends Command {
     const { args } = this.parse(DeployCommand)
     let { entryPointPath } = args
     if (!entryPointPath) {
-      entryPointPath = await this.getEntryPoint()
+      entryPointPath = await this.getEntryPointFromUser()
     }
     this.manifest = getManifestFromEntryPoint(entryPointPath)
     this.extensionService = new ExtensionService(this.manifest)
@@ -88,7 +88,7 @@ class DeployCommand extends Command {
       process.exit(0)
     }
   }
-  async getEntryPoint () {
+  async getEntryPointFromUser () {
     let entryPointPath
     const extensionsChoices = this.extensionsPaths.map(e => ({
       name: path.relative('./', e),
