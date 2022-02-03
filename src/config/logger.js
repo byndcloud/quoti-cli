@@ -1,5 +1,5 @@
 const { createLogger, format, transports, addColors } = require('winston')
-const { combine, timestamp, label, printf } = format
+const { combine, timestamp, printf } = format
 
 const colorizer = format.colorize()
 
@@ -23,10 +23,14 @@ const myCustomLevels = {
 const logger = createLogger({
   levels: myCustomLevels.levels,
   format: combine(
-    format.timestamp(),
-    format.printf(msg => {
+    timestamp(),
+    printf(msg => {
       if (msg.level === 'debug') {
-        return colorizer.colorize(msg.level, `${msg.timestamp} - ${msg.level}: ${msg.message}`)
+        if (msg.tag) {
+          return colorizer.colorize(msg.level, `${msg.timestamp} - ${msg.tag} - ${msg.level}: ${msg.message}`)
+        } else {
+          return colorizer.colorize(msg.level, `${msg.timestamp} - ${msg.level}: ${msg.message}`)
+        }
       } else {
         return colorizer.colorize(msg.level, `${msg.message}`)
       }
