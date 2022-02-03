@@ -10,7 +10,10 @@ const path = require('path')
 const inquirer = require('inquirer')
 const semver = require('semver')
 const Logger = require('../config/logger')
-const { getManifestFromEntryPoint, listExtensionsPaths } = require('../utils/index')
+const {
+  getManifestFromEntryPoint,
+  listExtensionsPaths
+} = require('../utils/index')
 
 class DeployCommand extends Command {
   constructor () {
@@ -41,12 +44,19 @@ class DeployCommand extends Command {
     this.extensionService = new ExtensionService(this.manifest)
     try {
       if (!this.manifest.exists()) {
-        this.logger.warning('Por favor selecione sua extensão. Execute qt selectExtension no diretório onde encontra a extensão')
+        this.logger.warning(
+          'Por favor selecione sua extensão. Execute qt selectExtension no diretório onde encontra a extensão'
+        )
         return
       }
-      const currentTime = await firebase.firestore.Timestamp.fromDate(new Date()).toMillis()
-      const versionName = await this.inputVersionName() || currentTime
-      const filename = this.getUploadFileNameDeploy(currentTime.toString(), this.manifest.type === 'build')
+      const currentTime = await firebase.firestore.Timestamp.fromDate(
+        new Date()
+      ).toMillis()
+      const versionName = (await this.inputVersionName()) || currentTime
+      const filename = this.getUploadFileNameDeploy(
+        currentTime.toString(),
+        this.manifest.type === 'build'
+      )
       const url = `https://storage.cloud.google.com/dynamic-components/${filename}`
 
       let extensionPath = entryPointPath
@@ -54,7 +64,10 @@ class DeployCommand extends Command {
         extensionPath = await this.extensionService.build(entryPointPath)
       }
 
-      await this.extensionService.upload(fs.readFileSync(extensionPath), filename)
+      await this.extensionService.upload(
+        fs.readFileSync(extensionPath),
+        filename
+      )
 
       const token = await firebase.auth().currentUser.getIdToken()
       this.spinner.start('Fazendo deploy...')
@@ -77,11 +90,10 @@ class DeployCommand extends Command {
   }
   async getEntryPoint () {
     let entryPointPath
-    const extensionsChoices = this.extensionsPaths.map(e => ({ name: path.relative(
-      './',
-      e
-    ),
-    value: e }))
+    const extensionsChoices = this.extensionsPaths.map(e => ({
+      name: path.relative('./', e),
+      value: e
+    }))
     if (extensionsChoices.length > 1) {
       const { selectedExtensionPublish } = await inquirer.prompt([
         {
@@ -101,8 +113,7 @@ class DeployCommand extends Command {
     const { versionName } = await inquirer.prompt([
       {
         name: 'versionName',
-        message:
-            `Escolha uma versão para sua extensão`,
+        message: `Escolha uma versão para sua extensão`,
         type: 'input',
         validate: input => {
           if (!semver.valid(input)) {
@@ -110,13 +121,14 @@ class DeployCommand extends Command {
           }
           return true
         }
-
       }
     ])
     return versionName
   }
   getUploadFileNameDeploy (currentTime, isBuild) {
-    return encodeURI(`${credentials.institution}/${md5(currentTime)}.${isBuild ? 'js' : 'vue'}`)
+    return encodeURI(
+      `${credentials.institution}/${md5(currentTime)}.${isBuild ? 'js' : 'vue'}`
+    )
   }
 }
 
