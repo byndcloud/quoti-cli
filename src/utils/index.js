@@ -36,7 +36,7 @@ function getManifestFromEntryPoint (entrypointPath) {
 }
 function getProjectRootPath () {
   const pkgInfo = readPkgSync()
-  if (!pkgInfo) {
+  if (!pkgInfo?.packageJson) {
     throw new Error(
       'Para executar determinado comando você precisa estar em um projeto Vue com um arquivo package.json. Execute npm init na raiz do projeto ou use um modelo.'
     )
@@ -45,13 +45,8 @@ function getProjectRootPath () {
   return path.resolve(path.dirname(pkgInfo.path))
 }
 function listExtensionsPaths () {
-  const pkgInfo = readPkgSync()
-  if (!pkgInfo?.packageJson) {
-    throw new Error(
-      'Nenhum arquivo package.json encontrado, tem certeza que o diretório atual é de um projeto Vue?'
-    )
-  }
   const projectRoot = getProjectRootPath()
+  const pkgInfo = readPkgSync()
   return pkgInfo.packageJson.quoti.extensions.map(extPath =>
     path.resolve(projectRoot, extPath)
   )
