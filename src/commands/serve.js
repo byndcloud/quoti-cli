@@ -32,7 +32,7 @@ class ServeCommand extends Command {
       this.extensionsPaths = listExtensionsPaths()
       if (this.extensionsPaths.length === 0) {
         throw new Error(
-          'Nenhuma extensão declarada no package.json, adicione o entrypoint da sua extensão em um array no path quoti.extensions dentro do package.json'
+          'Nenhuma extensão foi selecionada até agora, execute qt select-extension para escolher extensões para desenvolver.'
         )
       }
     } catch (error) {

@@ -38,7 +38,7 @@ function getProjectRootPath () {
   const pkgInfo = readPkgSync()
   if (!pkgInfo?.packageJson) {
     throw new Error(
-      'Para executar determinado comando você precisa estar em um projeto Vue com um arquivo package.json. Execute npm init na raiz do projeto ou use um modelo.'
+      'Para executar esse comando você precisa estar em um projeto Vue com um arquivo package.json. Execute npm init na raiz do projeto ou use um modelo.'
     )
   }
 

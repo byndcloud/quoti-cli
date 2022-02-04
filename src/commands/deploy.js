@@ -28,6 +28,11 @@ class DeployCommand extends Command {
     this.spinner = ora(this.spinnerOptions)
     try {
       this.extensionsPaths = listExtensionsPaths()
+      if (this.extensionsPaths.length === 0) {
+        throw new Error(
+          'Nenhuma extensão foi selecionada até agora, execute qt select-extension para escolher extensões para desenvolver.'
+        )
+      }
     } catch (error) {
       this.logger.error(error)
       process.exit(0)
@@ -96,7 +101,7 @@ class DeployCommand extends Command {
       const { selectedExtensionPublish } = await inquirer.prompt([
         {
           name: 'selectedExtensionPublish',
-          message: 'Qual extensão deseja publicar ?',
+          message: 'De qual extensão você deseja fazer deploy?',
           type: 'list',
           choices: extensionsChoices
         }
