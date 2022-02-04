@@ -4,18 +4,34 @@ const { firebase } = require('../config/firebase')
 const logo = require('./logo')
 const chalk = require('chalk')
 const inquirer = require('inquirer')
+const api = require('../config/axios')
+const Logger = require('../config/logger')
 
 class Auth {
   async login () {
     console.log(chalk`${logo}`)
     const institution = await this.insertOrgSLug()
     const customToken = await this.insertToken()
-    const authFirebase = await app.auth().signInWithCustomToken(customToken)
-    const data = {
-      institution: institution,
-      user: authFirebase.user.toJSON()
+    try {
+      const authFirebase = await app.auth().signInWithCustomToken(customToken)
+      const token = await firebase.auth().currentUser.getIdToken()
+      const data = {
+        institution: institution,
+        user: authFirebase.user.toJSON()
+      }
+      await api.axios.get(
+        `/${data.institution}/users`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      )
+      credentials.save(data)
+    } catch (e) {
+      if (e?.response?.status === 406) {
+        Logger.error('Falha ao realizar login. Verifique se escreveu o nome da organização corretamente')
+      } else {
+        Logger.error('Falha ao realizar login.')
+      }
+      process.exit(0)
     }
-    credentials.save(data)
   }
 
   async insertOrgSLug () {
