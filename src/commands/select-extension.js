@@ -3,7 +3,6 @@ const ora = require('ora')
 const { union } = require('lodash')
 const inquirer = require('inquirer')
 const readJSON = require('json-file-plus')
-const readPkgSync = require('read-pkg-up').sync
 const inquirerFileTreeSelection = require('inquirer-file-tree-selection-prompt')
 
 const { merge } = require('lodash')
@@ -17,6 +16,7 @@ const api = require('../config/axios')
 const JSONManager = require('../config/JSONManager')
 const fuzzy = require('fuzzy')
 const Logger = require('../config/logger')
+const { getProjectRootPath } = require('../utils/index')
 inquirer.registerPrompt('file-tree-selection', inquirerFileTreeSelection)
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'))
 
@@ -27,15 +27,13 @@ class SelectExtensionCommand extends Command {
     this.logger = Logger.child({
       tag: 'command/publish'
     })
-    const pkgInfo = readPkgSync()
-    if (pkgInfo) {
-      this.projectRoot = path.resolve(path.dirname(pkgInfo.path))
-      this.packageJsonPath = pkgInfo.path
-    } else {
-      this.projectRoot = process.cwd()
+    try {
+      this.projectRoot = getProjectRootPath()
+    } catch (error) {
+      this.logger.error(error)
+      process.exit(0)
     }
   }
-
   async run () {
     try {
       const { args, flags } = this.parse(SelectExtensionCommand)
@@ -49,12 +47,6 @@ class SelectExtensionCommand extends Command {
       if (args.entryPointPath && !args.entryPointPath.endsWith('.vue')) {
         throw new Error(
           `O arquivo de ponto de entrada de extensão deve ser um arquivo .vue`
-        )
-      }
-
-      if (!this.packageJsonPath) {
-        throw new Error(
-          'Para selecionar uma extensão você precisa estar em um projeto Vue com um arquivo package.json. Execute npm init na raiz do projeto ou use um modelo.'
         )
       }
 
@@ -119,15 +111,7 @@ class SelectExtensionCommand extends Command {
         args.entryPointPath || selectedEntryPoint
       )
 
-      if (!this.packageJsonPath) {
-        throw new Error(
-          'Para selecionar uma extensão você precisa estar em um projeto Vue com um arquivo package.json. Execute npm init na raiz do projeto ou use um modelo.'
-        )
-      }
-
-      if (this.packageJsonPath) {
-        await this.addExtensionToPackageJson(absoluteExtensionPath)
-      }
+      await this.addExtensionToPackageJson(absoluteExtensionPath)
 
       this.upsertManifest(
         path.resolve(path.dirname(absoluteExtensionPath), 'manifest.json'),
@@ -172,7 +156,7 @@ class SelectExtensionCommand extends Command {
     const extensionPathRelativeToProjectRootPOSIX = this.convertPathToPOSIX(
       extensionPathRelativeToProjectRoot
     )
-    const packageJsonEditor = await readJSON(path.resolve(this.packageJsonPath))
+    const packageJsonEditor = await readJSON(path.resolve(this.projectRoot, 'package.json'))
 
     const currentQuotiInfo = merge(
       { extensions: [] },
