@@ -6,11 +6,14 @@ const { default: Command } = require('@oclif/command')
 const api = require('../config/axios')
 const ExtensionService = require('../services/extension')
 const fs = require('fs')
-const JSONManager = require('../config/JSONManager')
 const path = require('path')
 const inquirer = require('inquirer')
 const semver = require('semver')
 const Logger = require('../config/logger')
+const {
+  getManifestFromEntryPoint,
+  listExtensionsPaths
+} = require('../utils/index')
 
 class DeployCommand extends Command {
   constructor () {
@@ -23,29 +26,46 @@ class DeployCommand extends Command {
       color: 'yellow'
     }
     this.spinner = ora(this.spinnerOptions)
+    try {
+      this.extensionsPaths = listExtensionsPaths()
+    } catch (error) {
+      this.logger.error(error)
+      process.exit(0)
+    }
   }
   async run () {
     credentials.load()
     const { args } = this.parse(DeployCommand)
-    const manifestPath = path.resolve(path.dirname(args.filePath), 'manifest.json')
-    this.manifest = new JSONManager(manifestPath)
+    let { entryPointPath } = args
+    if (!entryPointPath) {
+      entryPointPath = await this.getEntryPointFromUser()
+    }
+    this.manifest = getManifestFromEntryPoint(entryPointPath)
     this.extensionService = new ExtensionService(this.manifest)
     try {
       if (!this.manifest.exists()) {
-        this.logger.warning('Por favor selecione sua extensão. Execute qt selectExtension no diretório onde encontra a extensão')
+        this.logger.warning(
+          'Por favor selecione sua extensão. Execute qt selectExtension no diretório onde encontra a extensão'
+        )
         return
       }
-      const currentTime = await firebase.firestore.Timestamp.fromDate(new Date()).toMillis()
-      const versionName = await this.inputVersionName() || currentTime
-      const filename = this.getUploadFileNameDeploy(currentTime.toString(), this.manifest.type === 'build')
+      const currentTime = new Date().getTime()
+      const versionName = (await this.inputVersionName()) || currentTime
+      const filename = this.getUploadFileNameDeploy(
+        currentTime.toString(),
+        this.manifest.type === 'build'
+      )
       const url = `https://storage.cloud.google.com/dynamic-components/${filename}`
 
-      let extensionPath = args.filePath
+      let extensionPath = entryPointPath
       if (this.manifest.type === 'build') {
-        extensionPath = await this.extensionService.build(args.filePath)
+        extensionPath = await this.extensionService.build(entryPointPath)
       }
 
-      await this.extensionService.upload(fs.readFileSync(extensionPath), filename)
+      await this.extensionService.upload(
+        fs.readFileSync(extensionPath),
+        filename
+      )
 
       const token = await firebase.auth().currentUser.getIdToken()
       this.spinner.start('Fazendo deploy...')
@@ -66,12 +86,32 @@ class DeployCommand extends Command {
       process.exit(0)
     }
   }
+  async getEntryPointFromUser () {
+    let entryPointPath
+    const extensionsChoices = this.extensionsPaths.map(e => ({
+      name: path.relative('./', e),
+      value: e
+    }))
+    if (extensionsChoices.length > 1) {
+      const { selectedExtensionPublish } = await inquirer.prompt([
+        {
+          name: 'selectedExtensionPublish',
+          message: 'Qual extensão deseja publicar ?',
+          type: 'list',
+          choices: extensionsChoices
+        }
+      ])
+      entryPointPath = selectedExtensionPublish
+    } else {
+      entryPointPath = extensionsChoices[0].value
+    }
+    return entryPointPath
+  }
   async inputVersionName () {
     const { versionName } = await inquirer.prompt([
       {
         name: 'versionName',
-        message:
-            `Escolha uma versão para sua extensão`,
+        message: `Escolha uma versão para sua extensão`,
         type: 'input',
         validate: input => {
           if (!semver.valid(input)) {
@@ -79,13 +119,14 @@ class DeployCommand extends Command {
           }
           return true
         }
-
       }
     ])
     return versionName
   }
   getUploadFileNameDeploy (currentTime, isBuild) {
-    return encodeURI(`${credentials.institution}/${md5(currentTime)}.${isBuild ? 'js' : 'vue'}`)
+    return encodeURI(
+      `${credentials.institution}/${md5(currentTime)}.${isBuild ? 'js' : 'vue'}`
+    )
   }
 }
 
@@ -93,10 +134,9 @@ class DeployCommand extends Command {
 
 DeployCommand.args = [
   {
-    name: 'filePath',
-    required: true,
-    description: 'The path to a file to deploy',
-    default: './src/App.vue'
+    name: 'entryPointPath',
+    required: false,
+    description: 'Endereço do entry point (arquivo principal) da extensão'
   }
 ]
 

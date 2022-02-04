@@ -3,11 +3,10 @@ const path = require('path')
 const ora = require('ora')
 const VueCliService = require('@vue/cli-service')
 const { randomUUID } = require('crypto')
-const vueCliService = new VueCliService(process.cwd())
 const api = require('../config/axios')
 const credentials = require('../config/credentials')
 const Logger = require('../config/logger')
-
+const { getProjectRootPath } = require('../utils/index')
 class ExtensionService {
   constructor (manifest, { spinnerOptions } = {}) {
     if (!manifest) {
@@ -23,6 +22,7 @@ class ExtensionService {
       spinner: 'arrow3',
       color: 'yellow'
     })
+    this.vueCliService = new VueCliService(getProjectRootPath())
   }
   async upload (buffer, remotePath) {
     if (!this.manifest.exists()) {
@@ -98,11 +98,11 @@ class ExtensionService {
       }
     }
     try {
-      vueCliService.init(mode)
+      this.vueCliService.init(mode)
       this.spinner.start(`Fazendo build da extensão ${this.manifest.name} ...`)
       const dest = 'dist/'
       const name = `dc_${this.manifest.extensionUUID}`
-      await vueCliService.run('build', {
+      await this.vueCliService.run('build', {
         mode,
         modern: true,
         target: 'lib',
@@ -113,7 +113,7 @@ class ExtensionService {
         'inline-vue': true
       })
       this.spinner.succeed(`Build da extensão ${this.manifest.name} finalizado`)
-      return path.join(process.cwd(), dest, `${name}.umd.min.js`)
+      return path.join(getProjectRootPath(), dest, `${name}.umd.min.js`)
     } catch (error) {
       this.spinner.fail('Erro durante o build')
       throw new Error(error)
