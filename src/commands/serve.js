@@ -1,7 +1,6 @@
 const fs = require('fs')
 const path = require('path')
 const chokidar = require('chokidar')
-const readPkgSync = require('read-pkg-up').sync
 const getDependencyTree = require('get-dependency-tree')
 
 const { debounce } = require('lodash')
@@ -13,6 +12,7 @@ const Socket = require('../config/socket')
 const { getManifestFromEntryPoint } = require('../utils/index')
 const Logger = require('../config/logger')
 const ora = require('ora')
+const { getProjectRootPath, listExtensionsPaths } = require('../utils/index')
 class ServeCommand extends Command {
   constructor () {
     super(...arguments)
@@ -27,22 +27,17 @@ class ServeCommand extends Command {
     this.socket = new Socket()
 
     credentials.load()
-
-    const pkgInfo = readPkgSync()
-    if (!pkgInfo?.packageJson) {
-      throw new Error(
-        'Nenhum arquivo package.json encontrado, tem certeza que o diretório atual é de um projeto Vue?'
-      )
-    }
-
-    this.projectRoot = path.resolve(path.dirname(pkgInfo.path))
-    this.extensionsPaths = pkgInfo.packageJson.quoti.extensions.map(extPath =>
-      path.resolve(this.projectRoot, extPath)
-    )
-    if (this.extensionsPaths.length === 0) {
-      throw new Error(
-        'Nenhuma extensão declarada no package.json, adicione o entrypoint da sua extensão em um array no path quoti.extensions dentro do package.json'
-      )
+    try {
+      this.projectRoot = getProjectRootPath()
+      this.extensionsPaths = listExtensionsPaths()
+      if (this.extensionsPaths.length === 0) {
+        throw new Error(
+          'Nenhuma extensão declarada no package.json, adicione o entrypoint da sua extensão em um array no path quoti.extensions dentro do package.json'
+        )
+      }
+    } catch (error) {
+      Logger.error(error)
+      process.exit(0)
     }
   }
   buildAndUpload (args) {
@@ -61,18 +56,14 @@ class ServeCommand extends Command {
         extensionsEntrypointsToCheck.push(currentExtensionPath)
       }
 
-      const changedFileAbsolutePath = path.resolve(changedFilePath)
+      const changedFileAbsolutePath = path.join(this.projectRoot, changedFilePath)
       const extensionsToUpdate = extensionsEntrypointsToCheck.filter(
         entryPoint => {
           const { arr: dependencies } = getDependencyTree({ entry: entryPoint })
+          dependencies.push(entryPoint)
           return dependencies.includes(changedFileAbsolutePath)
         }
       )
-
-      // Victor: code below suports to extensions wich type is noBuild
-      if (!extensionsToUpdate.length && changedFilePath.includes('.vue')) {
-        extensionsToUpdate.push(changedFilePath)
-      }
 
       const manifests = extensionsToUpdate.reduce(
         (manifestsObj, entryPoint) => {
@@ -105,7 +96,7 @@ class ServeCommand extends Command {
                 await extensionService.createExtensionUUID()
               }
             }
-            distPath = `./dist/dc_${manifest.extensionUUID}.umd.min.js`
+            distPath = path.resolve(this.projectRoot, `dist/dc_${manifest.extensionUUID}.umd.min.js`)
             await extensionService.build(entryPoint, { mode: 'staging' })
           }
           const fileBuffer = fs.readFileSync(distPath || changedFilePath)
@@ -162,7 +153,7 @@ class ServeCommand extends Command {
 
       const debouncedBuild = debounce(this.buildAndUpload(args), 800)
       chokidar
-        .watch(filesToWatch, { ignored: ['node_modules'] })
+        .watch(filesToWatch, { cwd: this.projectRoot, ignored: ['node_modules'] })
         .on('change', debouncedBuild)
 
       const watchingChangesMessage = args.entryPointPath
