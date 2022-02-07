@@ -51,6 +51,16 @@ function listExtensionsPaths () {
     path.resolve(projectRoot, extPath)
   )
 }
+function validateEntryPointIncludedInPackage (entryPointPath) {
+  const entryPointPaths = listExtensionsPaths()
+  if (
+    !entryPointPaths.includes(path.resolve(entryPointPath))
+  ) {
+    throw new Error(
+      `O caminho especificado (${entryPointPath}) não foi declarado como de uma extensão no package.json em quoti.extensions`
+    )
+  }
+}
 
 module.exports = {
   isYes,
@@ -58,5 +68,6 @@ module.exports = {
   confirmQuestion,
   getManifestFromEntryPoint,
   getProjectRootPath,
-  listExtensionsPaths
+  listExtensionsPaths,
+  validateEntryPointIncludedInPackage
 }
