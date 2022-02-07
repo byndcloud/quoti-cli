@@ -5,7 +5,7 @@ const inquirer = require('inquirer')
 const readJSON = require('json-file-plus')
 const inquirerFileTreeSelection = require('inquirer-file-tree-selection-prompt')
 
-const { merge } = require('lodash')
+const { merge, set } = require('lodash')
 const { readdirSync, existsSync } = require('fs')
 const Command = require('../base.js')
 const { flags } = require('@oclif/command')
@@ -157,8 +157,8 @@ class SelectExtensionCommand extends Command {
     currentQuotiInfo.extensions = union(currentQuotiInfo.extensions, [
       extensionPathRelativeToProjectRootPOSIX
     ])
-    if (packageJsonEditor?.data?.quoti?.extensions) {
-      packageJsonEditor.data.quoti.extensions = currentQuotiInfo.extensions
+    if (packageJsonEditor?.data) {
+      set(packageJsonEditor.data, 'quoti.extensions', currentQuotiInfo.extensions)
     }
     await packageJsonEditor.save()
   }
