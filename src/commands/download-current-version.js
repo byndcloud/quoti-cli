@@ -1,20 +1,16 @@
 const fs = require('fs')
 const { firebase } = require('../config/firebase')
 const credentials = require('../config/credentials')
-const { default: Command } = require('@oclif/command')
+const Command = require('../base.js')
 var http = require('https')
 const api = require('../config/axios')
 const JSONManager = require('../config/JSONManager')
 const { confirmQuestion } = require('../utils/index')
-const Logger = require('../config/logger')
 
 class DownloadCurrentVersion extends Command {
   constructor () {
     super(...arguments)
     this.manifest = new JSONManager('./manifest.json')
-    this.logger = Logger.child({
-      tag: 'command/download-current-version'
-    })
   }
   async run () {
     await credentials.load()

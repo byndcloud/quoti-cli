@@ -7,7 +7,8 @@ const inquirerFileTreeSelection = require('inquirer-file-tree-selection-prompt')
 
 const { merge } = require('lodash')
 const { readdirSync, existsSync } = require('fs')
-const { default: Command, flags } = require('@oclif/command')
+const Command = require('../base.js')
+const { flags } = require('@oclif/command')
 
 const { app } = require('../config/firebase')
 
@@ -15,7 +16,6 @@ const credentials = require('../config/credentials')
 const api = require('../config/axios')
 const JSONManager = require('../config/JSONManager')
 const fuzzy = require('fuzzy')
-const Logger = require('../config/logger')
 const { getProjectRootPath } = require('../utils/index')
 inquirer.registerPrompt('file-tree-selection', inquirerFileTreeSelection)
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'))
@@ -23,10 +23,6 @@ inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'))
 class SelectExtensionCommand extends Command {
   constructor () {
     super(...arguments)
-
-    this.logger = Logger.child({
-      tag: 'command/publish'
-    })
     try {
       this.projectRoot = getProjectRootPath()
     } catch (error) {

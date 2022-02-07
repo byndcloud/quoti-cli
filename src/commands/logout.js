@@ -1,14 +1,7 @@
 const credentials = require('../config/credentials')
-const { default: Command } = require('@oclif/command')
-const Logger = require('../config/logger')
+const Command = require('../base.js')
 
 class LogoutCommand extends Command {
-  constructor () {
-    super(...arguments)
-    this.logger = Logger.child({
-      tag: 'command/download-current-version'
-    })
-  }
   async run () {
     try {
       const loggedOut = credentials.delete()

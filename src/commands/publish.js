@@ -1,22 +1,16 @@
 const credentials = require('../config/credentials')
-const { default: Command, flags } = require('@oclif/command')
+const Command = require('../base.js')
+const { flags } = require('@oclif/command')
 const api = require('../config/axios')
 const { firebase } = require('../config/firebase')
 const semver = require('semver')
 const { getManifestFromEntryPoint, confirmQuestion, listExtensionsPaths, getProjectRootPath } = require('../utils/index')
 const inquirer = require('inquirer')
-const readPkgSync = require('read-pkg-up').sync
 const path = require('path')
-const Logger = require('../config/logger')
 
 class PublishCommand extends Command {
   constructor () {
     super(...arguments)
-
-    this.logger = Logger.child({
-      tag: 'command/publish'
-    })
-
     try {
       credentials.load()
       this.projectRoot = getProjectRootPath()
