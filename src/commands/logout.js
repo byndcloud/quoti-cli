@@ -3,15 +3,11 @@ const Command = require('../base.js')
 
 class LogoutCommand extends Command {
   async run () {
-    try {
-      const loggedOut = credentials.delete()
-      if (loggedOut) {
-        this.logger.success('Usuário deslogado')
-      } else {
-        this.logger.success('Usuário já realizou logout.')
-      }
-    } catch (error) {
-      this.logger.error(error)
+    const loggedOut = credentials.delete()
+    if (loggedOut) {
+      this.logger.success('Usuário deslogado')
+    } else {
+      this.logger.success('Usuário já realizou logout.')
     }
   }
 }

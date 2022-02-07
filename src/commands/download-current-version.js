@@ -14,36 +14,33 @@ class DownloadCurrentVersion extends Command {
   }
   async run () {
     await credentials.load()
-    try {
-      if (!this.manifest.exists()) {
-        this.logger.warning('Por favor selecione sua extensão. Execute qt selectExtension')
-        process.exit(0)
-      }
-      await this.manifest.load()
-      const { args } = this.parse(DownloadCurrentVersion)
-      if (!fs.existsSync(args.filePath)) {
-        this.logger.red(`${args.filePath} não é um endereço válido`)
-        process.exit(0)
-      }
-      const token = await firebase.auth().currentUser.getIdToken()
-      const result = await api.axios.get(
-        `/${credentials.institution}/dynamic-components/url-file-active/${this.manifest.extensionId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      )
-      let pathFile = true
-      pathFile = await this.isReplaceFile(args.filePath)
-      if (pathFile) {
-        await this.downloadFile(result.data.url, pathFile)
-        this.logger.blue(`Arquivo salvo em ${args.filePath}`)
-      }
-      return result.data
-    } catch (error) {
-      this.logger.error(`${error}`)
+
+    if (!this.manifest.exists()) {
+      this.logger.warning('Por favor selecione sua extensão. Execute qt selectExtension')
+      process.exit(0)
     }
+    await this.manifest.load()
+    const { args } = this.parse(DownloadCurrentVersion)
+    if (!fs.existsSync(args.filePath)) {
+      this.logger.red(`${args.filePath} não é um endereço válido`)
+      process.exit(0)
+    }
+    const token = await firebase.auth().currentUser.getIdToken()
+    const result = await api.axios.get(
+      `/${credentials.institution}/dynamic-components/url-file-active/${this.manifest.extensionId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    )
+    let pathFile = true
+    pathFile = await this.isReplaceFile(args.filePath)
+    if (pathFile) {
+      await this.downloadFile(result.data.url, pathFile)
+      this.logger.blue(`Arquivo salvo em ${args.filePath}`)
+    }
+    return result.data
   }
   async isReplaceFile (path) {
     let pathFile
