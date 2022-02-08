@@ -20,9 +20,8 @@ class DownloadCurrentVersion extends Command {
       process.exit(0)
     }
     await this.manifest.load()
-    const { args } = this.parse(DownloadCurrentVersion)
-    if (!fs.existsSync(args.filePath)) {
-      this.logger.red(`${args.filePath} não é um endereço válido`)
+    if (!fs.existsSync(this.args.filePath)) {
+      this.logger.error(`${this.args.filePath} não é um endereço válido`)
       process.exit(0)
     }
     const token = await firebase.auth().currentUser.getIdToken()
@@ -35,10 +34,10 @@ class DownloadCurrentVersion extends Command {
       }
     )
     let pathFile = true
-    pathFile = await this.isReplaceFile(args.filePath)
+    pathFile = await this.isReplaceFile(this.args.filePath)
     if (pathFile) {
       await this.downloadFile(result.data.url, pathFile)
-      this.logger.blue(`Arquivo salvo em ${args.filePath}`)
+      this.logger.success(`Arquivo salvo em ${this.args.filePath}`)
     }
     return result.data
   }

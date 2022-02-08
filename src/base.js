@@ -12,8 +12,9 @@ module.exports = class BaseCommand extends Command {
 
   async init () {
     try {
-      const { flags } = this.parse(this.constructor)
+      const { flags, args } = this.parse(this.constructor)
       this.flags = flags
+      this.args = args
     } catch (error) {
       this.logger.error(error)
     }

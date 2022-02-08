@@ -31,15 +31,13 @@ class SelectExtensionCommand extends Command {
     }
   }
   async run () {
-    const { args, flags } = this.parse(SelectExtensionCommand)
-
-    if (args.entryPointPath && !existsSync(args.entryPointPath)) {
+    if (this.args.entryPointPath && !existsSync(this.args.entryPointPath)) {
       throw new Error(
-        `O arquivo de ponto de entrada de extensão fornecido não foi encontrado em '${args.entryPointPath}', certifique-se de que o arquivo existe`
+        `O arquivo de ponto de entrada de extensão fornecido não foi encontrado em '${this.args.entryPointPath}', certifique-se de que o arquivo existe`
       )
     }
 
-    if (args.entryPointPath && !args.entryPointPath.endsWith('.vue')) {
+    if (this.args.entryPointPath && !this.args.entryPointPath.endsWith('.vue')) {
       throw new Error(
         `O arquivo de ponto de entrada de extensão deve ser um arquivo .vue`
       )
@@ -52,7 +50,7 @@ class SelectExtensionCommand extends Command {
         type: 'file-tree-selection',
         validate: file => file.endsWith('.vue'),
         hideRoot: true,
-        when: !args.entryPointPath
+        when: !this.args.entryPointPath
       }
     ])
 
@@ -63,7 +61,7 @@ class SelectExtensionCommand extends Command {
 
     const extensions = await this.listExtensions(
       credentials.institution,
-      flags.build
+      this.flags.build
     ).catch(err => {
       spinner.fail('Falha ao carregar extensões')
       throw err
@@ -103,7 +101,7 @@ class SelectExtensionCommand extends Command {
     ])
 
     const absoluteExtensionPath = path.resolve(
-      args.entryPointPath || selectedEntryPoint
+      this.args.entryPointPath || selectedEntryPoint
     )
 
     await this.addExtensionToPackageJson(absoluteExtensionPath)

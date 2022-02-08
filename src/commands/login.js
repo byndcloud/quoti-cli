@@ -7,7 +7,7 @@ class LoginCommand extends Command {
     if (credentials.exists()) {
       this.logger.success('Usuário com login realizado')
     } else {
-      this.logger.red('Erro no login')
+      this.logger.error('Erro no login')
     }
   }
 }

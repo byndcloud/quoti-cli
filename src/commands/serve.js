@@ -132,27 +132,26 @@ class ServeCommand extends Command {
   }
 
   async run () {
-    const { args } = this.parse(ServeCommand)
     const filesToWatch = ['*.js', './**/*.vue', './**/*.js']
 
     if (
-      args.entryPointPath &&
-        !this.extensionsPaths.includes(path.resolve(args.entryPointPath))
+      this.args.entryPointPath &&
+        !this.extensionsPaths.includes(path.resolve(this.args.entryPointPath))
     ) {
       throw new Error(
-        `O caminho especificado (${args.entryPointPath}) não foi declarado como de uma extensão no package.json em quoti.extensions`
+        `O caminho especificado (${this.args.entryPointPath}) não foi declarado como de uma extensão no package.json em quoti.extensions`
       )
     }
 
     this.logger.info('Conectado ao Quoti!')
 
-    const debouncedBuild = debounce(this.buildAndUpload(args), 800)
+    const debouncedBuild = debounce(this.buildAndUpload(this.args), 800)
     chokidar
       .watch(filesToWatch, { cwd: this.projectRoot, ignored: ['node_modules'] })
       .on('change', debouncedBuild)
 
-    const watchingChangesMessage = args.entryPointPath
-      ? `Observando alterações na extensão em ${args.entryPointPath}`
+    const watchingChangesMessage = this.args.entryPointPath
+      ? `Observando alterações na extensão em ${this.args.entryPointPath}`
       : 'Observando alterações em qualquer extensão'
 
     this.logger.info(watchingChangesMessage)

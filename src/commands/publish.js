@@ -26,19 +26,18 @@ class PublishCommand extends Command {
     }
   }
   async run () {
-    const { flags, args } = this.parse(PublishCommand)
-    const { entryPointPath } = args
+    const { entryPointPath } = this.args
     const manifest = await this.getManifest(entryPointPath)
     if (!manifest.extensionUUID) {
       this.logger.error(`Por razões de segurança é necessário realizar deploy em sua extensão antes de publicar no Marketplace. Uma vez publicado esta mensagem não irá mais aparecer porém sempre que desejar publicar uma versão mais antiga que a data de hoje será necessário realizar deploy da versão desejada`)
       process.exit(0)
     }
-    if (flags.version && !semver.valid(flags.version)) {
+    if (this.flags.version && !semver.valid(this.flags.version)) {
       this.logger.error(`Versão deve estar no formato x.x.x`)
       process.exit(0)
     }
 
-    if (!this.commandSintaxeValid(flags)) {
+    if (!this.commandSintaxeValid(this.flags)) {
       this.logger.error(`Use apenas uma das flags  --version --patch, --minor, --major`)
       process.exit(0)
     }
@@ -69,9 +68,9 @@ class PublishCommand extends Command {
       process.exit(0)
     }
     if (!dynamicComponentFile.marketplaceExtensionId) {
-      await this.publishExtension(flags, dynamicComponentFileActivated.id, token, manifest)
+      await this.publishExtension(this.flags, dynamicComponentFileActivated.id, token, manifest)
     } else {
-      await this.publishNewVersion(flags, dynamicComponentFileActivated.id, token, manifest)
+      await this.publishNewVersion(this.flags, dynamicComponentFileActivated.id, token, manifest)
     }
   }
   async publishExtension (flags, dynamicComponentFileId, token, manifest) {

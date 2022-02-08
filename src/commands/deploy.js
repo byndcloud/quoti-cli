@@ -32,8 +32,7 @@ class DeployCommand extends Command {
   }
   async run () {
     credentials.load()
-    const { args } = this.parse(DeployCommand)
-    let { entryPointPath } = args
+    let { entryPointPath } = this.args
     if (!entryPointPath) {
       entryPointPath = await this.getEntryPointFromUser()
     }
