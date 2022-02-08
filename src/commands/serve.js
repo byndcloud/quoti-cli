@@ -135,7 +135,7 @@ class ServeCommand extends Command {
     const filesToWatch = ['*.js', './**/*.vue', './**/*.js']
 
     if (this.args.entryPointPath) {
-      validateEntryPointIncludedInPackage(args.entryPointPath)
+      validateEntryPointIncludedInPackage(this.args.entryPointPath)
     }
 
     this.logger.info('Conectado ao Quoti!')
