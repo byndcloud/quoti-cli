@@ -1,129 +1,120 @@
 const path = require('path')
 const ora = require('ora')
-const chalk = require('chalk')
 const { union } = require('lodash')
 const inquirer = require('inquirer')
 const readJSON = require('json-file-plus')
-const readPkgSync = require('read-pkg-up').sync
 const inquirerFileTreeSelection = require('inquirer-file-tree-selection-prompt')
 
-const { merge } = require('lodash')
+const { merge, set } = require('lodash')
 const { readdirSync, existsSync } = require('fs')
-const { default: Command, flags } = require('@oclif/command')
+const Command = require('../base.js')
+const { flags } = require('@oclif/command')
 
 const { app } = require('../config/firebase')
 
 const credentials = require('../config/credentials')
 const api = require('../config/axios')
 const JSONManager = require('../config/JSONManager')
-
+const fuzzy = require('fuzzy')
+const { getProjectRootPath } = require('../utils/index')
 inquirer.registerPrompt('file-tree-selection', inquirerFileTreeSelection)
+inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'))
 
 class SelectExtensionCommand extends Command {
   constructor () {
     super(...arguments)
-    const pkgInfo = readPkgSync()
-    if (pkgInfo) {
-      this.projectRoot = path.resolve(path.dirname(pkgInfo.path))
-      this.packageJsonPath = pkgInfo.path
-    } else {
-      this.projectRoot = process.cwd()
+    try {
+      this.projectRoot = getProjectRootPath()
+    } catch (error) {
+      this.logger.error(error)
+      process.exit(0)
     }
   }
-
   async run () {
-    try {
-      const { args, flags } = this.parse(SelectExtensionCommand)
-
-      if (args.entryPointPath && !existsSync(args.entryPointPath)) {
-        throw new Error(
-          `The given extension entrypoint file wasn't found at '${args.entryPointPath}', make sure the file exists`
-        )
-      }
-
-      if (args.entryPointPath && !args.entryPointPath.endsWith('.vue')) {
-        throw new Error(`The extension entrypoint file must be a .vue file`)
-      }
-
-      if (!this.packageJsonPath && flags.build === true) {
-        throw new Error(
-          'To select an extension with build you have to be in a Vue project with a package.json file'
-        )
-      }
-
-      const { selectedEntryPoint } = await inquirer.prompt([
-        {
-          name: 'selectedEntryPoint',
-          message:
-            'Which file is the entry point (main file) to your extension?',
-          type: 'file-tree-selection',
-          validate: file => file.endsWith('.vue'),
-          hideRoot: true,
-          when: !args.entryPointPath
-        }
-      ])
-
-      const spinner = ora({
-        text: 'Fetching extensions',
-        spinner: 'dots3'
-      }).start()
-
-      const extensions = await this.listExtensions(
-        credentials.institution,
-        flags.build
-      ).catch(err => {
-        spinner.fail('Failed loading extensions')
-        throw err
-      })
-
-      if (extensions.length === 0) {
-        spinner.fail("Couldn't find any extensions")
-        return
-      }
-
-      spinner.succeed('Got extensions list!')
-      const extensionsChoices = extensions.map(ext => ({
-        name: ext.title,
-        value: ext
-      }))
-
-      const { selectedExtension } = await inquirer.prompt([
-        {
-          name: 'selectedExtension',
-          message: 'Choose your extension:',
-          type: 'list',
-          choices: extensionsChoices
-        }
-      ])
-
-      const absoluteExtensionPath = path.resolve(
-        args.entryPointPath || selectedEntryPoint
+    if (this.args.entryPointPath && !existsSync(this.args.entryPointPath)) {
+      throw new Error(
+        `O arquivo de ponto de entrada de extensão fornecido não foi encontrado em '${this.args.entryPointPath}', certifique-se de que o arquivo existe`
       )
-
-      if (selectedExtension.type === 'Com build' && !this.packageJsonPath) {
-        throw new Error(
-          `The selected extension requires building so you must have a package.json file at the root of your project. Try running npm init at the root of the project or using a template.`
-        )
-      }
-
-      if (this.packageJsonPath) {
-        await this.addExtensionToPackageJson(absoluteExtensionPath)
-      }
-
-      this.upsertManifest(
-        path.resolve(path.dirname(absoluteExtensionPath), 'manifest.json'),
-        selectedExtension
-      )
-
-      console.log(chalk.green('Extension selected! \\o/'))
-      console.log(
-        chalk.blue("You can now go to your project's root and run"),
-        chalk.yellow('qt serve')
-      )
-    } catch (error) {
-      console.log(chalk.red(error))
-      if (process.env.DEBUG) console.error(error)
     }
+
+    if (this.args.entryPointPath && !this.args.entryPointPath.endsWith('.vue')) {
+      throw new Error(
+        `O arquivo de ponto de entrada de extensão deve ser um arquivo .vue`
+      )
+    }
+
+    const { selectedEntryPoint } = await inquirer.prompt([
+      {
+        name: 'selectedEntryPoint',
+        message: 'Qual é o entry point (arquivo principal) da sua extensão?',
+        type: 'file-tree-selection',
+        validate: file => file.endsWith('.vue'),
+        hideRoot: true,
+        when: !this.args.entryPointPath
+      }
+    ])
+
+    const spinner = ora({
+      text: 'Buscando extensões',
+      spinner: 'dots3'
+    }).start()
+
+    const extensions = await this.listExtensions(
+      credentials.institution,
+      this.flags.build
+    ).catch(err => {
+      spinner.fail('Falha ao carregar extensões')
+      throw err
+    })
+
+    if (extensions.length === 0) {
+      spinner.fail('Não encontramos nenhuma extensão.')
+      return
+    }
+
+    spinner.succeed('Lista de extensões obtida')
+    const extensionsChoices = extensions.map(ext => ({
+      name: ext.title,
+      value: ext
+    }))
+
+    const { selectedExtension } = await inquirer.prompt([
+      {
+        name: 'selectedExtension',
+        message: 'Escolha sua extensão:',
+        type: 'autocomplete',
+        choices: extensionsChoices,
+        searchText: 'Carregando...',
+        emptyText: 'Nem resultado encontrado para a pesquisa realizada',
+        source: function (answersSoFar, input) {
+          if (input) {
+            const fuzzyResult = fuzzy.filter(
+              input,
+              extensionsChoices.map(e => e.name)
+            )
+            return fuzzyResult.map(fr => extensionsChoices[fr.index])
+          } else {
+            return extensionsChoices
+          }
+        }
+      }
+    ])
+
+    const absoluteExtensionPath = path.resolve(
+      this.args.entryPointPath || selectedEntryPoint
+    )
+
+    await this.addExtensionToPackageJson(absoluteExtensionPath)
+
+    this.upsertManifest(
+      path.resolve(path.dirname(absoluteExtensionPath), 'manifest.json'),
+      selectedExtension
+    )
+
+    this.logger.success('Extensão selecionada! \\o/')
+    this.logger.success(
+      'Para desenvolver, execute qt serve para fazer deploy execute qt deploy'
+    )
   }
 
   upsertManifest (manifestPath, extensionData) {
@@ -133,33 +124,42 @@ class SelectExtensionCommand extends Command {
     manifest.extensionStorageId = extensionData.extensionStorageId
     manifest.type = extensionData.type === 'Com build' ? 'build' : 'noBuild'
     manifest.name = extensionData.title
+    manifest.extensionUUID = extensionData.extensionUUID
 
     manifest.save()
 
     return manifest
   }
 
+  convertPathToPOSIX (targetPath) {
+    if (targetPath.includes('/')) {
+      return targetPath
+    }
+    return targetPath.replace(/\\/g, '/')
+  }
   async addExtensionToPackageJson (absoluteExtensionPath) {
     const extensionPathRelativeToProjectRoot = path.relative(
       this.projectRoot,
       absoluteExtensionPath
     )
-
-    const packageJsonEditor = await readJSON(path.resolve(this.packageJsonPath))
+    const extensionPathRelativeToProjectRootPOSIX = this.convertPathToPOSIX(
+      extensionPathRelativeToProjectRoot
+    )
+    const packageJsonEditor = await readJSON(path.resolve(this.projectRoot, 'package.json'))
 
     const currentQuotiInfo = merge(
       { extensions: [] },
       await packageJsonEditor.get('quoti')
     )
-
-    currentQuotiInfo.extensions = union(currentQuotiInfo.extensions, [
-      extensionPathRelativeToProjectRoot
-    ])
-
-    packageJsonEditor.set({
-      quoti: currentQuotiInfo
+    currentQuotiInfo.extensions = currentQuotiInfo?.extensions?.map(item => {
+      return this.convertPathToPOSIX(item)
     })
-
+    currentQuotiInfo.extensions = union(currentQuotiInfo.extensions, [
+      extensionPathRelativeToProjectRootPOSIX
+    ])
+    if (packageJsonEditor?.data) {
+      set(packageJsonEditor.data, 'quoti.extensions', currentQuotiInfo.extensions)
+    }
     await packageJsonEditor.save()
   }
 
@@ -204,7 +204,7 @@ SelectExtensionCommand.args = [
   {
     name: 'entryPointPath',
     required: false,
-    description: "The path to the Extension's entry point"
+    description: 'Endereço do entry point (arquivo principal) da extensão'
   }
 ]
 
@@ -213,11 +213,11 @@ SelectExtensionCommand.flags = {
     allowNo: true,
     char: 'b',
     description:
-      "Specify that you're selecting an extension **with** build, use --no-build for extensions without build",
+      'Use build se você está selecionando uma extensão com build ou use no-build se você está selecionando uma extensão sem build',
     exclusive: []
   })
 }
 
-SelectExtensionCommand.description = `Select your extension to work`
+SelectExtensionCommand.description = `Selecione sua extensão para desenvolvimento`
 
 module.exports = SelectExtensionCommand

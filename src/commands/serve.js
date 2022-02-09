@@ -1,40 +1,39 @@
 const fs = require('fs')
-const Ws = require('ws')
 const path = require('path')
-const chalk = require('chalk')
 const chokidar = require('chokidar')
-const readPkgSync = require('read-pkg-up').sync
 const getDependencyTree = require('get-dependency-tree')
 
 const { debounce } = require('lodash')
-const { default: Command } = require('@oclif/command')
+const Command = require('../base.js')
 
 const credentials = require('../config/credentials')
 const ExtensionService = require('../services/extension')
-const JSONManager = require('../config/JSONManager')
-const socket = require('../config/socket')
-
+const Socket = require('../config/socket')
+const { getManifestFromEntryPoint } = require('../utils/index')
+const ora = require('ora')
+const { getProjectRootPath, listExtensionsPaths, validateEntryPointIncludedInPackage } = require('../utils/index')
 class ServeCommand extends Command {
   constructor () {
     super(...arguments)
+    this.spinnerOptions = {
+      spinner: 'arrow3',
+      color: 'yellow'
+    }
+    this.spinner = ora(this.spinnerOptions)
+    this.socket = new Socket()
 
     credentials.load()
-
-    const pkgInfo = readPkgSync()
-    if (!pkgInfo?.packageJson) {
-      throw new Error(
-        'Nenhum arquivo package.json encontrado, tem certeza que o diretório atual é de um projeto Vue?'
-      )
-    }
-
-    this.projectRoot = path.resolve(path.dirname(pkgInfo.path))
-    this.extensionsPaths = pkgInfo.packageJson.quoti.extensions.map(extPath =>
-      path.resolve(this.projectRoot, extPath)
-    )
-    if (this.extensionsPaths.length === 0) {
-      throw new Error(
-        'Nenhuma extensão declarada no package.json, adicione o entrypoint da sua extensão em um array no path quoti.extensions dentro do package.json'
-      )
+    try {
+      this.projectRoot = getProjectRootPath()
+      this.extensionsPaths = listExtensionsPaths()
+      if (this.extensionsPaths.length === 0) {
+        throw new Error(
+          'Nenhuma extensão foi selecionada até agora, execute qt select-extension para escolher extensões para desenvolver.'
+        )
+      }
+    } catch (error) {
+      this.logger.error(error)
+      process.exit(0)
     }
   }
   buildAndUpload (args) {
@@ -53,23 +52,18 @@ class ServeCommand extends Command {
         extensionsEntrypointsToCheck.push(currentExtensionPath)
       }
 
-      const changedFileAbsolutePath = path.resolve(changedFilePath)
+      const changedFileAbsolutePath = path.join(this.projectRoot, changedFilePath)
       const extensionsToUpdate = extensionsEntrypointsToCheck.filter(
         entryPoint => {
           const { arr: dependencies } = getDependencyTree({ entry: entryPoint })
-          // console.log(`entry`, entryPoint, dependencies)
+          dependencies.push(entryPoint)
           return dependencies.includes(changedFileAbsolutePath)
         }
       )
 
-      // Victor: code below suports to extensions wich type is noBuild
-      if (!extensionsToUpdate.length && changedFilePath.includes('.vue')) {
-        extensionsToUpdate.push(changedFilePath)
-      }
-
       const manifests = extensionsToUpdate.reduce(
         (manifestsObj, entryPoint) => {
-          manifestsObj[entryPoint] = this.getManifestFromEntryPoint(entryPoint)
+          manifestsObj[entryPoint] = getManifestFromEntryPoint(entryPoint)
           return manifestsObj
         },
         {}
@@ -89,17 +83,20 @@ class ServeCommand extends Command {
           const manifest = manifests[entryPoint]
           const extensionService = new ExtensionService(manifest)
           if (manifest.type === 'build') {
-            distPath = `./dist/dc_${manifest.extensionId}.umd.min.js`
-            console.log(`Building extension...`)
+            if (!manifest.extensionUUID) {
+              const extension = await extensionService.getExtension(manifest.extensionId)
+              if (extension?.extensionUUID) {
+                manifest.extensionUUID = extension.extensionUUID
+                manifest.save()
+              } else {
+                await extensionService.createExtensionUUID()
+              }
+            }
+            distPath = path.resolve(this.projectRoot, `dist/dc_${manifest.extensionUUID}.umd.min.js`)
             await extensionService.build(entryPoint, { mode: 'staging' })
-            console.log(
-              `Built extension ${entryPoint.replace(this.projectRoot, '')}`
-            )
           }
-          console.log(`Uploading file ${distPath}...`)
           const fileBuffer = fs.readFileSync(distPath || changedFilePath)
           const extensionCode = fileBuffer.toString()
-
           extensionService.upload(fileBuffer, this.getUploadFileName(manifest))
           return {
             extensionInfo: manifests[entryPoint],
@@ -109,9 +106,8 @@ class ServeCommand extends Command {
       )
 
       extensionsData.forEach(async extensionData => {
-        console.log(`Built extension ${extensionData.extensionInfo.name}`)
-
-        const err = await socket.emit({
+        this.spinner.start('Enviando código para o Quoti...')
+        const err = await this.socket.emit({
           event: 'reload-extension',
           data: {
             ...extensionData,
@@ -123,10 +119,11 @@ class ServeCommand extends Command {
         })
 
         if (!err) {
-          console.log(chalk.blue('Quoti received extension code!'))
+          this.spinner.succeed('Quoti recebeu o código da extensão!')
           return
         }
-        console.log(chalk.red('Error sending code to Quoti', err))
+        this.spinner.fail('Quoti não recebeu o código da extensão!')
+        this.logger.error(`Erro ao enviar extensão para o Quoti ${err}`)
         if (process.env.DEBUG) {
           console.error(err)
         }
@@ -134,44 +131,25 @@ class ServeCommand extends Command {
     }
   }
 
-  getManifestFromEntryPoint (changedFilePath) {
-    const manifestPath = path.resolve(
-      path.dirname(changedFilePath),
-      'manifest.json'
-    )
-    const manifest = new JSONManager(manifestPath)
-    return manifest
-  }
-
   async run () {
-    try {
-      const { args } = this.parse(ServeCommand)
-      const filesToWatch = ['*.js', './**/*.vue', './**/*.js']
+    const filesToWatch = ['*.js', './**/*.vue', './**/*.js']
 
-      if (
-        args.entryPointPath &&
-        !this.extensionsPaths.includes(path.resolve(args.entryPointPath))
-      ) {
-        throw new Error(
-          `O caminho especificado (${args.entryPointPath}) não foi declarado como de uma extensão no package.json em quoti.extensions`
-        )
-      }
-
-      this.log(chalk.blue('Connected to Quoti!'))
-
-      const debouncedBuild = debounce(this.buildAndUpload(args), 800)
-      chokidar
-        .watch(filesToWatch, { ignored: ['node_modules'] })
-        .on('change', debouncedBuild)
-
-      const watchingChangesMessage = args.entryPointPath
-        ? `Waching and serving changes in extension at ${args.entryPointPath}`
-        : 'Waching and serving changes in any extension'
-
-      this.log(chalk.blue(watchingChangesMessage))
-    } catch (error) {
-      console.log(chalk.red(`${error}`))
+    if (this.args.entryPointPath) {
+      validateEntryPointIncludedInPackage(this.args.entryPointPath)
     }
+
+    this.logger.info('Conectado ao Quoti!')
+
+    const debouncedBuild = debounce(this.buildAndUpload(this.args), 800)
+    chokidar
+      .watch(filesToWatch, { cwd: this.projectRoot, ignored: ['node_modules'] })
+      .on('change', debouncedBuild)
+
+    const watchingChangesMessage = this.args.entryPointPath
+      ? `Observando alterações na extensão em ${this.args.entryPointPath}`
+      : 'Observando alterações em qualquer extensão'
+
+    this.logger.info(watchingChangesMessage)
   }
   getUploadFileName (manifest) {
     let path = `${credentials.institution}/dev/idExtension${manifest.extensionId}.min`
@@ -188,11 +166,11 @@ ServeCommand.args = [
   {
     name: 'entryPointPath',
     required: false,
-    description: "The path to an Extension's entry point"
+    description: 'Endereço do entry point (arquivo principal) da extensão'
   }
 ]
-ServeCommand.description = `Create local serve and Upload file automatically
+ServeCommand.description = `Cria um serve local e realiza upload automaticamente para o Quoti
 ...
-A local serve to upload your file automatically
+Cria um serve local e realiza upload automaticamente para o Quoti
 `
 module.exports = ServeCommand

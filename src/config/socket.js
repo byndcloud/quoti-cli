@@ -4,7 +4,7 @@ const Ws = require('ws')
 const socketServerUrl =
   process.env.WEBSOCKET_URL || 'wss://develop.ws.quoti.cloud/'
 
-module.exports = new (class Socket {
+module.exports = class Socket {
   constructor () {
     /**
      * @type {WebSocket}
@@ -25,7 +25,7 @@ module.exports = new (class Socket {
     this.connInterval = setInterval(() => {
       if (this.socket !== null) {
         clearInterval(this.connInterval)
-      } else {
+      } else if (credentials?.user?.uid) {
         this.socket = new Ws(socketServerUrl, {
           Cookie: `uuid=${credentials.user.uid}`
         })
@@ -67,4 +67,4 @@ module.exports = new (class Socket {
       this.socket.send(JSON.stringify({ event, data }), r => resolve(r))
     )
   }
-})()
+}

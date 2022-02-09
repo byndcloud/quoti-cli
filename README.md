@@ -14,7 +14,7 @@ $ npm install -g quoti-cli
 $ qt COMMAND
 running command...
 $ qt (-v|--version|version)
-quoti-cli/0.1.6 linux-x64 node-v14.18.2
+quoti-cli/0.2.6 linux-x64 node-v14.18.2
 $ qt --help [COMMAND]
 USAGE
   $ qt COMMAND
@@ -23,35 +23,36 @@ USAGE
 <!-- usagestop -->
 # Commands
 <!-- commands -->
-* [`qt deploy FILEPATH`](#qt-deploy-filepath)
+* [`qt deploy [ENTRYPOINTPATH]`](#qt-deploy-entrypointpath)
 * [`qt download-current-version [FILEPATH]`](#qt-download-current-version-filepath)
 * [`qt help [COMMAND]`](#qt-help-command)
 * [`qt login`](#qt-login)
 * [`qt logout`](#qt-logout)
-* [`qt select-extension`](#qt-select-extension)
-* [`qt serve [FILEPATH]`](#qt-serve-filepath)
+* [`qt publish [ENTRYPOINTPATH]`](#qt-publish-entrypointpath)
+* [`qt select-extension [ENTRYPOINTPATH]`](#qt-select-extension-entrypointpath)
+* [`qt serve [ENTRYPOINTPATH]`](#qt-serve-entrypointpath)
 
-## `qt deploy FILEPATH`
+## `qt deploy [ENTRYPOINTPATH]`
 
-Deploy your extension
+Deploy sua extensão
 
 ```
 USAGE
-  $ qt deploy FILEPATH
+  $ qt deploy [ENTRYPOINTPATH]
 
 ARGUMENTS
-  FILEPATH  [default: ./src/App.vue] The path to a file to deploy
+  ENTRYPOINTPATH  Endereço do entry point (arquivo principal) da extensão
 
 DESCRIPTION
   ...
-  Deploy specify document to your application
+  Deploy sua extensão
 ```
 
-_See code: [src/commands/deploy.js](https://github.com/byndcloud/quoti-cli/blob/v0.1.6/src/commands/deploy.js)_
+_See code: [src/commands/deploy.js](https://github.com/byndcloud/quoti-cli/blob/v0.2.6/src/commands/deploy.js)_
 
 ## `qt download-current-version [FILEPATH]`
 
-Download your extension active
+Baixa a versão da extensão ativa
 
 ```
 USAGE
@@ -64,35 +65,35 @@ DESCRIPTION
   ...
 ```
 
-_See code: [src/commands/download-current-version.js](https://github.com/byndcloud/quoti-cli/blob/v0.1.6/src/commands/download-current-version.js)_
+_See code: [src/commands/download-current-version.js](https://github.com/byndcloud/quoti-cli/blob/v0.2.6/src/commands/download-current-version.js)_
 
 ## `qt help [COMMAND]`
 
-display help for qt
+Display help for qt.
 
 ```
 USAGE
   $ qt help [COMMAND]
 
 ARGUMENTS
-  COMMAND  command to show help for
+  COMMAND  Command to show help for.
 
 OPTIONS
-  --all  see all commands in CLI
+  -n, --nested-commands  Include all nested commands in the output.
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v3.2.1/src/commands/help.ts)_
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.10/src/commands/help.ts)_
 
 ## `qt login`
 
-Logout from the current organization
+Realiza login em uma organização do Quoti
 
 ```
 USAGE
   $ qt login
 ```
 
-_See code: [src/commands/login.js](https://github.com/byndcloud/quoti-cli/blob/v0.1.6/src/commands/login.js)_
+_See code: [src/commands/login.js](https://github.com/byndcloud/quoti-cli/blob/v0.2.6/src/commands/login.js)_
 
 ## `qt logout`
 
@@ -103,34 +104,61 @@ USAGE
   $ qt logout
 ```
 
-_See code: [src/commands/logout.js](https://github.com/byndcloud/quoti-cli/blob/v0.1.6/src/commands/logout.js)_
+_See code: [src/commands/logout.js](https://github.com/byndcloud/quoti-cli/blob/v0.2.6/src/commands/logout.js)_
 
-## `qt select-extension`
+## `qt publish [ENTRYPOINTPATH]`
 
-Select your extension to work
-
-```
-USAGE
-  $ qt select-extension
-```
-
-_See code: [src/commands/select-extension.js](https://github.com/byndcloud/quoti-cli/blob/v0.1.6/src/commands/select-extension.js)_
-
-## `qt serve [FILEPATH]`
-
-Create local serve and Upload file automatically
+Publica uma nova extensão
 
 ```
 USAGE
-  $ qt serve [FILEPATH]
+  $ qt publish [ENTRYPOINTPATH]
 
 ARGUMENTS
-  FILEPATH  [default: ./src/App.vue] The path to a file to build
+  ENTRYPOINTPATH  Endereço do entry point (arquivo principal) da extensão
+
+OPTIONS
+  -M, --major            x.x.x -> x+1.x.x
+  -m, --minor            x.x.x -> x.x+1.x
+  -p, --patch            x.x.x -> x.x.x+1
+  -v, --version=version  Versão da extensão
+```
+
+_See code: [src/commands/publish.js](https://github.com/byndcloud/quoti-cli/blob/v0.2.6/src/commands/publish.js)_
+
+## `qt select-extension [ENTRYPOINTPATH]`
+
+Selecione sua extensão para desenvolvimento
+
+```
+USAGE
+  $ qt select-extension [ENTRYPOINTPATH]
+
+ARGUMENTS
+  ENTRYPOINTPATH  Endereço do entry point (arquivo principal) da extensão
+
+OPTIONS
+  -b, --[no-]build  Use build se você está selecionando uma extensão com build ou use no-build se você está selecionando
+                    uma extensão sem build
+```
+
+_See code: [src/commands/select-extension.js](https://github.com/byndcloud/quoti-cli/blob/v0.2.6/src/commands/select-extension.js)_
+
+## `qt serve [ENTRYPOINTPATH]`
+
+Cria um serve local e realiza upload automaticamente para o Quoti
+
+```
+USAGE
+  $ qt serve [ENTRYPOINTPATH]
+
+ARGUMENTS
+  ENTRYPOINTPATH  Endereço do entry point (arquivo principal) da extensão
 
 DESCRIPTION
   ...
-  A local serve to upload your file automatically
+  Cria um serve local e realiza upload automaticamente para o Quoti
 ```
 
-_See code: [src/commands/serve.js](https://github.com/byndcloud/quoti-cli/blob/v0.1.6/src/commands/serve.js)_
+_See code: [src/commands/serve.js](https://github.com/byndcloud/quoti-cli/blob/v0.2.6/src/commands/serve.js)_
 <!-- commandsstop -->
