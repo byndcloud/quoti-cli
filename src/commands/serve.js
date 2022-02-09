@@ -11,7 +11,7 @@ const ExtensionService = require('../services/extension')
 const Socket = require('../config/socket')
 const { getManifestFromEntryPoint } = require('../utils/index')
 const ora = require('ora')
-const { getProjectRootPath, listExtensionsPaths } = require('../utils/index')
+const { getProjectRootPath, listExtensionsPaths, validateEntryPointIncludedInPackage } = require('../utils/index')
 class ServeCommand extends Command {
   constructor () {
     super(...arguments)
@@ -134,13 +134,8 @@ class ServeCommand extends Command {
   async run () {
     const filesToWatch = ['*.js', './**/*.vue', './**/*.js']
 
-    if (
-      this.args.entryPointPath &&
-        !this.extensionsPaths.includes(path.resolve(this.args.entryPointPath))
-    ) {
-      throw new Error(
-        `O caminho especificado (${this.args.entryPointPath}) não foi declarado como de uma extensão no package.json em quoti.extensions`
-      )
+    if (this.args.entryPointPath) {
+      validateEntryPointIncludedInPackage(this.args.entryPointPath)
     }
 
     this.logger.info('Conectado ao Quoti!')

@@ -4,7 +4,7 @@ const { flags } = require('@oclif/command')
 const api = require('../config/axios')
 const { firebase } = require('../config/firebase')
 const semver = require('semver')
-const { getManifestFromEntryPoint, confirmQuestion, listExtensionsPaths, getProjectRootPath } = require('../utils/index')
+const { getManifestFromEntryPoint, confirmQuestion, listExtensionsPaths, getProjectRootPath, validateEntryPointIncludedInPackage } = require('../utils/index')
 const inquirer = require('inquirer')
 const path = require('path')
 
@@ -27,6 +27,9 @@ class PublishCommand extends Command {
   }
   async run () {
     const { entryPointPath } = this.args
+    if (entryPointPath) {
+      validateEntryPointIncludedInPackage(entryPointPath)
+    }
     const manifest = await this.getManifest(entryPointPath)
     if (!manifest.extensionUUID) {
       this.logger.error(`Por razões de segurança é necessário realizar deploy em sua extensão antes de publicar no Marketplace. Uma vez publicado esta mensagem não irá mais aparecer porém sempre que desejar publicar uma versão mais antiga que a data de hoje será necessário realizar deploy da versão desejada`)

@@ -51,6 +51,16 @@ function listExtensionsPaths () {
     path.resolve(projectRoot, extPath)
   )
 }
+function validateEntryPointIncludedInPackage (entryPointPath) {
+  const entryPointPaths = listExtensionsPaths()
+  if (
+    !entryPointPaths.includes(path.resolve(entryPointPath))
+  ) {
+    throw new Error(
+      `O entrypoint especificado (${entryPointPath}) não está entre as extensões que já foram selecionadas. Tem certeza que o caminho está correto ou que a extensão já foi selecionada com qt select-extension?`
+    )
+  }
+}
 
 module.exports = {
   isYes,
@@ -58,5 +68,6 @@ module.exports = {
   confirmQuestion,
   getManifestFromEntryPoint,
   getProjectRootPath,
-  listExtensionsPaths
+  listExtensionsPaths,
+  validateEntryPointIncludedInPackage
 }

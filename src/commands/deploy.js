@@ -11,7 +11,8 @@ const inquirer = require('inquirer')
 const semver = require('semver')
 const {
   getManifestFromEntryPoint,
-  listExtensionsPaths
+  listExtensionsPaths,
+  validateEntryPointIncludedInPackage
 } = require('../utils/index')
 
 class DeployCommand extends Command {
@@ -35,6 +36,8 @@ class DeployCommand extends Command {
     let { entryPointPath } = this.args
     if (!entryPointPath) {
       entryPointPath = await this.getEntryPointFromUser()
+    } else {
+      validateEntryPointIncludedInPackage(entryPointPath)
     }
     this.manifest = getManifestFromEntryPoint(entryPointPath)
     this.extensionService = new ExtensionService(this.manifest)
