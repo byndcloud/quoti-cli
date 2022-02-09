@@ -7,7 +7,8 @@ const inquirerFileTreeSelection = require('inquirer-file-tree-selection-prompt')
 
 const { merge } = require('lodash')
 const { readdirSync, existsSync } = require('fs')
-const { default: Command, flags } = require('@oclif/command')
+const Command = require('../base.js')
+const { flags } = require('@oclif/command')
 
 const { app } = require('../config/firebase')
 
@@ -15,7 +16,6 @@ const credentials = require('../config/credentials')
 const api = require('../config/axios')
 const JSONManager = require('../config/JSONManager')
 const fuzzy = require('fuzzy')
-const Logger = require('../config/logger')
 const { getProjectRootPath } = require('../utils/index')
 inquirer.registerPrompt('file-tree-selection', inquirerFileTreeSelection)
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'))
@@ -23,10 +23,6 @@ inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'))
 class SelectExtensionCommand extends Command {
   constructor () {
     super(...arguments)
-
-    this.logger = Logger.child({
-      tag: 'command/publish'
-    })
     try {
       this.projectRoot = getProjectRootPath()
     } catch (error) {
@@ -35,97 +31,90 @@ class SelectExtensionCommand extends Command {
     }
   }
   async run () {
-    try {
-      const { args, flags } = this.parse(SelectExtensionCommand)
+    if (this.args.entryPointPath && !existsSync(this.args.entryPointPath)) {
+      throw new Error(
+        `O arquivo de ponto de entrada de extensão fornecido não foi encontrado em '${this.args.entryPointPath}', certifique-se de que o arquivo existe`
+      )
+    }
 
-      if (args.entryPointPath && !existsSync(args.entryPointPath)) {
-        throw new Error(
-          `O arquivo de ponto de entrada de extensão fornecido não foi encontrado em '${args.entryPointPath}', certifique-se de que o arquivo existe`
-        )
+    if (this.args.entryPointPath && !this.args.entryPointPath.endsWith('.vue')) {
+      throw new Error(
+        `O arquivo de ponto de entrada de extensão deve ser um arquivo .vue`
+      )
+    }
+
+    const { selectedEntryPoint } = await inquirer.prompt([
+      {
+        name: 'selectedEntryPoint',
+        message: 'Qual é o entry point (arquivo principal) da sua extensão?',
+        type: 'file-tree-selection',
+        validate: file => file.endsWith('.vue'),
+        hideRoot: true,
+        when: !this.args.entryPointPath
       }
+    ])
 
-      if (args.entryPointPath && !args.entryPointPath.endsWith('.vue')) {
-        throw new Error(
-          `O arquivo de ponto de entrada de extensão deve ser um arquivo .vue`
-        )
-      }
+    const spinner = ora({
+      text: 'Buscando extensões',
+      spinner: 'dots3'
+    }).start()
 
-      const { selectedEntryPoint } = await inquirer.prompt([
-        {
-          name: 'selectedEntryPoint',
-          message: 'Qual é o entry point (arquivo principal) da sua extensão?',
-          type: 'file-tree-selection',
-          validate: file => file.endsWith('.vue'),
-          hideRoot: true,
-          when: !args.entryPointPath
-        }
-      ])
+    const extensions = await this.listExtensions(
+      credentials.institution,
+      this.flags.build
+    ).catch(err => {
+      spinner.fail('Falha ao carregar extensões')
+      throw err
+    })
 
-      const spinner = ora({
-        text: 'Buscando extensões',
-        spinner: 'dots3'
-      }).start()
+    if (extensions.length === 0) {
+      spinner.fail('Não encontramos nenhuma extensão.')
+      return
+    }
 
-      const extensions = await this.listExtensions(
-        credentials.institution,
-        flags.build
-      ).catch(err => {
-        spinner.fail('Falha ao carregar extensões')
-        throw err
-      })
+    spinner.succeed('Lista de extensões obtida')
+    const extensionsChoices = extensions.map(ext => ({
+      name: ext.title,
+      value: ext
+    }))
 
-      if (extensions.length === 0) {
-        spinner.fail('Não encontramos nenhuma extensão.')
-        return
-      }
-
-      spinner.succeed('Lista de extensões obtida')
-      const extensionsChoices = extensions.map(ext => ({
-        name: ext.title,
-        value: ext
-      }))
-
-      const { selectedExtension } = await inquirer.prompt([
-        {
-          name: 'selectedExtension',
-          message: 'Escolha sua extensão:',
-          type: 'autocomplete',
-          choices: extensionsChoices,
-          searchText: 'Carregando...',
-          emptyText: 'Nem resultado encontrado para a pesquisa realizada',
-          source: function (answersSoFar, input) {
-            if (input) {
-              const fuzzyResult = fuzzy.filter(
-                input,
-                extensionsChoices.map(e => e.name)
-              )
-              return fuzzyResult.map(fr => extensionsChoices[fr.index])
-            } else {
-              return extensionsChoices
-            }
+    const { selectedExtension } = await inquirer.prompt([
+      {
+        name: 'selectedExtension',
+        message: 'Escolha sua extensão:',
+        type: 'autocomplete',
+        choices: extensionsChoices,
+        searchText: 'Carregando...',
+        emptyText: 'Nem resultado encontrado para a pesquisa realizada',
+        source: function (answersSoFar, input) {
+          if (input) {
+            const fuzzyResult = fuzzy.filter(
+              input,
+              extensionsChoices.map(e => e.name)
+            )
+            return fuzzyResult.map(fr => extensionsChoices[fr.index])
+          } else {
+            return extensionsChoices
           }
         }
-      ])
+      }
+    ])
 
-      const absoluteExtensionPath = path.resolve(
-        args.entryPointPath || selectedEntryPoint
-      )
+    const absoluteExtensionPath = path.resolve(
+      this.args.entryPointPath || selectedEntryPoint
+    )
 
-      await this.addExtensionToPackageJson(absoluteExtensionPath)
+    await this.addExtensionToPackageJson(absoluteExtensionPath)
 
-      this.upsertManifest(
-        path.resolve(path.dirname(absoluteExtensionPath), 'manifest.json'),
-        selectedExtension
-      )
+    this.upsertManifest(
+      path.resolve(path.dirname(absoluteExtensionPath), 'manifest.json'),
+      selectedExtension
+    )
 
-      this.logger.success('Extensão selecionada! \\o/')
-      this.logger.success(
-        'Para desenvolver, execute qt serve para fazer deploy execute qt deploy'
-      )
-    } catch (error) {
-      this.logger.error(error)
-      if (process.env.DEBUG) console.error(error)
-    }
+    this.logger.success('Extensão selecionada! \\o/')
+    this.logger.success(
+      'Para desenvolver, execute qt serve para fazer deploy execute qt deploy'
+    )
   }
 
   upsertManifest (manifestPath, extensionData) {

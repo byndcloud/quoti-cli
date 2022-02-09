@@ -1,53 +1,45 @@
 const fs = require('fs')
 const { firebase } = require('../config/firebase')
 const credentials = require('../config/credentials')
-const { default: Command } = require('@oclif/command')
+const Command = require('../base.js')
 var http = require('https')
 const api = require('../config/axios')
 const JSONManager = require('../config/JSONManager')
 const { confirmQuestion } = require('../utils/index')
-const Logger = require('../config/logger')
 
 class DownloadCurrentVersion extends Command {
   constructor () {
     super(...arguments)
     this.manifest = new JSONManager('./manifest.json')
-    this.logger = Logger.child({
-      tag: 'command/download-current-version'
-    })
   }
   async run () {
     await credentials.load()
-    try {
-      if (!this.manifest.exists()) {
-        this.logger.warning('Por favor selecione sua extensão. Execute qt selectExtension')
-        process.exit(0)
-      }
-      await this.manifest.load()
-      const { args } = this.parse(DownloadCurrentVersion)
-      if (!fs.existsSync(args.filePath)) {
-        this.logger.red(`${args.filePath} não é um endereço válido`)
-        process.exit(0)
-      }
-      const token = await firebase.auth().currentUser.getIdToken()
-      const result = await api.axios.get(
-        `/${credentials.institution}/dynamic-components/url-file-active/${this.manifest.extensionId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        }
-      )
-      let pathFile = true
-      pathFile = await this.isReplaceFile(args.filePath)
-      if (pathFile) {
-        await this.downloadFile(result.data.url, pathFile)
-        this.logger.blue(`Arquivo salvo em ${args.filePath}`)
-      }
-      return result.data
-    } catch (error) {
-      this.logger.error(`${error}`)
+
+    if (!this.manifest.exists()) {
+      this.logger.warning('Por favor selecione sua extensão. Execute qt selectExtension')
+      process.exit(0)
     }
+    await this.manifest.load()
+    if (!fs.existsSync(this.args.filePath)) {
+      this.logger.error(`${this.args.filePath} não é um endereço válido`)
+      process.exit(0)
+    }
+    const token = await firebase.auth().currentUser.getIdToken()
+    const result = await api.axios.get(
+      `/${credentials.institution}/dynamic-components/url-file-active/${this.manifest.extensionId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      }
+    )
+    let pathFile = true
+    pathFile = await this.isReplaceFile(this.args.filePath)
+    if (pathFile) {
+      await this.downloadFile(result.data.url, pathFile)
+      this.logger.success(`Arquivo salvo em ${this.args.filePath}`)
+    }
+    return result.data
   }
   async isReplaceFile (path) {
     let pathFile

@@ -1,6 +1,9 @@
 const { createLogger, format, transports, addColors } = require('winston')
-const { combine, timestamp, label, printf } = format
+const { combine, timestamp, printf } = format
+const dotenv = require('dotenv')
+dotenv.config()
 
+const NODE_ENV = process.env.NODE_ENV
 const colorizer = format.colorize()
 
 const myCustomLevels = {
@@ -23,13 +26,18 @@ const myCustomLevels = {
 const logger = createLogger({
   levels: myCustomLevels.levels,
   format: combine(
-    format.timestamp(),
-    format.printf(msg => {
-      if (msg.level === 'debug') {
-        return colorizer.colorize(msg.level, `${msg.timestamp} - ${msg.level}: ${msg.message}`)
-      } else {
-        return colorizer.colorize(msg.level, `${msg.message}`)
+    timestamp(),
+    printf(msg => {
+      if (msg.level === 'debug' && NODE_ENV === 'development') {
+        if (msg.tag) {
+          return colorizer.colorize(msg.level, `${msg.timestamp} - ${msg.tag} - ${msg.level}: ${msg.message}`)
+        } else {
+          return colorizer.colorize(msg.level, `${msg.timestamp} - ${msg.level}: ${msg.message}`)
+        }
+      } else if (msg.stack && NODE_ENV === 'development') {
+        return colorizer.colorize(msg.level, `${msg.stack}`)
       }
+      return colorizer.colorize(msg.level, `${msg.message}`)
     })
   ),
   transports: [

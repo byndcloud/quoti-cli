@@ -4,13 +4,12 @@ const chokidar = require('chokidar')
 const getDependencyTree = require('get-dependency-tree')
 
 const { debounce } = require('lodash')
-const { default: Command } = require('@oclif/command')
+const Command = require('../base.js')
 
 const credentials = require('../config/credentials')
 const ExtensionService = require('../services/extension')
 const Socket = require('../config/socket')
 const { getManifestFromEntryPoint } = require('../utils/index')
-const Logger = require('../config/logger')
 const ora = require('ora')
 const { getProjectRootPath, listExtensionsPaths } = require('../utils/index')
 class ServeCommand extends Command {
@@ -21,9 +20,6 @@ class ServeCommand extends Command {
       color: 'yellow'
     }
     this.spinner = ora(this.spinnerOptions)
-    this.logger = Logger.child({
-      tag: 'command/publish'
-    })
     this.socket = new Socket()
 
     credentials.load()
@@ -36,7 +32,7 @@ class ServeCommand extends Command {
         )
       }
     } catch (error) {
-      Logger.error(error)
+      this.logger.error(error)
       process.exit(0)
     }
   }
@@ -136,34 +132,29 @@ class ServeCommand extends Command {
   }
 
   async run () {
-    try {
-      const { args } = this.parse(ServeCommand)
-      const filesToWatch = ['*.js', './**/*.vue', './**/*.js']
+    const filesToWatch = ['*.js', './**/*.vue', './**/*.js']
 
-      if (
-        args.entryPointPath &&
-        !this.extensionsPaths.includes(path.resolve(args.entryPointPath))
-      ) {
-        throw new Error(
-          `O caminho especificado (${args.entryPointPath}) não foi declarado como de uma extensão no package.json em quoti.extensions`
-        )
-      }
-
-      this.logger.info('Conectado ao Quoti!')
-
-      const debouncedBuild = debounce(this.buildAndUpload(args), 800)
-      chokidar
-        .watch(filesToWatch, { cwd: this.projectRoot, ignored: ['node_modules'] })
-        .on('change', debouncedBuild)
-
-      const watchingChangesMessage = args.entryPointPath
-        ? `Observando alterações na extensão em ${args.entryPointPath}`
-        : 'Observando alterações em qualquer extensão'
-
-      this.logger.info(watchingChangesMessage)
-    } catch (error) {
-      this.logger.error(`${error}`)
+    if (
+      this.args.entryPointPath &&
+        !this.extensionsPaths.includes(path.resolve(this.args.entryPointPath))
+    ) {
+      throw new Error(
+        `O caminho especificado (${this.args.entryPointPath}) não foi declarado como de uma extensão no package.json em quoti.extensions`
+      )
     }
+
+    this.logger.info('Conectado ao Quoti!')
+
+    const debouncedBuild = debounce(this.buildAndUpload(this.args), 800)
+    chokidar
+      .watch(filesToWatch, { cwd: this.projectRoot, ignored: ['node_modules'] })
+      .on('change', debouncedBuild)
+
+    const watchingChangesMessage = this.args.entryPointPath
+      ? `Observando alterações na extensão em ${this.args.entryPointPath}`
+      : 'Observando alterações em qualquer extensão'
+
+    this.logger.info(watchingChangesMessage)
   }
   getUploadFileName (manifest) {
     let path = `${credentials.institution}/dev/idExtension${manifest.extensionId}.min`

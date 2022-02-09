@@ -1,22 +1,16 @@
 const credentials = require('../config/credentials')
-const { default: Command, flags } = require('@oclif/command')
+const Command = require('../base.js')
+const { flags } = require('@oclif/command')
 const api = require('../config/axios')
 const { firebase } = require('../config/firebase')
 const semver = require('semver')
 const { getManifestFromEntryPoint, confirmQuestion, listExtensionsPaths, getProjectRootPath } = require('../utils/index')
 const inquirer = require('inquirer')
-const readPkgSync = require('read-pkg-up').sync
 const path = require('path')
-const Logger = require('../config/logger')
 
 class PublishCommand extends Command {
   constructor () {
     super(...arguments)
-
-    this.logger = Logger.child({
-      tag: 'command/publish'
-    })
-
     try {
       credentials.load()
       this.projectRoot = getProjectRootPath()
@@ -32,56 +26,51 @@ class PublishCommand extends Command {
     }
   }
   async run () {
-    try {
-      const { flags, args } = this.parse(PublishCommand)
-      const { entryPointPath } = args
-      const manifest = await this.getManifest(entryPointPath)
-      if (!manifest.extensionUUID) {
-        this.logger.error(`Por razões de segurança é necessário realizar deploy em sua extensão antes de publicar no Marketplace. Uma vez publicado esta mensagem não irá mais aparecer porém sempre que desejar publicar uma versão mais antiga que a data de hoje será necessário realizar deploy da versão desejada`)
-        process.exit(0)
-      }
-      if (flags.version && !semver.valid(flags.version)) {
-        this.logger.error(`Versão deve estar no formato x.x.x`)
-        process.exit(0)
-      }
+    const { entryPointPath } = this.args
+    const manifest = await this.getManifest(entryPointPath)
+    if (!manifest.extensionUUID) {
+      this.logger.error(`Por razões de segurança é necessário realizar deploy em sua extensão antes de publicar no Marketplace. Uma vez publicado esta mensagem não irá mais aparecer porém sempre que desejar publicar uma versão mais antiga que a data de hoje será necessário realizar deploy da versão desejada`)
+      process.exit(0)
+    }
+    if (this.flags.version && !semver.valid(this.flags.version)) {
+      this.logger.error(`Versão deve estar no formato x.x.x`)
+      process.exit(0)
+    }
 
-      if (!this.commandSintaxeValid(flags)) {
-        this.logger.error(`Use apenas uma das flags  --version --patch, --minor, --major`)
-        process.exit(0)
-      }
+    if (!this.commandSintaxeValid(this.flags)) {
+      this.logger.error(`Use apenas uma das flags  --version --patch, --minor, --major`)
+      process.exit(0)
+    }
 
-      if (!manifest) {
-        this.logger.warning('Por favor selecione uma extensão. Execute qt select-extension')
-        process.exit(0)
-      }
+    if (!manifest) {
+      this.logger.warning('Por favor selecione uma extensão. Execute qt select-extension')
+      process.exit(0)
+    }
 
-      const token = await firebase.auth().currentUser.getIdToken()
+    const token = await firebase.auth().currentUser.getIdToken()
 
-      const { data } = await api.axios.get(
-        decodeURIComponent(`/${credentials.institution}/dynamic-components?where[id]=${manifest.extensionId}`),
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+    const { data } = await api.axios.get(
+      decodeURIComponent(`/${credentials.institution}/dynamic-components?where[id]=${manifest.extensionId}`),
+      {
+        headers: {
+          Authorization: `Bearer ${token}`
         }
-      )
-      const dynamicComponentFile = data[0]
-      if (!dynamicComponentFile) {
-        this.logger.error('Extensão não encontrada. Verifique se você ainda possui esta extensão')
-        process.exit(0)
       }
-      const dynamicComponentFileActivated = dynamicComponentFile.DynamicComponentsFiles.find(item => item.activated)
-      if (!dynamicComponentFileActivated) {
-        this.logger.error('Nenhuma versão ativa para esta extensão. É necessário realizar deploy de alguma versão antes de publicar')
-        process.exit(0)
-      }
-      if (!dynamicComponentFile.marketplaceExtensionId) {
-        await this.publishExtension(flags, dynamicComponentFileActivated.id, token, manifest)
-      } else {
-        await this.publishNewVersion(flags, dynamicComponentFileActivated.id, token, manifest)
-      }
-    } catch (error) {
-      this.logger.error(error?.response?.data?.error || error)
+    )
+    const dynamicComponentFile = data[0]
+    if (!dynamicComponentFile) {
+      this.logger.error('Extensão não encontrada. Verifique se você ainda possui esta extensão')
+      process.exit(0)
+    }
+    const dynamicComponentFileActivated = dynamicComponentFile.DynamicComponentsFiles.find(item => item.activated)
+    if (!dynamicComponentFileActivated) {
+      this.logger.error('Nenhuma versão ativa para esta extensão. É necessário realizar deploy de alguma versão antes de publicar')
+      process.exit(0)
+    }
+    if (!dynamicComponentFile.marketplaceExtensionId) {
+      await this.publishExtension(this.flags, dynamicComponentFileActivated.id, token, manifest)
+    } else {
+      await this.publishNewVersion(this.flags, dynamicComponentFileActivated.id, token, manifest)
     }
   }
   async publishExtension (flags, dynamicComponentFileId, token, manifest) {

@@ -2,14 +2,13 @@ const md5 = require('md5')
 const { firebase } = require('../config/firebase')
 const ora = require('ora')
 const credentials = require('../config/credentials')
-const { default: Command } = require('@oclif/command')
+const Command = require('../base.js')
 const api = require('../config/axios')
 const ExtensionService = require('../services/extension')
 const fs = require('fs')
 const path = require('path')
 const inquirer = require('inquirer')
 const semver = require('semver')
-const Logger = require('../config/logger')
 const {
   getManifestFromEntryPoint,
   listExtensionsPaths
@@ -18,30 +17,22 @@ const {
 class DeployCommand extends Command {
   constructor () {
     super(...arguments)
-    this.logger = Logger.child({
-      tag: 'command/deploy'
-    })
     this.spinnerOptions = {
       spinner: 'arrow3',
       color: 'yellow'
     }
     this.spinner = ora(this.spinnerOptions)
-    try {
-      this.extensionsPaths = listExtensionsPaths()
-      if (this.extensionsPaths.length === 0) {
-        throw new Error(
-          'Nenhuma extensão foi selecionada até agora, execute qt select-extension para escolher extensões para desenvolver.'
-        )
-      }
-    } catch (error) {
-      this.logger.error(error)
-      process.exit(0)
+
+    this.extensionsPaths = listExtensionsPaths()
+    if (this.extensionsPaths.length === 0) {
+      throw new Error(
+        'Nenhuma extensão foi selecionada até agora, execute qt select-extension para escolher extensões para desenvolver.'
+      )
     }
   }
   async run () {
     credentials.load()
-    const { args } = this.parse(DeployCommand)
-    let { entryPointPath } = args
+    let { entryPointPath } = this.args
     if (!entryPointPath) {
       entryPointPath = await this.getEntryPointFromUser()
     }
