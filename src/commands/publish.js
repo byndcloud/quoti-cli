@@ -4,7 +4,13 @@ const { flags } = require('@oclif/command')
 const api = require('../config/axios')
 const { firebase } = require('../config/firebase')
 const semver = require('semver')
-const { getManifestFromEntryPoint, confirmQuestion, listExtensionsPaths, getProjectRootPath, validateEntryPointIncludedInPackage } = require('../utils/index')
+const {
+  getManifestFromEntryPoint,
+  confirmQuestion,
+  listExtensionsPaths,
+  getProjectRootPath,
+  validateEntryPointIncludedInPackage
+} = require('../utils/index')
 const inquirer = require('inquirer')
 const path = require('path')
 
@@ -32,7 +38,9 @@ class PublishCommand extends Command {
     }
     const manifest = await this.getManifest(entryPointPath)
     if (!manifest.extensionUUID) {
-      this.logger.error(`Por razões de segurança é necessário realizar deploy em sua extensão antes de publicar no Marketplace. Uma vez publicado esta mensagem não irá mais aparecer porém sempre que desejar publicar uma versão mais antiga que a data de hoje será necessário realizar deploy da versão desejada`)
+      this.logger.error(
+        `Por razões de segurança é necessário realizar deploy em sua extensão antes de publicar no Marketplace. Uma vez publicado esta mensagem não irá mais aparecer porém sempre que desejar publicar uma versão mais antiga que a data de hoje será necessário realizar deploy da versão desejada`
+      )
       process.exit(0)
     }
     if (this.flags.version && !semver.valid(this.flags.version)) {
@@ -41,19 +49,25 @@ class PublishCommand extends Command {
     }
 
     if (!this.commandSintaxeValid(this.flags)) {
-      this.logger.error(`Use apenas uma das flags  --version --patch, --minor, --major`)
+      this.logger.error(
+        `Use apenas uma das flags  --version --patch, --minor, --major`
+      )
       process.exit(0)
     }
 
     if (!manifest) {
-      this.logger.warning('Por favor selecione uma extensão. Execute qt select-extension')
+      this.logger.warning(
+        'Por favor selecione uma extensão. Execute qt select-extension'
+      )
       process.exit(0)
     }
 
     const token = await firebase.auth().currentUser.getIdToken()
 
     const { data } = await api.axios.get(
-      decodeURIComponent(`/${credentials.institution}/dynamic-components?where[id]=${manifest.extensionId}`),
+      decodeURIComponent(
+        `/${credentials.institution}/dynamic-components?where[id]=${manifest.extensionId}`
+      ),
       {
         headers: {
           Authorization: `Bearer ${token}`
@@ -62,23 +76,44 @@ class PublishCommand extends Command {
     )
     const dynamicComponentFile = data[0]
     if (!dynamicComponentFile) {
-      this.logger.error('Extensão não encontrada. Verifique se você ainda possui esta extensão')
+      this.logger.error(
+        'Extensão não encontrada. Verifique se você ainda possui esta extensão'
+      )
       process.exit(0)
     }
-    const dynamicComponentFileActivated = dynamicComponentFile.DynamicComponentsFiles.find(item => item.activated)
+    const dynamicComponentFileActivated =
+      dynamicComponentFile.DynamicComponentsFiles.find(item => item.activated)
     if (!dynamicComponentFileActivated) {
-      this.logger.error('Nenhuma versão ativa para esta extensão. É necessário realizar deploy de alguma versão antes de publicar')
+      this.logger.error(
+        'Nenhuma versão ativa para esta extensão. É necessário realizar deploy de alguma versão antes de publicar'
+      )
       process.exit(0)
     }
     if (!dynamicComponentFile.marketplaceExtensionId) {
-      await this.publishExtension(this.flags, dynamicComponentFileActivated.id, token, manifest)
+      await this.publishExtension(
+        this.flags,
+        dynamicComponentFileActivated.id,
+        token,
+        manifest
+      )
     } else {
-      await this.publishNewVersion(this.flags, dynamicComponentFileActivated.id, token, manifest)
+      await this.publishNewVersion(
+        this.flags,
+        dynamicComponentFileActivated.id,
+        token,
+        manifest
+      )
     }
   }
   async publishExtension (flags, dynamicComponentFileId, token, manifest) {
-    if (this.existIncrementVersion(flags)) { this.logger.warning('Flag [--patch] [--minor] [--major] ignoradas. Você está publicando uma extensão e portanto as flags [--patch] [--minor] [--major] não é importante nesse cenário. Apenas use essas flags quando estiver realizando a atualização de uma extensão') }
-    const confirmed = await confirmQuestion(`Deseja publicar a extensão "${manifest.name}" no Marketplace? Sim/Não\n`)
+    if (this.existIncrementVersion(flags)) {
+      this.logger.warning(
+        'Flag [--patch] [--minor] [--major] ignoradas. Você está publicando uma extensão e portanto as flags [--patch] [--minor] [--major] não é importante nesse cenário. Apenas use essas flags quando estiver realizando a atualização de uma extensão'
+      )
+    }
+    const confirmed = await confirmQuestion(
+      `Deseja publicar a extensão "${manifest.name}" no Marketplace? Sim/Não\n`
+    )
     if (!confirmed) {
       process.exit(0)
     }
@@ -87,8 +122,7 @@ class PublishCommand extends Command {
       const { versionName } = await inquirer.prompt([
         {
           name: 'versionName',
-          message:
-              `Escolha uma versão para sua extensão`,
+          message: `Escolha uma versão para sua extensão`,
           type: 'input',
           validate: input => {
             if (!semver.valid(input)) {
@@ -96,19 +130,24 @@ class PublishCommand extends Command {
             }
             return true
           }
-
         }
       ])
       version = versionName
     } else {
       version = flags.version
     }
-    const bodyPublishExtension = { dynamicComponentFileId, version, extensionUUID: manifest.extensionUUID }
+    const bodyPublishExtension = {
+      dynamicComponentFileId,
+      version,
+      extensionUUID: manifest.extensionUUID
+    }
     await this.callEndpointPublishExtension(bodyPublishExtension, token)
     this.logger.success('Nova extensão publicada com sucesso')
   }
   async publishNewVersion (flags, dynamicComponentFileId, token, manifest) {
-    const confirmed = await confirmQuestion(`Deseja publicar uma nova versão para a extensão "${manifest.name}" já publicada no Marketplace? Sim/Não\n`)
+    const confirmed = await confirmQuestion(
+      `Deseja publicar uma nova versão para a extensão "${manifest.name}" já publicada no Marketplace? Sim/Não\n`
+    )
     if (!confirmed) {
       process.exit(0)
     }
@@ -126,10 +165,15 @@ class PublishCommand extends Command {
       versionIncrement
     }
     try {
-      await this.callEndpointPublishExtensionVersion(bodyPublishExtensionVersion, token)
+      await this.callEndpointPublishExtensionVersion(
+        bodyPublishExtensionVersion,
+        token
+      )
     } catch (error) {
       if (error.response.status === 422) {
-        this.logger.error('A versão informada é menor ou igual à última versão. Por favor, insira uma versão maior.')
+        this.logger.error(
+          'A versão informada é menor ou igual à última versão. Por favor, insira uma versão maior.'
+        )
       } else {
         this.logger.error(JSON.stringify(error, null, 2))
       }
@@ -160,11 +204,10 @@ class PublishCommand extends Command {
     if (entryPointPath) {
       return getManifestFromEntryPoint(entryPointPath)
     }
-    const extensionsChoices = this.extensionsPaths.map(e => ({ name: path.relative(
-      './',
-      e
-    ),
-    value: e }))
+    const extensionsChoices = this.extensionsPaths.map(extension => ({
+      name: path.relative('./', extension),
+      value: extension
+    }))
     if (extensionsChoices.length > 1) {
       const { selectedExtensionPublish } = await inquirer.prompt([
         {
@@ -184,7 +227,9 @@ class PublishCommand extends Command {
     return flags.patch || flags.minor || flags.major
   }
 }
+
 PublishCommand.description = `Publica uma nova extensão`
+
 PublishCommand.flags = {
   version: flags.string({
     char: 'v',
@@ -206,8 +251,8 @@ PublishCommand.flags = {
     char: 'M',
     description: 'x.x.x -> x+1.x.x'
   })
-
 }
+
 PublishCommand.args = [
   {
     name: 'entryPointPath',
