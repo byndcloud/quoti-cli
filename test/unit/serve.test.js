@@ -50,5 +50,6 @@ describe('[getManifestObjectFromPathsExtensions]', function () {
     const serveCommand = new ServeCommand({ projectRoot: '/', extensionsPaths })
     sinon.stub(utils, 'getManifestFromEntryPoint').returns({ exists: () => false })
     expect(await serveCommand.getManifestObjectFromPathsExtensions.bind(extensionsPaths)).to.throw()
+    sinon.restore()
   })
 })
