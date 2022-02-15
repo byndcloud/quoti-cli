@@ -1,4 +1,6 @@
 const { expect } = require('@oclif/test')
+const ServeCommand = require('../../src/commands/serve')
+const utils = require('../../src/utils/index')
 var sinon = require('sinon')
 const proxyquire = require('proxyquire')
 const getDependencyTree = sinon.stub()
@@ -32,5 +34,21 @@ describe('[getDependentExtensionPath]', function () {
       const result = serveCommand.getDependentExtensionPath({ changedFilePath: `extension${index}/File1.vue` })
       expect(result).to.deep.equal([`/extension${index}/App.vue`])
     }
+  })
+})
+
+describe('[getManifestObjectFromPathsExtensions]', function () {
+  it('Must return an object which keys are paths (entrypoint) extension and value are manifest object  ', function () {
+    const serveCommand = new ServeCommand({ projectRoot: '/', extensionsPaths })
+    sinon.stub(utils, 'getManifestFromEntryPoint').returns({ exists: () => true })
+    const result = serveCommand.getManifestObjectFromPathsExtensions(extensionsPaths)
+    expect(result).to.be.an('object').to.have.all.keys(extensionsPaths)
+    sinon.restore()
+  })
+
+  it('Must return an error when path is invalid', async function () {
+    const serveCommand = new ServeCommand({ projectRoot: '/', extensionsPaths })
+    sinon.stub(utils, 'getManifestFromEntryPoint').returns({ exists: () => false })
+    expect(await serveCommand.getManifestObjectFromPathsExtensions.bind(extensionsPaths)).to.throw()
   })
 })
