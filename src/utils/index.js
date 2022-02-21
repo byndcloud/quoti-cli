@@ -44,9 +44,9 @@ function getProjectRootPath () {
 
   return path.resolve(path.dirname(pkgInfo.path))
 }
-function listExtensionsPaths () {
-  const projectRoot = getProjectRootPath()
-  const pkgInfo = readPkgSync()
+function listExtensionsPaths (projectRootPath) {
+  const projectRoot = projectRootPath || getProjectRootPath()
+  const pkgInfo = readPkgSync({ cwd: path.resolve(projectRoot) })
   return pkgInfo.packageJson.quoti.extensions.map(extPath =>
     path.resolve(projectRoot, extPath)
   )
