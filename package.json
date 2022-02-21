@@ -95,7 +95,8 @@
   "scripts": {
     "postpack": "rm -f oclif.manifest.json",
     "prepack": "oclif-dev manifest && oclif-dev readme",
-    "test": "nyc mocha --forbid-only \"test/**/*.test.js\"",
+    "test:unit": "nyc mocha --forbid-only --exit \"test/unit/**/*.test.js\"",
+    "test:endToEnd": "nyc mocha --forbid-only --exit \"test/end-to-end/**/*.test.js\"",
     "version": "oclif-dev readme && git add README.md"
   },
   "quoti": {
