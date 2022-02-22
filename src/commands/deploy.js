@@ -23,12 +23,16 @@ class DeployCommand extends Command {
       color: 'yellow'
     }
     this.spinner = ora(this.spinnerOptions)
-
-    this.extensionsPaths = listExtensionsPaths()
-    if (this.extensionsPaths.length === 0) {
-      throw new Error(
-        'Nenhuma extensão foi selecionada até agora, execute qt select-extension para escolher extensões para desenvolver.'
-      )
+    try {
+      this.extensionsPaths = listExtensionsPaths()
+      if (this.extensionsPaths.length === 0) {
+        throw new Error(
+          'Nenhuma extensão foi selecionada até agora, execute qt select-extension para escolher extensões para desenvolver.'
+        )
+      }
+    } catch (error) {
+      this.logger.error(error)
+      process.exit(0)
     }
   }
   async run () {
