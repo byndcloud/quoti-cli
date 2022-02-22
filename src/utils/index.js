@@ -47,7 +47,7 @@ function getProjectRootPath () {
 function listExtensionsPaths (projectRootPath) {
   const projectRoot = projectRootPath || getProjectRootPath()
   const pkgInfo = readPkgSync({ cwd: path.resolve(projectRoot) })
-  if (!pkgInfo.packageJson.quoti || !pkgInfo.packageJson.quoti.extensions) {
+  if (!pkgInfo.packageJson?.quoti?.extensions?.length) {
     throw new Error(
       'Você ainda não selecionou suas extensões. Execute qt select-extension.'
     )
