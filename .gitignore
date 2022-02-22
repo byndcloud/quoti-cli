@@ -4,3 +4,6 @@ manifest.json
 extension
 marketplace
 .env
+.nyc_output
+extensionsToTest/dist
+test/beyondCredentials.json
