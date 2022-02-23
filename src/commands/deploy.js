@@ -84,7 +84,11 @@ class DeployCommand extends Command {
       )
       this.spinner.succeed('Deploy feito com sucesso!')
     } catch (error) {
-      this.spinner.fail(error.message)
+      let errorMessage = 'Erro durante o deploy. '
+      if (error?.response?.data?.message) {
+        errorMessage += error?.response?.data?.message
+      }
+      this.spinner.fail(errorMessage)
     } finally {
       process.exit(0)
     }
