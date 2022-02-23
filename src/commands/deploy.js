@@ -45,31 +45,31 @@ class DeployCommand extends Command {
     }
     this.manifest = getManifestFromEntryPoint(entryPointPath)
     this.extensionService = new ExtensionService(this.manifest)
+
+    if (!this.manifest.exists()) {
+      this.logger.warning(
+        'Por favor selecione sua extensão. Execute qt selectExtension no diretório onde encontra a extensão'
+      )
+      return
+    }
+    const currentTime = new Date().getTime()
+    const versionName = (await this.inputVersionName()) || currentTime
+    const filename = this.getUploadFileNameDeploy(
+      currentTime.toString(),
+      this.manifest.type === 'build'
+    )
+    const url = `https://storage.cloud.google.com/dynamic-components/${filename}`
+
+    let extensionPath = entryPointPath
+    if (this.manifest.type === 'build') {
+      extensionPath = await this.extensionService.build(entryPointPath)
+    }
+
+    await this.extensionService.upload(
+      fs.readFileSync(extensionPath),
+      filename
+    )
     try {
-      if (!this.manifest.exists()) {
-        this.logger.warning(
-          'Por favor selecione sua extensão. Execute qt selectExtension no diretório onde encontra a extensão'
-        )
-        return
-      }
-      const currentTime = new Date().getTime()
-      const versionName = (await this.inputVersionName()) || currentTime
-      const filename = this.getUploadFileNameDeploy(
-        currentTime.toString(),
-        this.manifest.type === 'build'
-      )
-      const url = `https://storage.cloud.google.com/dynamic-components/${filename}`
-
-      let extensionPath = entryPointPath
-      if (this.manifest.type === 'build') {
-        extensionPath = await this.extensionService.build(entryPointPath)
-      }
-
-      await this.extensionService.upload(
-        fs.readFileSync(extensionPath),
-        filename
-      )
-
       const token = await firebase.auth().currentUser.getIdToken()
       this.spinner.start('Fazendo deploy...')
       await api.axios.put(
