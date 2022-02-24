@@ -73,7 +73,7 @@ async function getRemoteExtensionsByIds ({ ids, orgSlug, token }) {
   ids.reduce((address, id) => {
     address += `&where[or][id]=${id}`
     return address
-  }, `/beyond/dynamic-components?attributes=title&attributes=id`)
+  }, `/${orgSlug}/dynamic-components?attributes=title&attributes=id`)
 
   const { data } = await api.axios.get(
     address,
