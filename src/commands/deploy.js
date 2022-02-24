@@ -12,8 +12,13 @@ const semver = require('semver')
 const {
   getManifestFromEntryPoint,
   listExtensionsPaths,
-  validateEntryPointIncludedInPackage
+  validateEntryPointIncludedInPackage,
+  getRemoteExtensionsByIds
 } = require('../utils/index')
+
+const {
+  ExtensionNotFoundError
+} = require('../utils/erroClasses')
 
 class DeployCommand extends Command {
   constructor () {
@@ -44,6 +49,13 @@ class DeployCommand extends Command {
       validateEntryPointIncludedInPackage(entryPointPath)
     }
     this.manifest = getManifestFromEntryPoint(entryPointPath)
+
+    const token = await firebase.auth().currentUser.getIdToken()
+    const remoteExtension = await getRemoteExtensionsByIds({ ids: [this.manifest.extensionId], orgSlug: credentials.institution, token })
+    if (!remoteExtension) {
+      throw new ExtensionNotFoundError(`Você não possui a extensão ${path.relative('./', entryPointPath)} em sua organização`)
+    }
+
     this.extensionService = new ExtensionService(this.manifest)
 
     if (!this.manifest.exists()) {
@@ -70,7 +82,6 @@ class DeployCommand extends Command {
       filename
     )
     try {
-      const token = await firebase.auth().currentUser.getIdToken()
       this.spinner.start('Fazendo deploy...')
       await api.axios.put(
         `/${credentials.institution}/dynamic-components/${this.manifest.extensionId}`,

@@ -3,7 +3,7 @@ const path = require('path')
 const chokidar = require('chokidar')
 const getDependencyTree = require('get-dependency-tree')
 
-const { debounce } = require('lodash')
+const { debounce, pickBy } = require('lodash')
 const Command = require('../base.js')
 
 const credentials = require('../config/credentials')
@@ -11,6 +11,11 @@ const ExtensionService = require('../services/extension')
 const Socket = require('../config/socket')
 const utils = require('../utils/index')
 const ora = require('ora')
+const { firebase } = require('../config/firebase')
+const {
+  ExtensionsNotFoundError,
+  ExtensionNotFoundError
+} = require('../utils/erroClasses')
 class ServeCommand extends Command {
   constructor ({ projectRoot, extensionsPaths }) {
     super(...arguments)
@@ -139,13 +144,34 @@ class ServeCommand extends Command {
       await this.sendCodeToQuotiBySocket(extensionsData)
     }
   }
+  async checkIfRemoteExtensionsExists (extensionsPaths) {
+    const token = await firebase.auth().currentUser.getIdToken()
+    const orgSlug = credentials.institution
+    const remoteExtensions = await utils.getRemoteExtensions({
+      extensionsPathsArg: extensionsPaths,
+      orgSlug,
+      token
+    })
+    let remoteExtensionNotFound = Object.keys(pickBy(remoteExtensions, re => !re))
+    if (remoteExtensionNotFound?.length > 0) {
+      remoteExtensionNotFound = remoteExtensionNotFound.map(entryPointPath => path.relative('./', entryPointPath))
+      if (remoteExtensionNotFound.length === 1) {
+        throw new ExtensionNotFoundError(`Extensão ${remoteExtensionNotFound[0]} não encontrada na organização ${orgSlug}`)
+      } else {
+        throw new ExtensionsNotFoundError(`Extensões abaixo não puderam ser encontradas em sua organização ${orgSlug} \n* ${remoteExtensionNotFound.join('\n* ')} `)
+      }
+    }
+  }
 
   async run () {
     const filesToWatch = ['*.js', './**/*.vue', './**/*.js']
-
+    let extensionsPaths = this.extensionsPaths
     if (this.args.entryPointPath) {
       utils.validateEntryPointIncludedInPackage(this.args.entryPointPath)
+      extensionsPaths = [this.args.entryPointPath]
     }
+
+    await this.checkIfRemoteExtensionsExists(extensionsPaths)
 
     this.logger.info('Conectado ao Quoti!')
 
