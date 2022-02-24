@@ -1,4 +1,5 @@
 const JSONManager = require('../config/JSONManager')
+const api = require('../config/axios')
 const path = require('path')
 const inquirer = require('inquirer')
 const readPkgSync = require('read-pkg-up').sync
@@ -67,6 +68,42 @@ function validateEntryPointIncludedInPackage (entryPointPath) {
   }
 }
 
+async function getRemoteExtensionsByIds ({ ids, orgSlug, token }) {
+  const address =
+  ids.reduce((address, id) => {
+    address += `&where[or][id]=${id}`
+    return address
+  }, `/beyond/dynamic-components?attributes=title&attributes=id`)
+
+  const { data } = await api.axios.get(
+    address,
+    { headers: { Authorization: `Bearer ${token}` } }
+  )
+  if (!data || data?.length === 0) {
+    return
+  }
+  return data
+}
+async function getRemoteExtensions ({ extensionsPathsArg, orgSlug, token }) {
+  let extensionsPaths = extensionsPathsArg
+  if (!extensionsPaths) {
+    const projectRoot = getProjectRootPath()
+    extensionsPaths = listExtensionsPaths(projectRoot)
+  }
+  const ids = extensionsPaths.map(extension => {
+    const manifest = getManifestFromEntryPoint(extension)
+
+    return manifest.extensionId
+  })
+  const remoteExtensions = await getRemoteExtensionsByIds({ ids, orgSlug, token })
+  const remoteExtensionsObj = {}
+  ids.forEach((id, index) => {
+    const remoteExtension = remoteExtensions?.find(re => re.id === id)
+    remoteExtensionsObj[extensionsPaths[index]] = remoteExtension
+  })
+  return remoteExtensionsObj
+}
+
 module.exports = {
   isYes,
   isNo,
@@ -74,5 +111,7 @@ module.exports = {
   getManifestFromEntryPoint,
   getProjectRootPath,
   listExtensionsPaths,
-  validateEntryPointIncludedInPackage
+  validateEntryPointIncludedInPackage,
+  getRemoteExtensionsByIds,
+  getRemoteExtensions
 }
