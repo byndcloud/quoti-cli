@@ -165,10 +165,20 @@ class PublishCommand extends Command {
       versionIncrement
     }
     try {
-      await this.callEndpointPublishExtensionVersion(
+      const data = await this.callEndpointPublishExtensionVersion(
         bodyPublishExtensionVersion,
         token
       )
+      this.logger.success('Nova versão foi publicada com sucesso')
+      if (data.orgsUpdatedWithSuccess.length > 0) {
+        this.logger.success(`Organizações que tiveram sua extensão atualizada: ${data.orgsUpdatedWithSuccess.join(', ')}`)
+      }
+      if (data.orgsWithoutAutomaticUpdate.length > 0) {
+        this.logger.success(`Organizações sem a atualização automática para esta extensão: ${data.orgsWithoutAutomaticUpdate.join(', ')}`)
+      }
+      if (data.orgsWithErrorOnUpdate.length > 0) {
+        this.logger.error(`Houveram erros durante a atualização nessas organizações:  ${data.orgsWithErrorOnUpdate.join(', ')}`)
+      }
     } catch (error) {
       if (error.response.status === 422) {
         this.logger.error(
@@ -179,18 +189,18 @@ class PublishCommand extends Command {
       }
       process.exit(0)
     }
-    this.logger.success('Nova versão foi publicada com sucesso')
   }
 
   commandSintaxeValid (flags) {
     return Object.keys(flags).length < 2
   }
   async callEndpointPublishExtensionVersion (body, token) {
-    await api.axios.post(
+    const { data } = await api.axios.post(
       `/${credentials.institution}/marketplace/extensions/publish-version`,
       body,
       { headers: { Authorization: `Bearer ${token}` } }
     )
+    return data.data
   }
   async callEndpointPublishExtension (body, token) {
     await api.axios.post(
