@@ -103,6 +103,18 @@ async function getRemoteExtensions ({ extensionsPathsArg, orgSlug, token }) {
   })
   return remoteExtensionsObj
 }
+async function getRemoteExtensionVersionOnMarketplace ({ extensionId, orgSlug, token }) {
+  const address = `/${orgSlug}/marketplace/extensions/${extensionId}/versions`
+
+  const { data } = await api.axios.get(
+    address,
+    { headers: { Authorization: `Bearer ${token}` } }
+  )
+  if (!data || data?.length === 0) {
+    return
+  }
+  return data.data
+}
 
 module.exports = {
   isYes,
@@ -113,5 +125,6 @@ module.exports = {
   listExtensionsPaths,
   validateEntryPointIncludedInPackage,
   getRemoteExtensionsByIds,
-  getRemoteExtensions
+  getRemoteExtensions,
+  getRemoteExtensionVersionOnMarketplace
 }
