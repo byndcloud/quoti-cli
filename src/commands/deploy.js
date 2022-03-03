@@ -16,9 +16,7 @@ const {
   getRemoteExtensionsByIds
 } = require('../utils/index')
 
-const {
-  ExtensionNotFoundError
-} = require('../utils/erroClasses')
+const { ExtensionNotFoundError } = require('../utils/erroClasses')
 
 class DeployCommand extends Command {
   constructor () {
@@ -51,9 +49,18 @@ class DeployCommand extends Command {
     this.manifest = getManifestFromEntryPoint(entryPointPath)
 
     const token = await firebase.auth().currentUser.getIdToken()
-    const remoteExtension = await getRemoteExtensionsByIds({ ids: [this.manifest.extensionId], orgSlug: credentials.institution, token })
+    const remoteExtension = await getRemoteExtensionsByIds({
+      ids: [this.manifest.extensionId],
+      orgSlug: credentials.institution,
+      token
+    })
     if (!remoteExtension) {
-      throw new ExtensionNotFoundError(`Você não possui a extensão ${path.relative('./', entryPointPath)} em sua organização`)
+      throw new ExtensionNotFoundError(
+        `Você não possui a extensão ${path.relative(
+          './',
+          entryPointPath
+        )} em sua organização`
+      )
     }
 
     this.extensionService = new ExtensionService(this.manifest)
@@ -77,10 +84,7 @@ class DeployCommand extends Command {
       extensionPath = await this.extensionService.build(entryPointPath)
     }
 
-    await this.extensionService.upload(
-      fs.readFileSync(extensionPath),
-      filename
-    )
+    await this.extensionService.upload(fs.readFileSync(extensionPath), filename)
     try {
       this.spinner.start('Fazendo deploy...')
       await api.axios.put(
@@ -148,8 +152,6 @@ class DeployCommand extends Command {
   }
 }
 
-// TODO: Add documentation and flags specifications
-
 DeployCommand.args = [
   {
     name: 'entryPointPath',
@@ -158,9 +160,6 @@ DeployCommand.args = [
   }
 ]
 
-DeployCommand.description = `Deploy sua extensão
-...
-Deploy sua extensão
-`
+DeployCommand.description = `Realiza deploy da sua extensão para o Quoti`
 
 module.exports = DeployCommand
