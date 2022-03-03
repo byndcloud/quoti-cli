@@ -13,7 +13,8 @@ const {
   getManifestFromEntryPoint,
   listExtensionsPaths,
   validateEntryPointIncludedInPackage,
-  getRemoteExtensionsByIds
+  getRemoteExtensionsByIds,
+  getLastVersion
 } = require('../utils/index')
 
 const {
@@ -56,6 +57,12 @@ class DeployCommand extends Command {
       throw new ExtensionNotFoundError(`Você não possui a extensão ${path.relative('./', entryPointPath)} em sua organização`)
     }
 
+    const lastVersion = remoteExtension[0].DynamicComponentsFiles.find(item => item.activated).version
+    this.logger.info(`* Você está realizando deploy de uma nova versão para a extensão ${remoteExtension[0].title}`)
+    if (lastVersion) {
+      this.logger.info(`* Última versão ${lastVersion}`)
+    }
+
     this.extensionService = new ExtensionService(this.manifest)
 
     if (!this.manifest.exists()) {
@@ -64,10 +71,10 @@ class DeployCommand extends Command {
       )
       return
     }
-    const currentTime = new Date().getTime()
-    const versionName = (await this.inputVersionName()) || currentTime
+
+    const versionName = await this.inputVersionName(lastVersion)
     const filename = this.getUploadFileNameDeploy(
-      currentTime.toString(),
+      new Date().getTime().toString(),
       this.manifest.type === 'build'
     )
     const url = `https://storage.cloud.google.com/dynamic-components/${filename}`
@@ -125,15 +132,18 @@ class DeployCommand extends Command {
     }
     return entryPointPath
   }
-  async inputVersionName () {
+  async inputVersionName (lastVersion) {
     const { versionName } = await inquirer.prompt([
       {
         name: 'versionName',
-        message: `Escolha uma versão para sua extensão`,
+        message: `Escolha uma nova versão para sua extensão`,
         type: 'input',
         validate: input => {
           if (!semver.valid(input)) {
             return 'A versão deve está no formato x.x.x'
+          }
+          if (semver.valid(lastVersion) && semver.gte(lastVersion, input)) {
+            return `A versão deve ser maior que ${lastVersion}`
           }
           return true
         }
