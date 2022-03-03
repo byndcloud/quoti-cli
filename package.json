@@ -98,11 +98,5 @@
     "test:unit": "nyc mocha --forbid-only --exit \"test/unit/**/*.test.js\"",
     "test:e2e": "nyc mocha --forbid-only --exit \"test/end-to-end/**/*.test.js\"",
     "version": "oclif-dev readme && git add README.md"
-  },
-  "quoti": {
-    "extensions": [
-      "extension/src/App.vue",
-      "test/extensionToTest/App.vue"
-    ]
   }
 }
