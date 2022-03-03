@@ -65,6 +65,12 @@ class DeployCommand extends Command {
       )
     }
 
+    const lastVersion = remoteExtension[0].DynamicComponentsFiles.find(item => item.activated).version
+    this.logger.info(`* Você está realizando deploy de uma nova versão para a extensão ${remoteExtension[0].title}`)
+    if (lastVersion) {
+      this.logger.info(`* Última versão ${lastVersion}`)
+    }
+
     this.extensionService = new ExtensionService(this.manifest)
 
     if (!this.manifest.exists()) {
@@ -73,10 +79,10 @@ class DeployCommand extends Command {
       )
       return
     }
-    const currentTime = new Date().getTime()
-    const versionName = (await this.inputVersionName()) || currentTime
+
+    const versionName = await this.inputVersionName(lastVersion)
     const filename = this.getUploadFileNameDeploy(
-      currentTime.toString(),
+      new Date().getTime().toString(),
       this.manifest.type === 'build'
     )
     const url = `https://storage.cloud.google.com/dynamic-components/${filename}`
@@ -142,6 +148,9 @@ class DeployCommand extends Command {
         validate: input => {
           if (!semver.valid(input)) {
             return 'A versão deve está no formato x.x.x'
+          }
+          if (semver.valid(lastVersion) && semver.gte(lastVersion, input)) {
+            return `A versão deve ser maior que ${lastVersion}`
           }
           return true
         }
