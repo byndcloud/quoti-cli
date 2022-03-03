@@ -108,7 +108,13 @@ async function getRemoteExtensions ({ extensionsPathsArg, orgSlug, token }) {
   })
   return remoteExtensionsObj
 }
-
+function getFrontBaseURL () {
+  if (process.env.API_BASE_URL) {
+    return process.env.API_BASE_URL || `http://localhost:8081`
+  } else {
+    return 'https://quoti.cloud'
+  }
+}
 module.exports = {
   isYes,
   isNo,
@@ -118,5 +124,6 @@ module.exports = {
   listExtensionsPaths,
   validateEntryPointIncludedInPackage,
   getRemoteExtensionsByIds,
-  getRemoteExtensions
+  getRemoteExtensions,
+  getFrontBaseURL
 }
