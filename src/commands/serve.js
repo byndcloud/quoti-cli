@@ -28,7 +28,8 @@ class ServeCommand extends Command {
     credentials.load()
     try {
       this.projectRoot = projectRoot || utils.getProjectRootPath()
-      this.extensionsPaths = extensionsPaths || utils.listExtensionsPaths(this.projectRoot)
+      this.extensionsPaths =
+        extensionsPaths || utils.listExtensionsPaths(this.projectRoot)
       if (this.extensionsPaths.length === 0) {
         throw new Error(
           'Nenhuma extensão foi selecionada até agora, execute qt select-extension para escolher extensões para desenvolver.'
@@ -64,13 +65,10 @@ class ServeCommand extends Command {
     return extensionsToUpdate
   }
   getManifestObjectFromPathsExtensions (extensionsToUpdate) {
-    const manifests = extensionsToUpdate.reduce(
-      (manifestsObj, entryPoint) => {
-        manifestsObj[entryPoint] = utils.getManifestFromEntryPoint(entryPoint)
-        return manifestsObj
-      },
-      {}
-    )
+    const manifests = extensionsToUpdate.reduce((manifestsObj, entryPoint) => {
+      manifestsObj[entryPoint] = utils.getManifestFromEntryPoint(entryPoint)
+      return manifestsObj
+    }, {})
 
     Object.entries(manifests).forEach(([path, manifest]) => {
       if (!manifest?.exists()) {
@@ -81,7 +79,11 @@ class ServeCommand extends Command {
     })
     return manifests
   }
-  async buildAndUploadExtension ({ changedFilePath, extensionsToUpdate, manifests }) {
+  async buildAndUploadExtension ({
+    changedFilePath,
+    extensionsToUpdate,
+    manifests
+  }) {
     const extensionsData = await Promise.all(
       extensionsToUpdate.map(async entryPoint => {
         let distPath = entryPoint
@@ -90,7 +92,9 @@ class ServeCommand extends Command {
 
         if (manifest.type === 'build') {
           if (!manifest.extensionUUID) {
-            const extension = await extensionService.getExtension(manifest.extensionId)
+            const extension = await extensionService.getExtension(
+              manifest.extensionId
+            )
             if (extension?.extensionUUID) {
               manifest.extensionUUID = extension.extensionUUID
               manifest.save()
@@ -98,7 +102,9 @@ class ServeCommand extends Command {
               await extensionService.createExtensionUUID()
             }
           }
-          distPath = await extensionService.build(entryPoint, { mode: 'staging' })
+          distPath = await extensionService.build(entryPoint, {
+            mode: 'staging'
+          })
         }
         const fileBuffer = fs.readFileSync(distPath || changedFilePath)
         const extensionCode = fileBuffer.toString()
@@ -138,9 +144,17 @@ class ServeCommand extends Command {
   }
   chokidarOnChange (args, watch) {
     return async changedFilePath => {
-      const extensionsToUpdate = this.getDependentExtensionPath({ changedFilePath, args })
-      const manifests = this.getManifestObjectFromPathsExtensions(extensionsToUpdate)
-      const extensionsData = await this.buildAndUploadExtension({ changedFilePath, extensionsToUpdate, manifests })
+      const extensionsToUpdate = this.getDependentExtensionPath({
+        changedFilePath,
+        args
+      })
+      const manifests =
+        this.getManifestObjectFromPathsExtensions(extensionsToUpdate)
+      const extensionsData = await this.buildAndUploadExtension({
+        changedFilePath,
+        extensionsToUpdate,
+        manifests
+      })
       await this.sendCodeToQuotiBySocket(extensionsData)
     }
   }
@@ -154,15 +168,20 @@ class ServeCommand extends Command {
       token
     })
 
-    const remoteExtensionsNotFound =
-      Object
-        .keys(pickBy(remoteExtensionsByPaths, extension => !extension))
-        .map(entryPointPath => path.relative('./', entryPointPath))
+    const remoteExtensionsNotFound = Object.keys(
+      pickBy(remoteExtensionsByPaths, extension => !extension)
+    ).map(entryPointPath => path.relative('./', entryPointPath))
 
     if (remoteExtensionsNotFound?.length > 1) {
-      throw new ExtensionsNotFoundError(`Extensões abaixo não puderam ser encontradas em sua organização ${orgSlug} \n* ${remoteExtensionsNotFound.join('\n* ')} `)
+      throw new ExtensionsNotFoundError(
+        `Extensões abaixo não puderam ser encontradas em sua organização ${orgSlug} \n* ${remoteExtensionsNotFound.join(
+          '\n* '
+        )} `
+      )
     } else if (remoteExtensionsNotFound?.length === 1) {
-      throw new ExtensionNotFoundError(`Extensão ${remoteExtensionsNotFound[0]} não encontrada na organização ${orgSlug}`)
+      throw new ExtensionNotFoundError(
+        `Extensão ${remoteExtensionsNotFound[0]} não encontrada na organização ${orgSlug}`
+      )
     }
   }
 
