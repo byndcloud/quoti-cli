@@ -12,8 +12,11 @@ const semver = require('semver')
 const {
   getManifestFromEntryPoint,
   listExtensionsPaths,
-  validateEntryPointIncludedInPackage
+  validateEntryPointIncludedInPackage,
+  getRemoteExtensionsByIds
 } = require('../utils/index')
+
+const { ExtensionNotFoundError } = require('../utils/errorClasses')
 
 class DeployCommand extends Command {
   constructor () {
@@ -44,33 +47,45 @@ class DeployCommand extends Command {
       validateEntryPointIncludedInPackage(entryPointPath)
     }
     this.manifest = getManifestFromEntryPoint(entryPointPath)
+
+    const token = await firebase.auth().currentUser.getIdToken()
+    const remoteExtension = await getRemoteExtensionsByIds({
+      ids: [this.manifest.extensionId],
+      orgSlug: credentials.institution,
+      token
+    })
+    if (!remoteExtension) {
+      throw new ExtensionNotFoundError(
+        `Você não possui a extensão ${path.relative(
+          './',
+          entryPointPath
+        )} em sua organização`
+      )
+    }
+
     this.extensionService = new ExtensionService(this.manifest)
+
+    if (!this.manifest.exists()) {
+      this.logger.warning(
+        'Por favor selecione sua extensão. Execute qt selectExtension no diretório onde encontra a extensão'
+      )
+      return
+    }
+    const currentTime = new Date().getTime()
+    const versionName = (await this.inputVersionName()) || currentTime
+    const filename = this.getUploadFileNameDeploy(
+      currentTime.toString(),
+      this.manifest.type === 'build'
+    )
+    const url = `https://storage.cloud.google.com/dynamic-components/${filename}`
+
+    let extensionPath = entryPointPath
+    if (this.manifest.type === 'build') {
+      extensionPath = await this.extensionService.build(entryPointPath)
+    }
+
+    await this.extensionService.upload(fs.readFileSync(extensionPath), filename)
     try {
-      if (!this.manifest.exists()) {
-        this.logger.warning(
-          'Por favor selecione sua extensão. Execute qt selectExtension no diretório onde encontra a extensão'
-        )
-        return
-      }
-      const currentTime = new Date().getTime()
-      const versionName = (await this.inputVersionName()) || currentTime
-      const filename = this.getUploadFileNameDeploy(
-        currentTime.toString(),
-        this.manifest.type === 'build'
-      )
-      const url = `https://storage.cloud.google.com/dynamic-components/${filename}`
-
-      let extensionPath = entryPointPath
-      if (this.manifest.type === 'build') {
-        extensionPath = await this.extensionService.build(entryPointPath)
-      }
-
-      await this.extensionService.upload(
-        fs.readFileSync(extensionPath),
-        filename
-      )
-
-      const token = await firebase.auth().currentUser.getIdToken()
       this.spinner.start('Fazendo deploy...')
       await api.axios.put(
         `/${credentials.institution}/dynamic-components/${this.manifest.extensionId}`,
@@ -84,7 +99,11 @@ class DeployCommand extends Command {
       )
       this.spinner.succeed('Deploy feito com sucesso!')
     } catch (error) {
-      this.spinner.fail(error.message)
+      let errorMessage = 'Erro durante o deploy. '
+      if (error?.response?.data?.message) {
+        errorMessage += error?.response?.data?.message
+      }
+      this.spinner.fail(errorMessage)
     } finally {
       process.exit(0)
     }
@@ -133,8 +152,6 @@ class DeployCommand extends Command {
   }
 }
 
-// TODO: Add documentation and flags specifications
-
 DeployCommand.args = [
   {
     name: 'entryPointPath',
@@ -143,9 +160,6 @@ DeployCommand.args = [
   }
 ]
 
-DeployCommand.description = `Deploy sua extensão
-...
-Deploy sua extensão
-`
+DeployCommand.description = `Realiza deploy da sua extensão para o Quoti`
 
 module.exports = DeployCommand

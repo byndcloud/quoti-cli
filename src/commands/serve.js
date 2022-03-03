@@ -3,7 +3,7 @@ const path = require('path')
 const chokidar = require('chokidar')
 const getDependencyTree = require('get-dependency-tree')
 
-const { debounce } = require('lodash')
+const { debounce, pickBy } = require('lodash')
 const Command = require('../base.js')
 
 const credentials = require('../config/credentials')
@@ -11,6 +11,11 @@ const ExtensionService = require('../services/extension')
 const Socket = require('../config/socket')
 const utils = require('../utils/index')
 const ora = require('ora')
+const { firebase } = require('../config/firebase')
+const {
+  ExtensionsNotFoundError,
+  ExtensionNotFoundError
+} = require('../utils/errorClasses')
 class ServeCommand extends Command {
   constructor ({ projectRoot, extensionsPaths }) {
     super(...arguments)
@@ -23,7 +28,8 @@ class ServeCommand extends Command {
     credentials.load()
     try {
       this.projectRoot = projectRoot || utils.getProjectRootPath()
-      this.extensionsPaths = extensionsPaths || utils.listExtensionsPaths(this.projectRoot)
+      this.extensionsPaths =
+        extensionsPaths || utils.listExtensionsPaths(this.projectRoot)
       if (this.extensionsPaths.length === 0) {
         throw new Error(
           'Nenhuma extensão foi selecionada até agora, execute qt select-extension para escolher extensões para desenvolver.'
@@ -59,13 +65,10 @@ class ServeCommand extends Command {
     return extensionsToUpdate
   }
   getManifestObjectFromPathsExtensions (extensionsToUpdate) {
-    const manifests = extensionsToUpdate.reduce(
-      (manifestsObj, entryPoint) => {
-        manifestsObj[entryPoint] = utils.getManifestFromEntryPoint(entryPoint)
-        return manifestsObj
-      },
-      {}
-    )
+    const manifests = extensionsToUpdate.reduce((manifestsObj, entryPoint) => {
+      manifestsObj[entryPoint] = utils.getManifestFromEntryPoint(entryPoint)
+      return manifestsObj
+    }, {})
 
     Object.entries(manifests).forEach(([path, manifest]) => {
       if (!manifest?.exists()) {
@@ -76,7 +79,11 @@ class ServeCommand extends Command {
     })
     return manifests
   }
-  async buildAndUploadExtension ({ changedFilePath, extensionsToUpdate, manifests }) {
+  async buildAndUploadExtension ({
+    changedFilePath,
+    extensionsToUpdate,
+    manifests
+  }) {
     const extensionsData = await Promise.all(
       extensionsToUpdate.map(async entryPoint => {
         let distPath = entryPoint
@@ -85,7 +92,9 @@ class ServeCommand extends Command {
 
         if (manifest.type === 'build') {
           if (!manifest.extensionUUID) {
-            const extension = await extensionService.getExtension(manifest.extensionId)
+            const extension = await extensionService.getExtension(
+              manifest.extensionId
+            )
             if (extension?.extensionUUID) {
               manifest.extensionUUID = extension.extensionUUID
               manifest.save()
@@ -93,7 +102,9 @@ class ServeCommand extends Command {
               await extensionService.createExtensionUUID()
             }
           }
-          distPath = await extensionService.build(entryPoint, { mode: 'staging' })
+          distPath = await extensionService.build(entryPoint, {
+            mode: 'staging'
+          })
         }
         const fileBuffer = fs.readFileSync(distPath || changedFilePath)
         const extensionCode = fileBuffer.toString()
@@ -133,19 +144,56 @@ class ServeCommand extends Command {
   }
   chokidarOnChange (args, watch) {
     return async changedFilePath => {
-      const extensionsToUpdate = this.getDependentExtensionPath({ changedFilePath, args })
-      const manifests = this.getManifestObjectFromPathsExtensions(extensionsToUpdate)
-      const extensionsData = await this.buildAndUploadExtension({ changedFilePath, extensionsToUpdate, manifests })
+      const extensionsToUpdate = this.getDependentExtensionPath({
+        changedFilePath,
+        args
+      })
+      const manifests =
+        this.getManifestObjectFromPathsExtensions(extensionsToUpdate)
+      const extensionsData = await this.buildAndUploadExtension({
+        changedFilePath,
+        extensionsToUpdate,
+        manifests
+      })
       await this.sendCodeToQuotiBySocket(extensionsData)
+    }
+  }
+  async checkIfRemoteExtensionsExists (extensionsPaths) {
+    const token = await firebase.auth().currentUser.getIdToken()
+    const orgSlug = credentials.institution
+
+    const remoteExtensionsByPaths = await utils.getRemoteExtensions({
+      extensionsPathsArg: extensionsPaths,
+      orgSlug,
+      token
+    })
+
+    const remoteExtensionsNotFound = Object.keys(
+      pickBy(remoteExtensionsByPaths, extension => !extension)
+    ).map(entryPointPath => path.relative('./', entryPointPath))
+
+    if (remoteExtensionsNotFound?.length > 1) {
+      throw new ExtensionsNotFoundError(
+        `Extensões abaixo não puderam ser encontradas em sua organização ${orgSlug} \n* ${remoteExtensionsNotFound.join(
+          '\n* '
+        )} `
+      )
+    } else if (remoteExtensionsNotFound?.length === 1) {
+      throw new ExtensionNotFoundError(
+        `Extensão ${remoteExtensionsNotFound[0]} não encontrada na organização ${orgSlug}`
+      )
     }
   }
 
   async run () {
     const filesToWatch = ['*.js', './**/*.vue', './**/*.js']
-
+    let extensionsPaths = this.extensionsPaths
     if (this.args.entryPointPath) {
       utils.validateEntryPointIncludedInPackage(this.args.entryPointPath)
+      extensionsPaths = [this.args.entryPointPath]
     }
+
+    await this.checkIfRemoteExtensionsExists(extensionsPaths)
 
     this.logger.info('Conectado ao Quoti!')
 
