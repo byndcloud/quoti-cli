@@ -66,17 +66,23 @@ function validateEntryPointIncludedInPackage (entryPointPath) {
 }
 
 async function getRemoteExtensionsByIds ({ ids, orgSlug, token }) {
-  const address = ids.reduce((address, id) => {
-    address += `&where[or][id]=${id}`
-    return address
-  }, `/${orgSlug}/dynamic-components?attributes=title&attributes=id`)
+  const baseURI = `/${orgSlug}/dynamic-components`
 
-  const { data } = await api.axios.get(address, {
+  const params = new URLSearchParams()
+  params.append('attributes', 'title')
+  params.append('attributes', 'id')
+
+  ids.forEach(id => params.append('where[or][id]', id))
+
+  const URI = `${baseURI}?${params}`
+  const { data } = await api.axios.get(URI, {
     headers: { Authorization: `Bearer ${token}` }
   })
+
   if (!data || data?.length === 0) {
     return
   }
+
   return data
 }
 async function getRemoteExtensions ({ extensionsPathsArg, orgSlug, token }) {
