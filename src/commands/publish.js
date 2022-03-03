@@ -9,7 +9,8 @@ const {
   confirmQuestion,
   listExtensionsPaths,
   getProjectRootPath,
-  validateEntryPointIncludedInPackage
+  validateEntryPointIncludedInPackage,
+  getRemoteExtensionVersionOnMarketplace
 } = require('../utils/index')
 const inquirer = require('inquirer')
 const path = require('path')
@@ -86,9 +87,31 @@ class PublishCommand extends Command {
       dynamicComponentFile.DynamicComponentsFiles.find(item => item.activated)
     if (!dynamicComponentFileActivated) {
       this.logger.error(
-        'Nenhuma versão ativa para esta extensão. É necessário realizar deploy de alguma versão antes de publicar'
+        'Nenhuma versão ativa para esta extensão. É necessário realizar publish de alguma versão antes de publicar'
       )
       process.exit(0)
+    }
+
+    this.logger.info(`* Você está realizando publish de uma nova versão para a extensão ${dynamicComponentFile.title}`)
+
+    const extensionVersionsOnMarketplace = await getRemoteExtensionVersionOnMarketplace({
+      extensionId: dynamicComponentFile.marketplaceExtensionId,
+      orgSlug: credentials.institution,
+      token
+    })
+
+    const lastVersion = extensionVersionsOnMarketplace?.map(
+      item => {
+        if (item.version) {
+          return semver.valid(item.version)
+        }
+      }
+    ).sort(semver.rcompare)[0]
+    if (lastVersion) {
+      if (semver.valid(this.flags.version) && semver.gte(lastVersion, this.flags.version)) {
+        throw new Error(`Versão desejada ${this.flags.version} é menor que a versão atual ${lastVersion}`)
+      }
+      this.logger.info(`* Última versão desta extensão no marketplace ${lastVersion}`)
     }
     if (!dynamicComponentFile.marketplaceExtensionId) {
       await this.publishExtension(
@@ -144,7 +167,7 @@ class PublishCommand extends Command {
       extensionUUID: manifest.extensionUUID
     }
     await this.callEndpointPublishExtension(bodyPublishExtension, token)
-    this.logger.success('Nova extensão publicada com sucesso')
+    this.logger.success(`Nova extensão publicada com sucesso. Versão ${version}`)
   }
 
   async publishNewVersion (flags, dynamicComponentFileId, token, manifest) {
@@ -172,7 +195,7 @@ class PublishCommand extends Command {
         bodyPublishExtensionVersion,
         token
       )
-      this.logger.success('Nova versão foi publicada com sucesso')
+      this.logger.success(`Nova versão ${data.newVersion} foi publicada com sucesso`)
       if (data.orgsUpdatedWithSuccess.length > 0) {
         this.logger.success(`Organizações que tiveram sua extensão atualizada: ${data.orgsUpdatedWithSuccess.join(', ')}`)
       }
