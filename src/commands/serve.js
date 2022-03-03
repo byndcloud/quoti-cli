@@ -15,7 +15,7 @@ const { firebase } = require('../config/firebase')
 const {
   ExtensionsNotFoundError,
   ExtensionNotFoundError
-} = require('../utils/erroClasses')
+} = require('../utils/errorClasses')
 class ServeCommand extends Command {
   constructor ({ projectRoot, extensionsPaths }) {
     super(...arguments)

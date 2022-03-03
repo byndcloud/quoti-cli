@@ -16,7 +16,7 @@ const {
   getRemoteExtensionsByIds
 } = require('../utils/index')
 
-const { ExtensionNotFoundError } = require('../utils/erroClasses')
+const { ExtensionNotFoundError } = require('../utils/errorClasses')
 
 class DeployCommand extends Command {
   constructor () {
