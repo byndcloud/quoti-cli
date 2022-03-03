@@ -147,19 +147,22 @@ class ServeCommand extends Command {
   async checkIfRemoteExtensionsExists (extensionsPaths) {
     const token = await firebase.auth().currentUser.getIdToken()
     const orgSlug = credentials.institution
-    const remoteExtensions = await utils.getRemoteExtensions({
+
+    const remoteExtensionsByPaths = await utils.getRemoteExtensions({
       extensionsPathsArg: extensionsPaths,
       orgSlug,
       token
     })
-    let remoteExtensionNotFound = Object.keys(pickBy(remoteExtensions, re => !re))
-    if (remoteExtensionNotFound?.length > 0) {
-      remoteExtensionNotFound = remoteExtensionNotFound.map(entryPointPath => path.relative('./', entryPointPath))
-      if (remoteExtensionNotFound.length === 1) {
-        throw new ExtensionNotFoundError(`Extensão ${remoteExtensionNotFound[0]} não encontrada na organização ${orgSlug}`)
-      } else {
-        throw new ExtensionsNotFoundError(`Extensões abaixo não puderam ser encontradas em sua organização ${orgSlug} \n* ${remoteExtensionNotFound.join('\n* ')} `)
-      }
+
+    const remoteExtensionsNotFound =
+      Object
+        .keys(pickBy(remoteExtensionsByPaths, extension => !extension))
+        .map(entryPointPath => path.relative('./', entryPointPath))
+
+    if (remoteExtensionsNotFound?.length > 1) {
+      throw new ExtensionsNotFoundError(`Extensões abaixo não puderam ser encontradas em sua organização ${orgSlug} \n* ${remoteExtensionsNotFound.join('\n* ')} `)
+    } else if (remoteExtensionsNotFound?.length === 1) {
+      throw new ExtensionNotFoundError(`Extensão ${remoteExtensionsNotFound[0]} não encontrada na organização ${orgSlug}`)
     }
   }
 
