@@ -22,7 +22,6 @@ async function confirmQuestion (text) {
         }
         return true
       }
-
     }
   ])
   return isYes(confirmVersion)
@@ -59,9 +58,7 @@ function listExtensionsPaths (projectRootPath) {
 }
 function validateEntryPointIncludedInPackage (entryPointPath) {
   const entryPointPaths = listExtensionsPaths()
-  if (
-    !entryPointPaths.includes(path.resolve(entryPointPath))
-  ) {
+  if (!entryPointPaths.includes(path.resolve(entryPointPath))) {
     throw new Error(
       `O entrypoint especificado (${entryPointPath}) não está entre as extensões que já foram selecionadas. Tem certeza que o caminho está correto ou que a extensão já foi selecionada com qt select-extension?`
     )
@@ -69,16 +66,14 @@ function validateEntryPointIncludedInPackage (entryPointPath) {
 }
 
 async function getRemoteExtensionsByIds ({ ids, orgSlug, token }) {
-  const address =
-  ids.reduce((address, id) => {
+  const address = ids.reduce((address, id) => {
     address += `&where[or][id]=${id}`
     return address
   }, `/${orgSlug}/dynamic-components?attributes=title&attributes=id`)
 
-  const { data } = await api.axios.get(
-    address,
-    { headers: { Authorization: `Bearer ${token}` } }
-  )
+  const { data } = await api.axios.get(address, {
+    headers: { Authorization: `Bearer ${token}` }
+  })
   if (!data || data?.length === 0) {
     return
   }
@@ -95,7 +90,11 @@ async function getRemoteExtensions ({ extensionsPathsArg, orgSlug, token }) {
 
     return manifest.extensionId
   })
-  const remoteExtensions = await getRemoteExtensionsByIds({ ids, orgSlug, token })
+  const remoteExtensions = await getRemoteExtensionsByIds({
+    ids,
+    orgSlug,
+    token
+  })
   const remoteExtensionsObj = {}
   ids.forEach((id, index) => {
     const remoteExtension = remoteExtensions?.find(re => re.id === id)
