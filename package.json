@@ -10,6 +10,7 @@
   "dependencies": {
     "@oclif/command": "^1.8.16",
     "@oclif/config": "^1.17.0",
+    "@oclif/plugin-autocomplete": "^1.2.0",
     "@oclif/plugin-help": "^5.1.10",
     "@vue/cli-plugin-babel": "^4.5.15",
     "@vue/cli-plugin-eslint": "^4.5.15",
@@ -37,10 +38,9 @@
     "ws": "^8.3.0"
   },
   "devDependencies": {
-    "@sinonjs/referee": "^9.1.1",
-    "findup-sync": "^5.0.0",
     "@oclif/dev-cli": "^1.26.0",
     "@oclif/test": "^1.2.8",
+    "@sinonjs/referee": "^9.1.1",
     "@types/chai": "^4.2.15",
     "@types/eslint": "^7.2.6",
     "@types/express": "^4.17.11",
@@ -53,6 +53,7 @@
     "eslint-plugin-node": "^9.1.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.0",
+    "findup-sync": "^5.0.0",
     "globby": "^10.0.2",
     "mocha": "^5.2.0",
     "nyc": "^14.1.1",
@@ -82,7 +83,8 @@
     "commands": "./src/commands",
     "bin": "qt",
     "plugins": [
-      "@oclif/plugin-help"
+      "@oclif/plugin-help",
+      "@oclif/plugin-autocomplete"
     ],
     "hooks": {
       "prerun": "./src/hooks/login",
@@ -96,11 +98,5 @@
     "test:unit": "nyc mocha --forbid-only --exit \"test/unit/**/*.test.js\"",
     "test:e2e": "nyc mocha --forbid-only --exit \"test/end-to-end/**/*.test.js\"",
     "version": "oclif-dev readme && git add README.md"
-  },
-  "quoti": {
-    "extensions": [
-      "extension/src/App.vue",
-      "test/extensionToTest/App.vue"
-    ]
   }
 }
