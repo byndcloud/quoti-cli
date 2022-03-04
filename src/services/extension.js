@@ -115,7 +115,8 @@ class ExtensionService {
         entry,
         'inline-vue': true
       })
-      this.spinner.succeed(`Build da extensão ${this.manifest.name} finalizado`)
+      this.logger.info(`⇨ Extensão: ${this.manifest.name}\n`)
+      this.spinner.succeed(`Build finalizado`)
       return path.join(getProjectRootPath(), dest, `${name}.umd.min.js`)
     } catch (error) {
       this.spinner.fail('Erro durante o build')

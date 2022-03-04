@@ -141,8 +141,8 @@ class ServeCommand extends Command {
       })
 
       if (!err) {
-        const urlExtension = `${getFrontBaseURL()}/${credentials.institution}/develop/${extensionData.extensionInfo.name}/?devSessionId=${sessionId}`
-        await this.spinner.succeed('Quoti recebeu o código da extensão! Acesse em ' + urlExtension)
+        const urlExtension = `${getFrontBaseURL()}/${credentials.institution}/develop/${extensionData.extensionInfo.name}?devSessionId=${sessionId}`
+        await this.spinner.succeed('Disponível em ' + urlExtension)
         return
       }
       await this.spinner.fail('Quoti não recebeu o código da extensão!')
