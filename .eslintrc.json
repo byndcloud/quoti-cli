@@ -3,10 +3,11 @@
   "parserOptions": {
     "sourceType": "module",
     "allowImportExportEverywhere": false,
-    "ecmaVersion": 2020
-
+    "ecmaVersion": 13
   },
   "env": {
+    "es2021": true,
+    "node": true,
     "mocha": true
   },
   "rules": {

@@ -14,7 +14,7 @@ $ npm install -g quoti-cli
 $ qt COMMAND
 running command...
 $ qt (-v|--version|version)
-quoti-cli/0.3.0-beta.1 linux-x64 node-v14.18.2
+quoti-cli/0.3.0-beta.2 linux-x64 node-v14.18.2
 $ qt --help [COMMAND]
 USAGE
   $ qt COMMAND
@@ -23,6 +23,7 @@ USAGE
 <!-- usagestop -->
 # Commands
 <!-- commands -->
+* [`qt autocomplete [SHELL]`](#qt-autocomplete-shell)
 * [`qt deploy [ENTRYPOINTPATH]`](#qt-deploy-entrypointpath)
 * [`qt download-current-version [FILEPATH]`](#qt-download-current-version-filepath)
 * [`qt help [COMMAND]`](#qt-help-command)
@@ -32,9 +33,32 @@ USAGE
 * [`qt select-extension [ENTRYPOINTPATH]`](#qt-select-extension-entrypointpath)
 * [`qt serve [ENTRYPOINTPATH]`](#qt-serve-entrypointpath)
 
+## `qt autocomplete [SHELL]`
+
+display autocomplete installation instructions
+
+```
+USAGE
+  $ qt autocomplete [SHELL]
+
+ARGUMENTS
+  SHELL  shell type
+
+OPTIONS
+  -r, --refresh-cache  Refresh cache (ignores displaying instructions)
+
+EXAMPLES
+  $ qt autocomplete
+  $ qt autocomplete bash
+  $ qt autocomplete zsh
+  $ qt autocomplete --refresh-cache
+```
+
+_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v1.2.0/src/commands/autocomplete/index.ts)_
+
 ## `qt deploy [ENTRYPOINTPATH]`
 
-Deploy sua extensão
+Realiza deploy da sua extensão para o Quoti
 
 ```
 USAGE
@@ -42,13 +66,9 @@ USAGE
 
 ARGUMENTS
   ENTRYPOINTPATH  Endereço do entry point (arquivo principal) da extensão
-
-DESCRIPTION
-  ...
-  Deploy sua extensão
 ```
 
-_See code: [src/commands/deploy.js](https://github.com/byndcloud/quoti-cli/blob/v0.3.0-beta.1/src/commands/deploy.js)_
+_See code: [src/commands/deploy.js](https://github.com/byndcloud/quoti-cli/blob/v0.3.0-beta.2/src/commands/deploy.js)_
 
 ## `qt download-current-version [FILEPATH]`
 
@@ -65,7 +85,7 @@ DESCRIPTION
   ...
 ```
 
-_See code: [src/commands/download-current-version.js](https://github.com/byndcloud/quoti-cli/blob/v0.3.0-beta.1/src/commands/download-current-version.js)_
+_See code: [src/commands/download-current-version.js](https://github.com/byndcloud/quoti-cli/blob/v0.3.0-beta.2/src/commands/download-current-version.js)_
 
 ## `qt help [COMMAND]`
 
@@ -93,7 +113,7 @@ USAGE
   $ qt login
 ```
 
-_See code: [src/commands/login.js](https://github.com/byndcloud/quoti-cli/blob/v0.3.0-beta.1/src/commands/login.js)_
+_See code: [src/commands/login.js](https://github.com/byndcloud/quoti-cli/blob/v0.3.0-beta.2/src/commands/login.js)_
 
 ## `qt logout`
 
@@ -104,7 +124,7 @@ USAGE
   $ qt logout
 ```
 
-_See code: [src/commands/logout.js](https://github.com/byndcloud/quoti-cli/blob/v0.3.0-beta.1/src/commands/logout.js)_
+_See code: [src/commands/logout.js](https://github.com/byndcloud/quoti-cli/blob/v0.3.0-beta.2/src/commands/logout.js)_
 
 ## `qt publish [ENTRYPOINTPATH]`
 
@@ -124,7 +144,7 @@ OPTIONS
   -v, --version=version  Versão da extensão
 ```
 
-_See code: [src/commands/publish.js](https://github.com/byndcloud/quoti-cli/blob/v0.3.0-beta.1/src/commands/publish.js)_
+_See code: [src/commands/publish.js](https://github.com/byndcloud/quoti-cli/blob/v0.3.0-beta.2/src/commands/publish.js)_
 
 ## `qt select-extension [ENTRYPOINTPATH]`
 
@@ -142,7 +162,7 @@ OPTIONS
                     uma extensão sem build
 ```
 
-_See code: [src/commands/select-extension.js](https://github.com/byndcloud/quoti-cli/blob/v0.3.0-beta.1/src/commands/select-extension.js)_
+_See code: [src/commands/select-extension.js](https://github.com/byndcloud/quoti-cli/blob/v0.3.0-beta.2/src/commands/select-extension.js)_
 
 ## `qt serve [ENTRYPOINTPATH]`
 
@@ -160,5 +180,5 @@ DESCRIPTION
   Cria um serve local e realiza upload automaticamente para o Quoti
 ```
 
-_See code: [src/commands/serve.js](https://github.com/byndcloud/quoti-cli/blob/v0.3.0-beta.1/src/commands/serve.js)_
+_See code: [src/commands/serve.js](https://github.com/byndcloud/quoti-cli/blob/v0.3.0-beta.2/src/commands/serve.js)_
 <!-- commandsstop -->
