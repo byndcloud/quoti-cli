@@ -1,7 +1,7 @@
 const { expect } = require('@oclif/test')
 const ServeCommand = require('../../src/commands/serve')
 const utils = require('../../src/utils/index')
-var sinon = require('sinon')
+const sinon = require('sinon')
 const proxyquire = require('proxyquire')
 const getDependencyTree = sinon.stub()
 

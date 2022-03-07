@@ -38,6 +38,7 @@ class DeployCommand extends Command {
       process.exit(0)
     }
   }
+
   async run () {
     credentials.load()
     let { entryPointPath } = this.args
@@ -108,6 +109,7 @@ class DeployCommand extends Command {
       process.exit(0)
     }
   }
+
   async getEntryPointFromUser () {
     let entryPointPath
     const extensionsChoices = this.extensionsPaths.map(e => ({
@@ -129,11 +131,12 @@ class DeployCommand extends Command {
     }
     return entryPointPath
   }
+
   async inputVersionName () {
     const { versionName } = await inquirer.prompt([
       {
         name: 'versionName',
-        message: `Escolha uma versão para sua extensão`,
+        message: 'Escolha uma versão para sua extensão',
         type: 'input',
         validate: input => {
           if (!semver.valid(input)) {
@@ -145,6 +148,7 @@ class DeployCommand extends Command {
     ])
     return versionName
   }
+
   getUploadFileNameDeploy (currentTime, isBuild) {
     return encodeURI(
       `${credentials.institution}/${md5(currentTime)}.${isBuild ? 'js' : 'vue'}`
@@ -160,6 +164,6 @@ DeployCommand.args = [
   }
 ]
 
-DeployCommand.description = `Realiza deploy da sua extensão para o Quoti`
+DeployCommand.description = 'Realiza deploy da sua extensão para o Quoti'
 
 module.exports = DeployCommand

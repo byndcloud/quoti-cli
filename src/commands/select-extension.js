@@ -30,6 +30,7 @@ class SelectExtensionCommand extends Command {
       process.exit(0)
     }
   }
+
   async run () {
     if (this.args.entryPointPath && !existsSync(this.args.entryPointPath)) {
       throw new Error(
@@ -42,7 +43,7 @@ class SelectExtensionCommand extends Command {
       !this.args.entryPointPath.endsWith('.vue')
     ) {
       throw new Error(
-        `O arquivo de ponto de entrada de extensão deve ser um arquivo .vue`
+        'O arquivo de ponto de entrada de extensão deve ser um arquivo .vue'
       )
     }
 
@@ -140,6 +141,7 @@ class SelectExtensionCommand extends Command {
     }
     return targetPath.replace(/\\/g, '/')
   }
+
   async addExtensionToPackageJson (absoluteExtensionPath) {
     const extensionPathRelativeToProjectRoot = path.relative(
       this.projectRoot,
@@ -227,6 +229,6 @@ SelectExtensionCommand.flags = {
   })
 }
 
-SelectExtensionCommand.description = `Selecione sua extensão para desenvolvimento`
+SelectExtensionCommand.description = 'Selecione sua extensão para desenvolvimento'
 
 module.exports = SelectExtensionCommand

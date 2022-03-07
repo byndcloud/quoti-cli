@@ -40,6 +40,7 @@ class ServeCommand extends Command {
       process.exit(0)
     }
   }
+
   getDependentExtensionPath ({ changedFilePath, args }) {
     if (!changedFilePath) return
     const extensionsEntrypointsToCheck = []
@@ -64,6 +65,7 @@ class ServeCommand extends Command {
     )
     return extensionsToUpdate
   }
+
   getManifestObjectFromPathsExtensions (extensionsToUpdate) {
     const manifests = extensionsToUpdate.reduce((manifestsObj, entryPoint) => {
       manifestsObj[entryPoint] = utils.getManifestFromEntryPoint(entryPoint)
@@ -79,6 +81,7 @@ class ServeCommand extends Command {
     })
     return manifests
   }
+
   async buildAndUploadExtension ({
     changedFilePath,
     extensionsToUpdate,
@@ -117,6 +120,7 @@ class ServeCommand extends Command {
     )
     return extensionsData
   }
+
   async sendCodeToQuotiBySocket (extensionsData) {
     extensionsData.forEach(async extensionData => {
       this.spinner.start('Enviando código para o Quoti...')
@@ -142,6 +146,7 @@ class ServeCommand extends Command {
       }
     })
   }
+
   chokidarOnChange (args, watch) {
     return async changedFilePath => {
       const extensionsToUpdate = this.getDependentExtensionPath({
@@ -158,6 +163,7 @@ class ServeCommand extends Command {
       await this.sendCodeToQuotiBySocket(extensionsData)
     }
   }
+
   async checkIfRemoteExtensionsExists (extensionsPaths) {
     const token = await firebase.auth().currentUser.getIdToken()
     const orgSlug = credentials.institution
@@ -208,6 +214,7 @@ class ServeCommand extends Command {
 
     this.logger.info(watchingChangesMessage)
   }
+
   getUploadFileName (manifest) {
     let path = `${credentials.institution}/dev/idExtension${manifest.extensionId}.min`
     if (manifest.type === 'build') {

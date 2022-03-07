@@ -24,6 +24,7 @@ class ExtensionService {
     })
     this.vueCliService = new VueCliService(getProjectRootPath())
   }
+
   async upload (buffer, remotePath) {
     if (!this.manifest.exists()) {
       this.logger.warning('Por favor selecione sua extensão. Execute qt select-extension')
@@ -69,6 +70,7 @@ class ExtensionService {
     this.manifest.save()
     return uuid
   }
+
   async getExtension (extensionId) {
     const token = await firebase.auth().currentUser.getIdToken()
     const url = `${credentials.institution}/dynamic-components?where[id]=${extensionId}`
@@ -87,6 +89,7 @@ class ExtensionService {
       process.exit(0)
     }
   }
+
   async build (entry, { mode } = { mode: 'production' }) {
     if (!this.manifest.extensionUUID) {
       const extension = await this.getExtension(this.manifest.extensionId)

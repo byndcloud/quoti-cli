@@ -2,7 +2,7 @@ const fs = require('fs')
 const { firebase } = require('../config/firebase')
 const credentials = require('../config/credentials')
 const Command = require('../base.js')
-var http = require('https')
+const http = require('https')
 const api = require('../config/axios')
 const JSONManager = require('../config/JSONManager')
 const { confirmQuestion } = require('../utils/index')
@@ -12,6 +12,7 @@ class DownloadCurrentVersion extends Command {
     super(...arguments)
     this.manifest = new JSONManager('./manifest.json')
   }
+
   async run () {
     await credentials.load()
 
@@ -41,12 +42,13 @@ class DownloadCurrentVersion extends Command {
     }
     return result.data
   }
+
   async isReplaceFile (path) {
     let pathFile
     if (path.includes('.vue')) {
       pathFile = path
     } else {
-      if (path.slice(-1)[ 0 ] === '/') {
+      if (path.slice(-1)[0] === '/') {
         pathFile = path + 'index.vue'
       } else {
         pathFile = path + '/index.vue'
@@ -64,8 +66,9 @@ class DownloadCurrentVersion extends Command {
       return pathFile
     }
   }
+
   async downloadFile (url, dest, callback) {
-    var file = fs.createWriteStream(dest)
+    const file = fs.createWriteStream(dest)
     http.get(url, function (response) {
       response.pipe(file)
       file.on('finish', function () {

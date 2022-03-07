@@ -1,5 +1,5 @@
 const { expect, test } = require('@oclif/test')
-var sinon = require('sinon')
+const sinon = require('sinon')
 const credentials = require('../../src/config/credentials')
 const utils = require('../../src/utils/index')
 const JSONManager = require('../../src/config/JSONManager')
@@ -43,7 +43,7 @@ describe('Serve command', () => {
     .add('manifests', ctx => {
       return ctx.extensionsPaths.map(entryPoint => ({ entryPoint: utils.getManifestFromEntryPoint(entryPoint) }))
     })
-    .add('distPath', ctx => path.join(ctx.testProjectRootPath, `dist`))
+    .add('distPath', ctx => path.join(ctx.testProjectRootPath, 'dist'))
     .add('modifiedFiles', ctx => {
       return [{
         modifiedFilesPath: path.join(ctx.testProjectRootPath, 'src', 'extension1', 'views', 'MyComponent.vue'),

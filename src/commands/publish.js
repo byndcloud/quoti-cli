@@ -31,6 +31,7 @@ class PublishCommand extends Command {
       process.exit(0)
     }
   }
+
   async run () {
     const { entryPointPath } = this.args
     if (entryPointPath) {
@@ -39,18 +40,18 @@ class PublishCommand extends Command {
     const manifest = await this.getManifest(entryPointPath)
     if (!manifest.extensionUUID) {
       this.logger.error(
-        `Por razões de segurança é necessário realizar deploy em sua extensão antes de publicar no Marketplace. Uma vez publicado esta mensagem não irá mais aparecer porém sempre que desejar publicar uma versão mais antiga que a data de hoje será necessário realizar deploy da versão desejada`
+        'Por razões de segurança é necessário realizar deploy em sua extensão antes de publicar no Marketplace. Uma vez publicado esta mensagem não irá mais aparecer porém sempre que desejar publicar uma versão mais antiga que a data de hoje será necessário realizar deploy da versão desejada'
       )
       process.exit(0)
     }
     if (this.flags.version && !semver.valid(this.flags.version)) {
-      this.logger.error(`Versão deve estar no formato x.x.x`)
+      this.logger.error('Versão deve estar no formato x.x.x')
       process.exit(0)
     }
 
     if (!this.commandSintaxeValid(this.flags)) {
       this.logger.error(
-        `Use apenas uma das flags  --version --patch, --minor, --major`
+        'Use apenas uma das flags  --version --patch, --minor, --major'
       )
       process.exit(0)
     }
@@ -105,6 +106,7 @@ class PublishCommand extends Command {
       )
     }
   }
+
   async publishExtension (flags, dynamicComponentFileId, token, manifest) {
     if (this.existIncrementVersion(flags)) {
       this.logger.warning(
@@ -122,7 +124,7 @@ class PublishCommand extends Command {
       const { versionName } = await inquirer.prompt([
         {
           name: 'versionName',
-          message: `Escolha uma versão para sua extensão`,
+          message: 'Escolha uma versão para sua extensão',
           type: 'input',
           validate: input => {
             if (!semver.valid(input)) {
@@ -144,6 +146,7 @@ class PublishCommand extends Command {
     await this.callEndpointPublishExtension(bodyPublishExtension, token)
     this.logger.success('Nova extensão publicada com sucesso')
   }
+
   async publishNewVersion (flags, dynamicComponentFileId, token, manifest) {
     const confirmed = await confirmQuestion(
       `Deseja publicar uma nova versão para a extensão "${manifest.name}" já publicada no Marketplace? Sim/Não\n`
@@ -194,6 +197,7 @@ class PublishCommand extends Command {
   commandSintaxeValid (flags) {
     return Object.keys(flags).length < 2
   }
+
   async callEndpointPublishExtensionVersion (body, token) {
     const { data } = await api.axios.post(
       `/${credentials.institution}/marketplace/extensions/publish-version`,
@@ -202,6 +206,7 @@ class PublishCommand extends Command {
     )
     return data.data
   }
+
   async callEndpointPublishExtension (body, token) {
     await api.axios.post(
       `/${credentials.institution}/marketplace/extensions`,
@@ -233,12 +238,13 @@ class PublishCommand extends Command {
     }
     return getManifestFromEntryPoint(entryPointPath)
   }
+
   existIncrementVersion (flags) {
     return flags.patch || flags.minor || flags.major
   }
 }
 
-PublishCommand.description = `Publica uma nova extensão`
+PublishCommand.description = 'Publica uma nova extensão'
 
 PublishCommand.flags = {
   version: flags.string({
