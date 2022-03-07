@@ -96,6 +96,7 @@
     "prepack": "oclif-dev manifest && oclif-dev readme",
     "test:unit": "nyc mocha --forbid-only --exit \"test/unit/**/*.test.js\"",
     "test:e2e": "nyc mocha --forbid-only --exit \"test/end-to-end/**/*.test.js\"",
-    "version": "oclif-dev readme && git add README.md"
+    "version": "oclif-dev readme && git add README.md",
+    "lint": "eslint --fix ."
   }
 }
