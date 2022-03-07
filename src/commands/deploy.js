@@ -5,6 +5,7 @@ const credentials = require('../config/credentials')
 const Command = require('../base.js')
 const api = require('../config/axios')
 const ExtensionService = require('../services/extension')
+const RemoteExtensionService = require('../services/remoteExtension')
 const fs = require('fs')
 const path = require('path')
 const inquirer = require('inquirer')
@@ -12,8 +13,7 @@ const semver = require('semver')
 const {
   getManifestFromEntryPoint,
   listExtensionsPaths,
-  validateEntryPointIncludedInPackage,
-  getRemoteExtensionsByIds
+  validateEntryPointIncludedInPackage
 } = require('../utils/index')
 
 const { ExtensionNotFoundError } = require('../utils/errorClasses')
@@ -50,7 +50,8 @@ class DeployCommand extends Command {
     this.manifest = getManifestFromEntryPoint(entryPointPath)
 
     const token = await firebase.auth().currentUser.getIdToken()
-    const remoteExtension = await getRemoteExtensionsByIds({
+    const remoteExtensionService = new RemoteExtensionService(this.manifest)
+    const remoteExtension = await remoteExtensionService.getRemoteExtensionsByIds({
       ids: [this.manifest.extensionId],
       orgSlug: credentials.institution,
       token
