@@ -16,7 +16,7 @@ class RemoteExtension {
   constructor (manifest, orgSlug) {
     if (!manifest) {
       throw new Error(
-        'The manifest parameter is required to use the ExtensionService'
+        'The manifest parameter is required to use the RemoteExtensionService'
       )
     }
     if (!orgSlug) {
