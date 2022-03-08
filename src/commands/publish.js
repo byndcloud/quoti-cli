@@ -221,6 +221,22 @@ class PublishCommand extends Command {
     return Object.keys(flags).length < 2
   }
 
+  async validateVersionSemantics ({ targetVersion, lastVersion }) {
+    if (lastVersion) {
+      if (semver.valid(targetVersion) && semver.gte(lastVersion, targetVersion)) {
+        throw new Error(`A versão desejada "${targetVersion}" é menor ou igual à versão atual "${lastVersion}"`)
+      }
+    }
+  }
+
+  getTargetVersion (flags, lastVersion) {
+    if (flags.version) {
+      return flags.version
+    }
+    const inc = flags.minor || flags.major || 'patch'
+    return semver.inc(lastVersion, inc)
+  }
+
   async callEndpointPublishExtensionVersion (body, token) {
     const { data } = await api.axios.post(
       `/${credentials.institution}/marketplace/extensions/publish-version`,
