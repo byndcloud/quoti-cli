@@ -9,10 +9,10 @@ const {
   confirmQuestion,
   listExtensionsPaths,
   getProjectRootPath,
-  validateEntryPointIncludedInPackage
+  validateEntryPointIncludedInPackage,
+  getEntryPointFromUser
 } = require('../utils/index')
 const inquirer = require('inquirer')
-const path = require('path')
 const RemoteExtensionService = require('../services/remoteExtension')
 
 class PublishCommand extends Command {
@@ -254,23 +254,7 @@ class PublishCommand extends Command {
     if (entryPointPath) {
       return getManifestFromEntryPoint(entryPointPath)
     }
-    const extensionsChoices = this.extensionsPaths.map(extension => ({
-      name: path.relative('./', extension),
-      value: extension
-    }))
-    if (extensionsChoices.length > 1) {
-      const { selectedExtensionPublish } = await inquirer.prompt([
-        {
-          name: 'selectedExtensionPublish',
-          message: 'Qual extensão deseja publicar?',
-          type: 'list',
-          choices: extensionsChoices
-        }
-      ])
-      entryPointPath = selectedExtensionPublish
-    } else {
-      entryPointPath = extensionsChoices[0].value
-    }
+    entryPointPath = await getEntryPointFromUser({ extensionsPaths: this.extensionsPaths, message: 'Qual extensão deseja publicar?' })
     return getManifestFromEntryPoint(entryPointPath)
   }
 
