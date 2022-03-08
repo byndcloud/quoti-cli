@@ -94,25 +94,6 @@ class PublishCommand extends Command {
 
     this.logger.info(`* Você está realizando publish de uma nova versão para a extensão ${dynamicComponentFile.title}`)
 
-    const extensionVersionsOnMarketplace = await getRemoteExtensionVersionOnMarketplace({
-      extensionId: dynamicComponentFile.marketplaceExtensionId,
-      orgSlug: credentials.institution,
-      token
-    })
-
-    const lastVersion = extensionVersionsOnMarketplace?.map(
-      item => {
-        if (item.version) {
-          return semver.valid(item.version)
-        }
-      }
-    ).sort(semver.rcompare)[0]
-    if (lastVersion) {
-      if (semver.valid(this.flags.version) && semver.gte(lastVersion, this.flags.version)) {
-        throw new Error(`Versão desejada ${this.flags.version} é menor que a versão atual ${lastVersion}`)
-      }
-      this.logger.info(`* Última versão desta extensão no marketplace ${lastVersion}`)
-    }
     if (!dynamicComponentFile.marketplaceExtensionId) {
       await this.publishExtension(
         this.flags,
@@ -137,7 +118,8 @@ class PublishCommand extends Command {
         this.flags,
         dynamicComponentFileActivated.id,
         token,
-        manifest
+        manifest,
+        targetVersion
       )
     }
   }
@@ -182,11 +164,12 @@ class PublishCommand extends Command {
     this.logger.success(`Nova extensão publicada com sucesso. Versão ${version}`)
   }
 
-  async publishNewVersion (flags, dynamicComponentFileId, token, manifest) {
+  async publishNewVersion (flags, dynamicComponentFileId, token, manifest, targetVersion) {
     const confirmed = await confirmQuestion(
-      `Deseja publicar uma nova versão para a extensão "${manifest.name}" já publicada no Marketplace? Sim/Não\n`
+      `Deseja publicar uma nova versão "${targetVersion}" para a extensão "${manifest.name}" já publicada no Marketplace? Sim/Não\n`
     )
     if (!confirmed) {
+      this.logger.info('Operação cancelada. Caso queira saber mais sobre o comando publish execute qt help publish')
       process.exit(0)
     }
     let versionIncrement
