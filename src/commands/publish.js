@@ -102,10 +102,11 @@ class PublishCommand extends Command {
         manifest
       )
     } else {
-      const remoteExtensionService = new RemoteExtensionService(manifest, credentials.institution)
+      const remoteExtensionService = new RemoteExtensionService()
       await remoteExtensionService.loadExtensionVersionsOnMarketplace({
         extensionVersionId: dynamicComponentFile.marketplaceExtensionId,
-        token
+        token,
+        orgSlug: credentials.institution
       })
       const lastVersionOnMarketplace = remoteExtensionService.getLastVersionOnMarketplace()
       const targetVersion = this.getTargetVersion(this.flags, lastVersionOnMarketplace)

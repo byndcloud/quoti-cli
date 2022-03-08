@@ -49,7 +49,7 @@ class DeployCommand extends Command {
     this.manifest = getManifestFromEntryPoint(entryPointPath)
 
     const token = await firebase.auth().currentUser.getIdToken()
-    const remoteExtensionService = new RemoteExtensionService(this.manifest)
+    const remoteExtensionService = new RemoteExtensionService()
     const remoteExtension = await remoteExtensionService.getRemoteExtensionsByIds({
       ids: [this.manifest.extensionId],
       orgSlug: credentials.institution,
