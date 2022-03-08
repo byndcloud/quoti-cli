@@ -16,6 +16,7 @@ const {
   ExtensionsNotFoundError,
   ExtensionNotFoundError
 } = require('../utils/errorClasses')
+const RemoteExtensionService = require('../services/remoteExtension')
 class ServeCommand extends Command {
   constructor ({ projectRoot, extensionsPaths }) {
     super(...arguments)
@@ -167,8 +168,8 @@ class ServeCommand extends Command {
   async checkIfRemoteExtensionsExists (extensionsPaths) {
     const token = await firebase.auth().currentUser.getIdToken()
     const orgSlug = credentials.institution
-
-    const remoteExtensionsByPaths = await utils.getRemoteExtensions({
+    const remoteExtensionService = new RemoteExtensionService(this.manifest)
+    const remoteExtensionsByPaths = await remoteExtensionService.getRemoteExtensions({
       extensionsPathsArg: extensionsPaths,
       orgSlug,
       token
