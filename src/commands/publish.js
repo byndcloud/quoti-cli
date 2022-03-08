@@ -9,11 +9,11 @@ const {
   confirmQuestion,
   listExtensionsPaths,
   getProjectRootPath,
-  validateEntryPointIncludedInPackage,
-  getRemoteExtensionVersionOnMarketplace
+  validateEntryPointIncludedInPackage
 } = require('../utils/index')
 const inquirer = require('inquirer')
 const path = require('path')
+const RemoteExtensionService = require('../services/remoteExtension')
 
 class PublishCommand extends Command {
   constructor () {
@@ -121,6 +121,18 @@ class PublishCommand extends Command {
         manifest
       )
     } else {
+      const remoteExtensionService = new RemoteExtensionService(manifest, credentials.institution)
+      await remoteExtensionService.loadExtensionVersionsOnMarketplace({
+        extensionVersionId: dynamicComponentFile.marketplaceExtensionId,
+        token
+      })
+      const lastVersionOnMarketplace = remoteExtensionService.getLastVersionOnMarketplace()
+      const targetVersion = this.getTargetVersion(this.flags, lastVersionOnMarketplace)
+      await this.validateVersionSemantics({
+        targetVersion,
+        lastVersion: lastVersionOnMarketplace
+      })
+      this.logger.info(`Atualmente a versão mais recente para esta extensão no Marketplace é ${lastVersionOnMarketplace}`)
       await this.publishNewVersion(
         this.flags,
         dynamicComponentFileActivated.id,
