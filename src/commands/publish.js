@@ -87,7 +87,7 @@ class PublishCommand extends Command {
       dynamicComponentFile.DynamicComponentsFiles.find(item => item.activated)
     if (!dynamicComponentFileActivated) {
       this.logger.error(
-        'Nenhuma versão ativa para esta extensão. É necessário realizar publish de alguma versão antes de publicar'
+        'Nenhuma versão ativa para esta extensão. É necessário realizar deploy de alguma versão antes de publicar'
       )
       process.exit(0)
     }
