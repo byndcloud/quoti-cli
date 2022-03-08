@@ -161,7 +161,7 @@ class PublishCommand extends Command {
       extensionUUID: manifest.extensionUUID
     }
     await this.callEndpointPublishExtension(bodyPublishExtension, token)
-    this.logger.success(`Nova extensão publicada com sucesso. Versão ${version}`)
+    this.logger.success(`Nova extensão publicada com sucesso: ${version}`)
   }
 
   async publishNewVersion (flags, dynamicComponentFileId, token, manifest, targetVersion) {
