@@ -9,10 +9,11 @@ const {
   confirmQuestion,
   listExtensionsPaths,
   getProjectRootPath,
-  validateEntryPointIncludedInPackage
+  validateEntryPointIncludedInPackage,
+  getEntryPointFromUser
 } = require('../utils/index')
 const inquirer = require('inquirer')
-const path = require('path')
+const RemoteExtensionService = require('../services/remoteExtension')
 
 class PublishCommand extends Command {
   constructor () {
@@ -90,6 +91,9 @@ class PublishCommand extends Command {
       )
       process.exit(0)
     }
+
+    this.logger.info(`* Você está realizando publish de uma nova versão para a extensão ${dynamicComponentFile.title}`)
+
     if (!dynamicComponentFile.marketplaceExtensionId) {
       await this.publishExtension(
         this.flags,
@@ -98,11 +102,25 @@ class PublishCommand extends Command {
         manifest
       )
     } else {
+      const remoteExtensionService = new RemoteExtensionService()
+      await remoteExtensionService.loadExtensionVersionsOnMarketplace({
+        extensionVersionId: dynamicComponentFile.marketplaceExtensionId,
+        token,
+        orgSlug: credentials.institution
+      })
+      const lastVersionOnMarketplace = remoteExtensionService.getLastVersionOnMarketplace()
+      const targetVersion = this.getTargetVersion(this.flags, lastVersionOnMarketplace)
+      await this.validateVersionSemantics({
+        targetVersion,
+        lastVersion: lastVersionOnMarketplace
+      })
+      this.logger.info(`Atualmente a versão mais recente para esta extensão no Marketplace é ${lastVersionOnMarketplace}`)
       await this.publishNewVersion(
         this.flags,
         dynamicComponentFileActivated.id,
         token,
-        manifest
+        manifest,
+        targetVersion
       )
     }
   }
@@ -144,14 +162,15 @@ class PublishCommand extends Command {
       extensionUUID: manifest.extensionUUID
     }
     await this.callEndpointPublishExtension(bodyPublishExtension, token)
-    this.logger.success('Nova extensão publicada com sucesso')
+    this.logger.success(`Nova extensão publicada com sucesso: ${version}`)
   }
 
-  async publishNewVersion (flags, dynamicComponentFileId, token, manifest) {
+  async publishNewVersion (flags, dynamicComponentFileId, token, manifest, targetVersion) {
     const confirmed = await confirmQuestion(
-      `Deseja publicar uma nova versão para a extensão "${manifest.name}" já publicada no Marketplace? Sim/Não\n`
+      `Deseja publicar uma nova versão "${targetVersion}" para a extensão "${manifest.name}" já publicada no Marketplace? Sim/Não\n`
     )
     if (!confirmed) {
+      this.logger.info('Operação cancelada. Caso queira saber mais sobre o comando publish execute qt help publish')
       process.exit(0)
     }
     let versionIncrement
@@ -172,7 +191,7 @@ class PublishCommand extends Command {
         bodyPublishExtensionVersion,
         token
       )
-      this.logger.success('Nova versão foi publicada com sucesso')
+      this.logger.success(`Nova versão ${data.newVersion} foi publicada com sucesso`)
       if (data.orgsUpdatedWithSuccess.length > 0) {
         this.logger.success(`Organizações que tiveram sua extensão atualizada: ${data.orgsUpdatedWithSuccess.join(', ')}`)
       }
@@ -198,6 +217,22 @@ class PublishCommand extends Command {
     return Object.keys(flags).length < 2
   }
 
+  async validateVersionSemantics ({ targetVersion, lastVersion }) {
+    if (lastVersion) {
+      if (semver.valid(targetVersion) && semver.gte(lastVersion, targetVersion)) {
+        throw new Error(`A versão desejada "${targetVersion}" é menor ou igual à versão atual "${lastVersion}"`)
+      }
+    }
+  }
+
+  getTargetVersion (flags, lastVersion) {
+    if (flags.version) {
+      return flags.version
+    }
+    const inc = flags.minor || flags.major || 'patch'
+    return semver.inc(lastVersion, inc)
+  }
+
   async callEndpointPublishExtensionVersion (body, token) {
     const { data } = await api.axios.post(
       `/${credentials.institution}/marketplace/extensions/publish-version`,
@@ -219,23 +254,7 @@ class PublishCommand extends Command {
     if (entryPointPath) {
       return getManifestFromEntryPoint(entryPointPath)
     }
-    const extensionsChoices = this.extensionsPaths.map(extension => ({
-      name: path.relative('./', extension),
-      value: extension
-    }))
-    if (extensionsChoices.length > 1) {
-      const { selectedExtensionPublish } = await inquirer.prompt([
-        {
-          name: 'selectedExtensionPublish',
-          message: 'Qual extensão deseja publicar?',
-          type: 'list',
-          choices: extensionsChoices
-        }
-      ])
-      entryPointPath = selectedExtensionPublish
-    } else {
-      entryPointPath = extensionsChoices[0].value
-    }
+    entryPointPath = await getEntryPointFromUser({ extensionsPaths: this.extensionsPaths, message: 'Qual extensão deseja publicar?' })
     return getManifestFromEntryPoint(entryPointPath)
   }
 

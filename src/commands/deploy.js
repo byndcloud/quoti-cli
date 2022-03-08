@@ -5,15 +5,15 @@ const credentials = require('../config/credentials')
 const Command = require('../base.js')
 const api = require('../config/axios')
 const ExtensionService = require('../services/extension')
+const RemoteExtensionService = require('../services/remoteExtension')
 const fs = require('fs')
 const path = require('path')
 const inquirer = require('inquirer')
-const semver = require('semver')
 const {
   getManifestFromEntryPoint,
   listExtensionsPaths,
   validateEntryPointIncludedInPackage,
-  getRemoteExtensionsByIds
+  getEntryPointFromUser
 } = require('../utils/index')
 
 const { ExtensionNotFoundError } = require('../utils/errorClasses')
@@ -43,14 +43,18 @@ class DeployCommand extends Command {
     credentials.load()
     let { entryPointPath } = this.args
     if (!entryPointPath) {
-      entryPointPath = await this.getEntryPointFromUser()
+      entryPointPath = await getEntryPointFromUser({
+        extensionsPaths: this.extensionsPaths,
+        message: 'De qual extensão você deseja fazer deploy?'
+      })
     } else {
       validateEntryPointIncludedInPackage(entryPointPath)
     }
     this.manifest = getManifestFromEntryPoint(entryPointPath)
 
     const token = await firebase.auth().currentUser.getIdToken()
-    const remoteExtension = await getRemoteExtensionsByIds({
+    const remoteExtensionService = new RemoteExtensionService()
+    const remoteExtension = await remoteExtensionService.getRemoteExtensionsByIds({
       ids: [this.manifest.extensionId],
       orgSlug: credentials.institution,
       token
@@ -64,6 +68,12 @@ class DeployCommand extends Command {
       )
     }
 
+    const lastVersion = remoteExtension[0].DynamicComponentsFiles.find(item => item.activated).version
+    this.logger.info(`* Você está realizando deploy de uma nova versão para a extensão ${remoteExtension[0].title}`)
+    if (lastVersion) {
+      this.logger.info(`* Última versão ${lastVersion}`)
+    }
+
     this.extensionService = new ExtensionService(this.manifest)
 
     if (!this.manifest.exists()) {
@@ -72,10 +82,10 @@ class DeployCommand extends Command {
       )
       return
     }
-    const currentTime = new Date().getTime()
-    const versionName = (await this.inputVersionName()) || currentTime
+
+    const versionName = await this.inputVersionName(lastVersion)
     const filename = this.getUploadFileNameDeploy(
-      currentTime.toString(),
+      new Date().getTime().toString(),
       this.manifest.type === 'build'
     )
     const url = `https://storage.cloud.google.com/dynamic-components/${filename}`
@@ -110,40 +120,12 @@ class DeployCommand extends Command {
     }
   }
 
-  async getEntryPointFromUser () {
-    let entryPointPath
-    const extensionsChoices = this.extensionsPaths.map(e => ({
-      name: path.relative('./', e),
-      value: e
-    }))
-    if (extensionsChoices.length > 1) {
-      const { selectedExtensionPublish } = await inquirer.prompt([
-        {
-          name: 'selectedExtensionPublish',
-          message: 'De qual extensão você deseja fazer deploy?',
-          type: 'list',
-          choices: extensionsChoices
-        }
-      ])
-      entryPointPath = selectedExtensionPublish
-    } else {
-      entryPointPath = extensionsChoices[0].value
-    }
-    return entryPointPath
-  }
-
   async inputVersionName () {
     const { versionName } = await inquirer.prompt([
       {
         name: 'versionName',
         message: 'Escolha uma versão para sua extensão',
-        type: 'input',
-        validate: input => {
-          if (!semver.valid(input)) {
-            return 'A versão deve está no formato x.x.x'
-          }
-          return true
-        }
+        type: 'input'
       }
     ])
     return versionName

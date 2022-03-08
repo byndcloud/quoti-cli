@@ -1,5 +1,4 @@
 const JSONManager = require('../config/JSONManager')
-const api = require('../config/axios')
 const path = require('path')
 const inquirer = require('inquirer')
 const readPkgSync = require('read-pkg-up').sync
@@ -64,49 +63,26 @@ function validateEntryPointIncludedInPackage (entryPointPath) {
     )
   }
 }
-
-async function getRemoteExtensionsByIds ({ ids, orgSlug, token }) {
-  const baseURI = `/${orgSlug}/dynamic-components`
-
-  const params = new URLSearchParams()
-  params.append('attributes', 'title')
-  params.append('attributes', 'id')
-
-  ids.forEach(id => params.append('where[or][id]', id))
-
-  const URI = `${baseURI}?${params}`
-  const { data } = await api.axios.get(URI, {
-    headers: { Authorization: `Bearer ${token}` }
-  })
-
-  if (!data || data?.length === 0) {
-    return
+async function getEntryPointFromUser ({ extensionsPaths, message = 'Selecione uma extensão' }) {
+  let entryPointPath
+  const extensionsChoices = extensionsPaths.map(e => ({
+    name: path.relative('./', e),
+    value: e
+  }))
+  if (extensionsChoices.length > 1) {
+    const { selectedEntryPoint } = await inquirer.prompt([
+      {
+        name: 'selectedEntryPoint',
+        message,
+        type: 'list',
+        choices: extensionsChoices
+      }
+    ])
+    entryPointPath = selectedEntryPoint
+  } else {
+    entryPointPath = extensionsChoices[0].value
   }
-
-  return data
-}
-async function getRemoteExtensions ({ extensionsPathsArg, orgSlug, token }) {
-  let extensionsPaths = extensionsPathsArg
-  if (!extensionsPaths) {
-    const projectRoot = getProjectRootPath()
-    extensionsPaths = listExtensionsPaths(projectRoot)
-  }
-  const ids = extensionsPaths.map(extension => {
-    const manifest = getManifestFromEntryPoint(extension)
-
-    return manifest.extensionId
-  })
-  const remoteExtensions = await getRemoteExtensionsByIds({
-    ids,
-    orgSlug,
-    token
-  })
-  const remoteExtensionsObj = {}
-  ids.forEach((id, index) => {
-    const remoteExtension = remoteExtensions?.find(re => re.id === id)
-    remoteExtensionsObj[extensionsPaths[index]] = remoteExtension
-  })
-  return remoteExtensionsObj
+  return entryPointPath
 }
 function getFrontBaseURL () {
   if (process.env.API_BASE_URL) {
@@ -125,5 +101,6 @@ module.exports = {
   validateEntryPointIncludedInPackage,
   getRemoteExtensionsByIds,
   getRemoteExtensions,
-  getFrontBaseURL
+  getFrontBaseURL,
+  getEntryPointFromUser
 }
