@@ -12,7 +12,8 @@ const inquirer = require('inquirer')
 const {
   getManifestFromEntryPoint,
   listExtensionsPaths,
-  validateEntryPointIncludedInPackage
+  validateEntryPointIncludedInPackage,
+  getEntryPointFromUser
 } = require('../utils/index')
 
 const { ExtensionNotFoundError } = require('../utils/errorClasses')
@@ -42,7 +43,10 @@ class DeployCommand extends Command {
     credentials.load()
     let { entryPointPath } = this.args
     if (!entryPointPath) {
-      entryPointPath = await this.getEntryPointFromUser()
+      entryPointPath = await getEntryPointFromUser({
+        extensionsPaths: this.extensionsPaths,
+        message: 'De qual extensão você deseja fazer deploy?'
+      })
     } else {
       validateEntryPointIncludedInPackage(entryPointPath)
     }
@@ -114,28 +118,6 @@ class DeployCommand extends Command {
     } finally {
       process.exit(0)
     }
-  }
-
-  async getEntryPointFromUser () {
-    let entryPointPath
-    const extensionsChoices = this.extensionsPaths.map(e => ({
-      name: path.relative('./', e),
-      value: e
-    }))
-    if (extensionsChoices.length > 1) {
-      const { selectedExtensionPublish } = await inquirer.prompt([
-        {
-          name: 'selectedExtensionPublish',
-          message: 'De qual extensão você deseja fazer deploy?',
-          type: 'list',
-          choices: extensionsChoices
-        }
-      ])
-      entryPointPath = selectedExtensionPublish
-    } else {
-      entryPointPath = extensionsChoices[0].value
-    }
-    return entryPointPath
   }
 
   async inputVersionName () {

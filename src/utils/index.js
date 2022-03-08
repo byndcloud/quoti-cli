@@ -63,6 +63,27 @@ function validateEntryPointIncludedInPackage (entryPointPath) {
     )
   }
 }
+async function getEntryPointFromUser ({ extensionsPaths, message = 'Selecione uma extensão' }) {
+  let entryPointPath
+  const extensionsChoices = extensionsPaths.map(e => ({
+    name: path.relative('./', e),
+    value: e
+  }))
+  if (extensionsChoices.length > 1) {
+    const { selectedEntryPoint } = await inquirer.prompt([
+      {
+        name: 'selectedEntryPoint',
+        message,
+        type: 'list',
+        choices: extensionsChoices
+      }
+    ])
+    entryPointPath = selectedEntryPoint
+  } else {
+    entryPointPath = extensionsChoices[0].value
+  }
+  return entryPointPath
+}
 
 module.exports = {
   isYes,
@@ -71,5 +92,6 @@ module.exports = {
   getManifestFromEntryPoint,
   getProjectRootPath,
   listExtensionsPaths,
-  validateEntryPointIncludedInPackage
+  validateEntryPointIncludedInPackage,
+  getEntryPointFromUser
 }
