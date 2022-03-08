@@ -13,27 +13,12 @@ class RemoteExtension {
     throw new Error('You must first perform load loadExtensionVersionsOnMarketplace')
   }
 
-  constructor (manifest, orgSlug) {
-    if (!manifest) {
-      throw new Error(
-        'The manifest parameter is required to use the RemoteExtensionService'
-      )
-    }
-    if (!orgSlug) {
-      throw new Error(
-        'The orgSlug parameter is required to use the RemoteExtensionService'
-      )
-    }
-    this.manifest = manifest
-    this.orgSlug = orgSlug
-  }
-
-  async loadExtensionVersionsOnMarketplace ({ extensionVersionId, token }) {
+  async loadExtensionVersionsOnMarketplace ({ extensionVersionId, token, orgSlug }) {
     if (!token) {
       token = await firebase.auth().currentUser.getIdToken()
     }
 
-    const address = `/${this.orgSlug}/marketplace/extensions/${extensionVersionId}/versions`
+    const address = `/${orgSlug}/marketplace/extensions/${extensionVersionId}/versions`
     const { data } = await api.axios.get(
       address,
       { headers: { Authorization: `Bearer ${token}` } }

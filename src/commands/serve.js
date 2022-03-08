@@ -168,7 +168,7 @@ class ServeCommand extends Command {
   async checkIfRemoteExtensionsExists (extensionsPaths) {
     const token = await firebase.auth().currentUser.getIdToken()
     const orgSlug = credentials.institution
-    const remoteExtensionService = new RemoteExtensionService(this.manifest)
+    const remoteExtensionService = new RemoteExtensionService()
     const remoteExtensionsByPaths = await remoteExtensionService.getRemoteExtensions({
       extensionsPathsArg: extensionsPaths,
       orgSlug,
