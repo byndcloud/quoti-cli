@@ -9,7 +9,6 @@ const RemoteExtensionService = require('../services/remoteExtension')
 const fs = require('fs')
 const path = require('path')
 const inquirer = require('inquirer')
-const semver = require('semver')
 const {
   getManifestFromEntryPoint,
   listExtensionsPaths,
@@ -144,16 +143,7 @@ class DeployCommand extends Command {
       {
         name: 'versionName',
         message: 'Escolha uma versão para sua extensão',
-        type: 'input',
-        validate: input => {
-          if (!semver.valid(input)) {
-            return 'A versão deve está no formato x.x.x'
-          }
-          if (semver.valid(lastVersion) && semver.gte(lastVersion, input)) {
-            return `A versão deve ser maior que ${lastVersion}`
-          }
-          return true
-        }
+        type: 'input'
       }
     ])
     return versionName
