@@ -1,9 +1,18 @@
+const semver = require('semver')
 const api = require('../config/axios')
 const { firebase } = require('../config/firebase')
-
 const utils = require('../utils/index')
 
 class RemoteExtension {
+  #extensionVersionsOnMarketplace = []
+  #isLoadExtensionVersionsOnMarketplace = false
+  #checkLoadExtensionVersions = () => {
+    if (this.#isLoadExtensionVersionsOnMarketplace) {
+      return this.#extensionVersionsOnMarketplace
+    }
+    throw new Error('You must first perform load loadExtensionVersionsOnMarketplace')
+  }
+
   constructor (manifest, orgSlug) {
     if (!manifest) {
       throw new Error(
@@ -19,9 +28,12 @@ class RemoteExtension {
     this.orgSlug = orgSlug
   }
 
-  async getExtensionOnMarketplace () {
-    const token = await firebase.auth().currentUser.getIdToken()
-    const address = `/${this.orgSlug}/marketplace/extensions/${this.manifest.extensionId}/versions`
+  async loadExtensionVersionsOnMarketplace ({ extensionVersionId, token }) {
+    if (!token) {
+      token = await firebase.auth().currentUser.getIdToken()
+    }
+
+    const address = `/${this.orgSlug}/marketplace/extensions/${extensionVersionId}/versions`
     const { data } = await api.axios.get(
       address,
       { headers: { Authorization: `Bearer ${token}` } }
@@ -29,10 +41,29 @@ class RemoteExtension {
     if (!data || data?.length === 0) {
       return
     }
-
-    return data.data
+    this.#extensionVersionsOnMarketplace = data.data
+    this.#isLoadExtensionVersionsOnMarketplace = true
   }
 
+  // extension on Marketplace
+  async getExtensionVersionsOnMarketplace () {
+    this.#checkLoadExtensionVersions()
+    return this.#checkLoadExtensionVersions
+  }
+
+  getLastVersionOnMarketplace () {
+    this.#checkLoadExtensionVersions()
+    const lastVersion = this.#extensionVersionsOnMarketplace.map(item => {
+      if (item.version) {
+        return semver.valid(item.version)
+      }
+      return null
+    }
+    ).filter(lv => lv).sort(semver.rcompare)[0]
+    return lastVersion
+  }
+
+  // extension on Org
   async getRemoteExtensionsByIds ({ ids, orgSlug, token }) {
     const baseURI = `/${orgSlug}/dynamic-components`
 
