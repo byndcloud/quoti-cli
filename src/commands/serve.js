@@ -16,7 +16,12 @@ const {
   ExtensionsNotFoundError,
   ExtensionNotFoundError
 } = require('../utils/errorClasses')
+
+const { flags } = require('@oclif/command')
+const { randomUUID } = require('crypto')
+const { getFrontBaseURL } = require('../utils/index')
 const RemoteExtensionService = require('../services/remoteExtension')
+
 class ServeCommand extends Command {
   constructor ({ projectRoot, extensionsPaths }) {
     super(...arguments)
@@ -112,7 +117,9 @@ class ServeCommand extends Command {
         }
         const fileBuffer = fs.readFileSync(distPath || changedFilePath)
         const extensionCode = fileBuffer.toString()
-        extensionService.upload(fileBuffer, this.getUploadFileName(manifest))
+        if (this.flags['deploy-develop']) {
+          extensionService.upload(fileBuffer, this.getUploadFileName(manifest))
+        }
         return {
           extensionInfo: manifests[entryPoint],
           code: extensionCode
@@ -121,14 +128,14 @@ class ServeCommand extends Command {
     )
     return extensionsData
   }
-
-  async sendCodeToQuotiBySocket (extensionsData) {
+  async sendCodeToQuotiBySocket (extensionsData, sessionId) {
     extensionsData.forEach(async extensionData => {
       this.spinner.start('Enviando código para o Quoti...')
       const err = await this.socket.emit({
         event: 'reload-extension',
         data: {
           ...extensionData,
+          sessionId,
           user: {
             uid: credentials.user.uid,
             orgSlug: credentials.institution
@@ -137,18 +144,18 @@ class ServeCommand extends Command {
       })
 
       if (!err) {
-        this.spinner.succeed('Quoti recebeu o código da extensão!')
+        const urlExtension = `${getFrontBaseURL()}/${credentials.institution}/develop/${extensionData.extensionInfo.name}?devSessionId=${sessionId}`
+        await this.spinner.succeed('Disponível em ' + urlExtension)
         return
       }
-      this.spinner.fail('Quoti não recebeu o código da extensão!')
+      await this.spinner.fail('Quoti não recebeu o código da extensão!')
       this.logger.error(`Erro ao enviar extensão para o Quoti ${err}`)
       if (process.env.DEBUG) {
         console.error(err)
       }
     })
   }
-
-  chokidarOnChange (args, watch) {
+  chokidarOnChange (args, sessionId) {
     return async changedFilePath => {
       const extensionsToUpdate = this.getDependentExtensionPath({
         changedFilePath,
@@ -161,7 +168,7 @@ class ServeCommand extends Command {
         extensionsToUpdate,
         manifests
       })
-      await this.sendCodeToQuotiBySocket(extensionsData)
+      await this.sendCodeToQuotiBySocket(extensionsData, sessionId)
     }
   }
 
@@ -204,7 +211,8 @@ class ServeCommand extends Command {
 
     this.logger.info('Conectado ao Quoti!')
 
-    const debouncedBuild = debounce(this.chokidarOnChange(this.args), 800)
+    const sessionId = randomUUID()
+    const debouncedBuild = debounce(this.chokidarOnChange(this.args, sessionId), 800)
     chokidar
       .watch(filesToWatch, { cwd: this.projectRoot, ignored: ['node_modules'] })
       .on('change', debouncedBuild)
@@ -226,7 +234,11 @@ class ServeCommand extends Command {
     return encodeURI(path)
   }
 }
-
+ServeCommand.flags = {
+  'deploy-develop': flags.boolean({
+    description: 'Indica se devemos salvar o build da extensão de develop no banco de dados da Beyond Company'
+  })
+}
 ServeCommand.args = [
   {
     name: 'entryPointPath',
