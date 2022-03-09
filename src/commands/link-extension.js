@@ -211,26 +211,26 @@ class LinkExtensionCommand extends Command {
   }
 
   static aliases = ['select-extension']
-}
 
-LinkExtensionCommand.args = [
-  {
-    name: 'entryPointPath',
-    required: false,
-    description: 'Endereço do entry point (arquivo principal) da extensão'
+  static description = 'Faça um link de uma extensão no Quoti com o seu código'
+
+  static args = [
+    {
+      name: 'entryPointPath',
+      required: false,
+      description: 'Endereço do entry point (arquivo principal) da extensão'
+    }
+  ]
+
+  static flags = {
+    build: flags.boolean({
+      allowNo: true,
+      char: 'b',
+      description:
+        'Use build se você está selecionando uma extensão com build ou use no-build se você está selecionando uma extensão sem build',
+      exclusive: []
+    })
   }
-]
-
-LinkExtensionCommand.flags = {
-  build: flags.boolean({
-    allowNo: true,
-    char: 'b',
-    description:
-      'Use build se você está selecionando uma extensão com build ou use no-build se você está selecionando uma extensão sem build',
-    exclusive: []
-  })
 }
-
-LinkExtensionCommand.description = 'Faça um link de uma extensão no Quoti com o seu código'
 
 module.exports = LinkExtensionCommand
