@@ -128,6 +128,7 @@ class ServeCommand extends Command {
     )
     return extensionsData
   }
+
   async sendCodeToQuotiBySocket (extensionsData, sessionId) {
     extensionsData.forEach(async extensionData => {
       this.spinner.start('Enviando código para o Quoti...')
@@ -155,6 +156,7 @@ class ServeCommand extends Command {
       }
     })
   }
+
   chokidarOnChange (args, sessionId) {
     return async changedFilePath => {
       const extensionsToUpdate = this.getDependentExtensionPath({
