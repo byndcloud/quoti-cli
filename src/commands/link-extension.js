@@ -227,7 +227,7 @@ class LinkExtensionCommand extends Command {
       allowNo: true,
       char: 'b',
       description:
-        'Use build se você está selecionando uma extensão com build ou use no-build se você está selecionando uma extensão sem build',
+        'Use (--build|-b) se você está selecionando uma extensão com build ou use --no-build se você está selecionando uma extensão sem build',
       exclusive: []
     })
   }
