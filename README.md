@@ -14,7 +14,7 @@ $ npm install -g quoti-cli
 $ qt COMMAND
 running command...
 $ qt (-v|--version|version)
-quoti-cli/0.4.2 linux-x64 node-v14.19.0
+quoti-cli/0.5.0 linux-x64 node-v14.19.0
 $ qt --help [COMMAND]
 USAGE
   $ qt COMMAND
@@ -27,10 +27,10 @@ USAGE
 * [`qt deploy [ENTRYPOINTPATH]`](#qt-deploy-entrypointpath)
 * [`qt download-current-version [FILEPATH]`](#qt-download-current-version-filepath)
 * [`qt help [COMMAND]`](#qt-help-command)
+* [`qt link-extension [ENTRYPOINTPATH]`](#qt-link-extension-entrypointpath)
 * [`qt login`](#qt-login)
 * [`qt logout`](#qt-logout)
 * [`qt publish [ENTRYPOINTPATH]`](#qt-publish-entrypointpath)
-* [`qt select-extension [ENTRYPOINTPATH]`](#qt-select-extension-entrypointpath)
 * [`qt serve [ENTRYPOINTPATH]`](#qt-serve-entrypointpath)
 
 ## `qt autocomplete [SHELL]`
@@ -68,7 +68,7 @@ ARGUMENTS
   ENTRYPOINTPATH  Endereço do entry point (arquivo principal) da extensão
 ```
 
-_See code: [src/commands/deploy.js](https://github.com/byndcloud/quoti-cli/blob/v0.4.2/src/commands/deploy.js)_
+_See code: [src/commands/deploy.js](https://github.com/byndcloud/quoti-cli/blob/v0.5.0/src/commands/deploy.js)_
 
 ## `qt download-current-version [FILEPATH]`
 
@@ -85,7 +85,7 @@ DESCRIPTION
   ...
 ```
 
-_See code: [src/commands/download-current-version.js](https://github.com/byndcloud/quoti-cli/blob/v0.4.2/src/commands/download-current-version.js)_
+_See code: [src/commands/download-current-version.js](https://github.com/byndcloud/quoti-cli/blob/v0.5.0/src/commands/download-current-version.js)_
 
 ## `qt help [COMMAND]`
 
@@ -104,6 +104,27 @@ OPTIONS
 
 _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v3.2.18/src/commands/help.ts)_
 
+## `qt link-extension [ENTRYPOINTPATH]`
+
+Faça um link de uma extensão no Quoti com o seu código
+
+```
+USAGE
+  $ qt link-extension [ENTRYPOINTPATH]
+
+ARGUMENTS
+  ENTRYPOINTPATH  Endereço do entry point (arquivo principal) da extensão
+
+OPTIONS
+  -b, --[no-]build  Use (--build|-b) se você está selecionando uma extensão com build ou use --no-build se você está
+                    selecionando uma extensão sem build
+
+ALIASES
+  $ qt select-extension
+```
+
+_See code: [src/commands/link-extension.js](https://github.com/byndcloud/quoti-cli/blob/v0.5.0/src/commands/link-extension.js)_
+
 ## `qt login`
 
 Realiza login em uma organização do Quoti
@@ -113,7 +134,7 @@ USAGE
   $ qt login
 ```
 
-_See code: [src/commands/login.js](https://github.com/byndcloud/quoti-cli/blob/v0.4.2/src/commands/login.js)_
+_See code: [src/commands/login.js](https://github.com/byndcloud/quoti-cli/blob/v0.5.0/src/commands/login.js)_
 
 ## `qt logout`
 
@@ -124,7 +145,7 @@ USAGE
   $ qt logout
 ```
 
-_See code: [src/commands/logout.js](https://github.com/byndcloud/quoti-cli/blob/v0.4.2/src/commands/logout.js)_
+_See code: [src/commands/logout.js](https://github.com/byndcloud/quoti-cli/blob/v0.5.0/src/commands/logout.js)_
 
 ## `qt publish [ENTRYPOINTPATH]`
 
@@ -144,25 +165,7 @@ OPTIONS
   -v, --version=version  Versão da extensão
 ```
 
-_See code: [src/commands/publish.js](https://github.com/byndcloud/quoti-cli/blob/v0.4.2/src/commands/publish.js)_
-
-## `qt select-extension [ENTRYPOINTPATH]`
-
-Selecione sua extensão para desenvolvimento
-
-```
-USAGE
-  $ qt select-extension [ENTRYPOINTPATH]
-
-ARGUMENTS
-  ENTRYPOINTPATH  Endereço do entry point (arquivo principal) da extensão
-
-OPTIONS
-  -b, --[no-]build  Use build se você está selecionando uma extensão com build ou use no-build se você está selecionando
-                    uma extensão sem build
-```
-
-_See code: [src/commands/select-extension.js](https://github.com/byndcloud/quoti-cli/blob/v0.4.2/src/commands/select-extension.js)_
+_See code: [src/commands/publish.js](https://github.com/byndcloud/quoti-cli/blob/v0.5.0/src/commands/publish.js)_
 
 ## `qt serve [ENTRYPOINTPATH]`
 
@@ -183,5 +186,5 @@ DESCRIPTION
   Cria um serve local e realiza upload automaticamente para o Quoti
 ```
 
-_See code: [src/commands/serve.js](https://github.com/byndcloud/quoti-cli/blob/v0.4.2/src/commands/serve.js)_
+_See code: [src/commands/serve.js](https://github.com/byndcloud/quoti-cli/blob/v0.5.0/src/commands/serve.js)_
 <!-- commandsstop -->
