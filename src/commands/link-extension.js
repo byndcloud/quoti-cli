@@ -20,7 +20,7 @@ const { getProjectRootPath } = require('../utils/index')
 inquirer.registerPrompt('file-tree-selection', inquirerFileTreeSelection)
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'))
 
-class SelectExtensionCommand extends Command {
+class LinkExtensionCommand extends Command {
   constructor () {
     super(...arguments)
     try {
@@ -209,9 +209,11 @@ class SelectExtensionCommand extends Command {
 
     return filesNames.map(fileName => ({ name: fileName, value: fileName }))
   }
+
+  static aliases = ['select-extension']
 }
 
-SelectExtensionCommand.args = [
+LinkExtensionCommand.args = [
   {
     name: 'entryPointPath',
     required: false,
@@ -219,7 +221,7 @@ SelectExtensionCommand.args = [
   }
 ]
 
-SelectExtensionCommand.flags = {
+LinkExtensionCommand.flags = {
   build: flags.boolean({
     allowNo: true,
     char: 'b',
@@ -229,6 +231,6 @@ SelectExtensionCommand.flags = {
   })
 }
 
-SelectExtensionCommand.description = 'Selecione sua extensão para desenvolvimento'
+LinkExtensionCommand.description = 'Faça um link de uma extensão no Quoti com o seu código'
 
-module.exports = SelectExtensionCommand
+module.exports = LinkExtensionCommand
