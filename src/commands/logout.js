@@ -11,6 +11,6 @@ class LogoutCommand extends Command {
     }
   }
 }
-LogoutCommand.description = `Logout from the current organization`
+LogoutCommand.description = 'Logout from the current organization'
 
 module.exports = LogoutCommand

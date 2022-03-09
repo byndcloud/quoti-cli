@@ -18,7 +18,7 @@ const myCustomLevels = {
     error: 'bold red',
     warning: 'italic yellow',
     debug: 'green',
-    info: 'white',
+    // info: 'white',
     success: 'bold blue' // fontStyle color
   }
 }

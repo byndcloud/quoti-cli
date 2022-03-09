@@ -11,6 +11,6 @@ class LoginCommand extends Command {
     }
   }
 }
-LoginCommand.description = `Realiza login em uma organização do Quoti`
+LoginCommand.description = 'Realiza login em uma organização do Quoti'
 
 module.exports = LoginCommand

@@ -30,6 +30,7 @@ class SelectExtensionCommand extends Command {
       process.exit(0)
     }
   }
+
   async run () {
     if (this.args.entryPointPath && !existsSync(this.args.entryPointPath)) {
       throw new Error(
@@ -37,9 +38,12 @@ class SelectExtensionCommand extends Command {
       )
     }
 
-    if (this.args.entryPointPath && !this.args.entryPointPath.endsWith('.vue')) {
+    if (
+      this.args.entryPointPath &&
+      !this.args.entryPointPath.endsWith('.vue')
+    ) {
       throw new Error(
-        `O arquivo de ponto de entrada de extensão deve ser um arquivo .vue`
+        'O arquivo de ponto de entrada de extensão deve ser um arquivo .vue'
       )
     }
 
@@ -137,6 +141,7 @@ class SelectExtensionCommand extends Command {
     }
     return targetPath.replace(/\\/g, '/')
   }
+
   async addExtensionToPackageJson (absoluteExtensionPath) {
     const extensionPathRelativeToProjectRoot = path.relative(
       this.projectRoot,
@@ -145,7 +150,9 @@ class SelectExtensionCommand extends Command {
     const extensionPathRelativeToProjectRootPOSIX = this.convertPathToPOSIX(
       extensionPathRelativeToProjectRoot
     )
-    const packageJsonEditor = await readJSON(path.resolve(this.projectRoot, 'package.json'))
+    const packageJsonEditor = await readJSON(
+      path.resolve(this.projectRoot, 'package.json')
+    )
 
     const currentQuotiInfo = merge(
       { extensions: [] },
@@ -158,7 +165,11 @@ class SelectExtensionCommand extends Command {
       extensionPathRelativeToProjectRootPOSIX
     ])
     if (packageJsonEditor?.data) {
-      set(packageJsonEditor.data, 'quoti.extensions', currentQuotiInfo.extensions)
+      set(
+        packageJsonEditor.data,
+        'quoti.extensions',
+        currentQuotiInfo.extensions
+      )
     }
     await packageJsonEditor.save()
   }
@@ -218,6 +229,6 @@ SelectExtensionCommand.flags = {
   })
 }
 
-SelectExtensionCommand.description = `Selecione sua extensão para desenvolvimento`
+SelectExtensionCommand.description = 'Selecione sua extensão para desenvolvimento'
 
 module.exports = SelectExtensionCommand
