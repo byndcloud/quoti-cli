@@ -14,7 +14,7 @@ $ npm install -g quoti-cli
 $ qt COMMAND
 running command...
 $ qt (-v|--version|version)
-quoti-cli/0.5.0 linux-x64 node-v14.19.0
+quoti-cli/0.5.2 linux-x64 node-v14.19.0
 $ qt --help [COMMAND]
 USAGE
   $ qt COMMAND
@@ -68,7 +68,7 @@ ARGUMENTS
   ENTRYPOINTPATH  Endereço do entry point (arquivo principal) da extensão
 ```
 
-_See code: [src/commands/deploy.js](https://github.com/byndcloud/quoti-cli/blob/v0.5.0/src/commands/deploy.js)_
+_See code: [src/commands/deploy.js](https://github.com/byndcloud/quoti-cli/blob/v0.5.2/src/commands/deploy.js)_
 
 ## `qt download-current-version [FILEPATH]`
 
@@ -85,7 +85,7 @@ DESCRIPTION
   ...
 ```
 
-_See code: [src/commands/download-current-version.js](https://github.com/byndcloud/quoti-cli/blob/v0.5.0/src/commands/download-current-version.js)_
+_See code: [src/commands/download-current-version.js](https://github.com/byndcloud/quoti-cli/blob/v0.5.2/src/commands/download-current-version.js)_
 
 ## `qt help [COMMAND]`
 
@@ -123,7 +123,7 @@ ALIASES
   $ qt select-extension
 ```
 
-_See code: [src/commands/link-extension.js](https://github.com/byndcloud/quoti-cli/blob/v0.5.0/src/commands/link-extension.js)_
+_See code: [src/commands/link-extension.js](https://github.com/byndcloud/quoti-cli/blob/v0.5.2/src/commands/link-extension.js)_
 
 ## `qt login`
 
@@ -134,7 +134,7 @@ USAGE
   $ qt login
 ```
 
-_See code: [src/commands/login.js](https://github.com/byndcloud/quoti-cli/blob/v0.5.0/src/commands/login.js)_
+_See code: [src/commands/login.js](https://github.com/byndcloud/quoti-cli/blob/v0.5.2/src/commands/login.js)_
 
 ## `qt logout`
 
@@ -145,7 +145,7 @@ USAGE
   $ qt logout
 ```
 
-_See code: [src/commands/logout.js](https://github.com/byndcloud/quoti-cli/blob/v0.5.0/src/commands/logout.js)_
+_See code: [src/commands/logout.js](https://github.com/byndcloud/quoti-cli/blob/v0.5.2/src/commands/logout.js)_
 
 ## `qt publish [ENTRYPOINTPATH]`
 
@@ -165,7 +165,7 @@ OPTIONS
   -v, --version=version  Versão da extensão
 ```
 
-_See code: [src/commands/publish.js](https://github.com/byndcloud/quoti-cli/blob/v0.5.0/src/commands/publish.js)_
+_See code: [src/commands/publish.js](https://github.com/byndcloud/quoti-cli/blob/v0.5.2/src/commands/publish.js)_
 
 ## `qt serve [ENTRYPOINTPATH]`
 
@@ -186,5 +186,5 @@ DESCRIPTION
   Cria um serve local e realiza upload automaticamente para o Quoti
 ```
 
-_See code: [src/commands/serve.js](https://github.com/byndcloud/quoti-cli/blob/v0.5.0/src/commands/serve.js)_
+_See code: [src/commands/serve.js](https://github.com/byndcloud/quoti-cli/blob/v0.5.2/src/commands/serve.js)_
 <!-- commandsstop -->
