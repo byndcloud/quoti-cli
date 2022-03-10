@@ -98,12 +98,11 @@ class ServeCommand extends Command {
         let distPath = entryPoint
         const manifest = manifests[entryPoint]
         const extensionService = new ExtensionService(manifest)
-
+        const extension = await extensionService.getExtension(
+          manifest.extensionId
+        )
         if (manifest.type === 'build') {
           if (!manifest.extensionUUID) {
-            const extension = await extensionService.getExtension(
-              manifest.extensionId
-            )
             if (extension?.extensionUUID) {
               manifest.extensionUUID = extension.extensionUUID
               manifest.save()
@@ -122,6 +121,7 @@ class ServeCommand extends Command {
         }
         return {
           extensionInfo: manifests[entryPoint],
+          extensionPath: extension.path,
           code: extensionCode
         }
       })
@@ -145,7 +145,7 @@ class ServeCommand extends Command {
       })
 
       if (!err) {
-        const urlExtension = `${getFrontBaseURL()}/${credentials.institution}/develop/${extensionData.extensionInfo.name}?devSessionId=${sessionId}`
+        const urlExtension = `${getFrontBaseURL()}/${credentials.institution}/develop/${extensionData.extensionPath}?devSessionId=${sessionId}`
         await this.spinner.succeed('Disponível em ' + urlExtension)
         return
       }
