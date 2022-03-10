@@ -86,7 +86,7 @@ async function getEntryPointFromUser ({ extensionsPaths, message = 'Selecione um
 }
 function getFrontBaseURL () {
   if (process.env.API_BASE_URL) {
-    return process.env.QUOTI_FRONT_BASE_URL || 'http://localhost:8081'
+    return process.env.QUOTI_FRONT_BASE_URL || 'http://localhost:8080'
   } else {
     return 'https://quoti.cloud'
   }

@@ -7,3 +7,4 @@ marketplace
 .nyc_output
 extensionsToTest/dist
 test/beyondCredentials.json
+quoti-cli*tgz
