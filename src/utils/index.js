@@ -1,6 +1,7 @@
 const JSONManager = require('../config/JSONManager')
 const path = require('path')
 const inquirer = require('inquirer')
+const { ManifestNotFoundError } = require('./errorClasses')
 const readPkgSync = require('read-pkg-up').sync
 function isYes (text) {
   return ['s', 'sim', 'yes', 'y'].includes(text.toLowerCase())
@@ -31,6 +32,9 @@ function getManifestFromEntryPoint (entrypointPath) {
     'manifest.json'
   )
   const manifest = new JSONManager(manifestPath)
+  if (!manifest?.exists()) {
+    throw new ManifestNotFoundError({ manifestPath: manifestPath })
+  }
   return manifest
 }
 function getProjectRootPath () {
