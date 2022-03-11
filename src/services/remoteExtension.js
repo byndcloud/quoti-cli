@@ -49,12 +49,14 @@ class RemoteExtension {
   }
 
   // extension on Org
-  async getRemoteExtensionsByIds ({ ids, orgSlug, token }) {
+  async getRemoteExtensionsByIds ({ ids, orgSlug, token, parameters = ['title', 'extension_uuid'] }) {
     const baseURI = `/${orgSlug}/dynamic-components`
 
     const params = new URLSearchParams()
-    params.append('attributes', 'title')
     params.append('attributes', 'id')
+    for (const parameter of parameters) {
+      params.append('attributes', parameter)
+    }
 
     ids.forEach(id => params.append('where[or][id]', id))
 
@@ -70,7 +72,7 @@ class RemoteExtension {
     return data
   }
 
-  async getRemoteExtensions ({ extensionsPathsArg, orgSlug, token }) {
+  async getRemoteExtensions ({ extensionsPathsArg, orgSlug, token, parameters = ['title', 'extension_uuid'] }) {
     let extensionsPaths = extensionsPathsArg
     if (!extensionsPaths) {
       const projectRoot = utils.getProjectRootPath()
@@ -84,7 +86,8 @@ class RemoteExtension {
     const remoteExtensions = await this.getRemoteExtensionsByIds({
       ids,
       orgSlug,
-      token
+      token,
+      parameters
     })
     const remoteExtensionsObj = {}
     ids.forEach((id, index) => {
