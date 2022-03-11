@@ -47,20 +47,8 @@ class ServeCommand extends Command {
     }
   }
 
-  getDependentExtensionPath ({ changedFilePath, args }) {
+  getDependentExtensionPath ({ changedFilePath, extensionsEntrypointsToCheck }) {
     if (!changedFilePath) return
-    const extensionsEntrypointsToCheck = []
-
-    const currentExtensionPath = args?.entryPointPath
-      ? path.resolve(args.entryPointPath)
-      : null
-
-    if (!currentExtensionPath) {
-      extensionsEntrypointsToCheck.push(...this.extensionsPaths)
-    } else {
-      extensionsEntrypointsToCheck.push(currentExtensionPath)
-    }
-
     const changedFileAbsolutePath = path.join(this.projectRoot, changedFilePath)
     const extensionsToUpdate = extensionsEntrypointsToCheck.filter(
       entryPoint => {
@@ -72,7 +60,7 @@ class ServeCommand extends Command {
     return extensionsToUpdate
   }
 
-  getManifestObjectFromPathsExtensions (extensionsToUpdate) {
+  getManifestObjectFromPaths (extensionsToUpdate) {
     const manifests = extensionsToUpdate.reduce((manifestsObj, entryPoint) => {
       manifestsObj[entryPoint] = utils.getManifestFromEntryPoint(entryPoint)
       return manifestsObj
@@ -90,38 +78,29 @@ class ServeCommand extends Command {
 
   async buildAndUploadExtension ({
     changedFilePath,
-    extensionsToUpdate,
-    manifests
+    extensionsPathsToUpdate,
+    remoteExtensionsByPaths,
+    manifestsByPaths
   }) {
     const extensionsData = await Promise.all(
-      extensionsToUpdate.map(async entryPoint => {
-        let distPath = entryPoint
-        const manifest = manifests[entryPoint]
+      extensionsPathsToUpdate.map(async path => {
+        let distPath = path
+        const manifest = manifestsByPaths[path]
         const extensionService = new ExtensionService(manifest)
-        const extension = await extensionService.getExtension(
-          manifest.extensionId
-        )
-        if (manifest.type === 'build') {
-          if (!manifest.extensionUUID) {
-            if (extension?.extensionUUID) {
-              manifest.extensionUUID = extension.extensionUUID
-              manifest.save()
-            } else {
-              await extensionService.createExtensionUUID()
-            }
-          }
-          distPath = await extensionService.build(entryPoint, {
+        if (manifestsByPaths[path].type === 'build') {
+          distPath = await extensionService.build(path, {
             mode: 'staging'
           })
         }
+
         const fileBuffer = fs.readFileSync(distPath || changedFilePath)
         const extensionCode = fileBuffer.toString()
         if (this.flags['deploy-develop']) {
           extensionService.upload(fileBuffer, this.getUploadFileName(manifest))
         }
         return {
-          extensionInfo: manifests[entryPoint],
-          extensionPath: extension.path,
+          extensionInfo: manifestsByPaths[path],
+          extensionPath: remoteExtensionsByPaths[path].path,
           code: extensionCode
         }
       })
@@ -157,33 +136,38 @@ class ServeCommand extends Command {
     })
   }
 
-  chokidarOnChange (args, sessionId) {
+  chokidarOnChange ({ sessionId, remoteExtensionsByPaths, manifestsByPaths }) {
     return async changedFilePath => {
-      const extensionsToUpdate = this.getDependentExtensionPath({
+      const extensionsEntrypointsToCheck = Object.keys(remoteExtensionsByPaths)
+      const extensionsPathsToUpdate = this.getDependentExtensionPath({
         changedFilePath,
-        args
+        extensionsEntrypointsToCheck
       })
-      const manifests =
-        this.getManifestObjectFromPathsExtensions(extensionsToUpdate)
       const extensionsData = await this.buildAndUploadExtension({
         changedFilePath,
-        extensionsToUpdate,
-        manifests
+        extensionsPathsToUpdate,
+        remoteExtensionsByPaths,
+        manifestsByPaths
       })
       await this.sendCodeToQuotiBySocket(extensionsData, sessionId)
     }
   }
 
-  async checkIfRemoteExtensionsExists (extensionsPaths) {
+  async getRemoteExtensions (extensionsPaths) {
     const token = await firebase.auth().currentUser.getIdToken()
     const orgSlug = credentials.institution
     const remoteExtensionService = new RemoteExtensionService()
     const remoteExtensionsByPaths = await remoteExtensionService.getRemoteExtensions({
       extensionsPathsArg: extensionsPaths,
       orgSlug,
-      token
+      token,
+      parameters: ['path', 'extension_uuid']
     })
+    return remoteExtensionsByPaths
+  }
 
+  checkWhichRemoteExtensionsExists (remoteExtensionsByPaths) {
+    const orgSlug = credentials.institution
     const remoteExtensionsNotFound = Object.keys(
       pickBy(remoteExtensionsByPaths, extension => !extension)
     ).map(entryPointPath => path.relative('./', entryPointPath))
