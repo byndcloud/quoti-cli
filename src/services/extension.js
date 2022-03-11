@@ -71,25 +71,6 @@ class ExtensionService {
     return uuid
   }
 
-  async getExtension (extensionId) {
-    const token = await firebase.auth().currentUser.getIdToken()
-    const url = `${credentials.institution}/dynamic-components?where[id]=${extensionId}`
-    const path = encodeURI(url)
-    const { data } = await api.axios.get(
-      path,
-      { headers: { Authorization: `Bearer ${token}` } }
-    )
-    if (data.length === 1) {
-      return data[0]
-    } else if (data.length === 0) {
-      this.logger.error('Verifique se realmente possui esta extensão')
-      process.exit(0)
-    } else {
-      this.logger.error('Existe mais de uma extensão com o mesmo id')
-      process.exit(0)
-    }
-  }
-
   async build (entry, { mode } = { mode: 'production' }) {
     if (!this.manifest.extensionUUID) {
       const extension = await this.getExtension(this.manifest.extensionId)
