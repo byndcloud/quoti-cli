@@ -6,7 +6,10 @@ require('dotenv').config({ path: pathEnv })
 
 module.exports = async function () {
   if (process.env.API_BASE_URL?.includes('localhost')) {
-    credentials.load()
-    Logger.info(`**************** Você está em um ambiente localhost, organização: ${credentials.institution} ****************`)
+    if (credentials.exists()) {
+      credentials.load()
+      Logger.info(`\n**************** Você está em um ambiente localhost, organização: ${credentials.institution} ****************`)
+    }
+    Logger.info('\n**************** Você está em um ambiente localhost ****************')
   }
 }
