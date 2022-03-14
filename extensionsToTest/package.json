@@ -51,7 +51,8 @@
   "quoti": {
     "extensions": [
       "src/extension1/App.vue",
-      "src/extension2/App.vue"
+      "src/extension2/App.vue",
+      "src/extension3/App.vue"
     ]
   }
 }
