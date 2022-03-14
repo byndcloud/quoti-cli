@@ -192,20 +192,22 @@ class ServeCommand extends Command {
       utils.validateEntryPointIncludedInPackage(this.args.entryPointPath)
     }
 
-    const extensionsPathsToCheck = this.getEntrypointsOfExtensionsToWatch(
+    const entrypointsOfExtensionsToWatch = this.getEntrypointsOfExtensionsToWatch(
       this.args?.entryPointPath,
       this.extensionsPaths
     )
 
-    const remoteExtensionsByPaths = await this.getRemoteExtensions(extensionsPathsToCheck)
-    this.checkWhichRemoteExtensionsExist(remoteExtensionsByPaths)
-    const manifestsByEntrypoints = await this.getManifestsFromEntrypoints(extensionsPathsToCheck)
-    await this.createUUIDIfItDoesNotExist(extensionsPathsToCheck, remoteExtensionsByPaths, manifestsByEntrypoints)
+    const remoteExtensionsByEntrypoints = await this.getRemoteExtensions(entrypointsOfExtensionsToWatch)
+    this.checkWhichRemoteExtensionsExist(remoteExtensionsByEntrypoints)
+
+    const manifestsByEntrypoints = await this.getManifestsFromEntrypoints(entrypointsOfExtensionsToWatch)
+    await this.createUUIDsIfTheyDontExist(entrypointsOfExtensionsToWatch, remoteExtensionsByEntrypoints, manifestsByEntrypoints)
+    this.addUUIDsToManifestsIfNeeded(entrypointsOfExtensionsToWatch, remoteExtensionsByEntrypoints, manifestsByEntrypoints)
 
     this.logger.info('Conectado ao Quoti!')
 
     const sessionId = randomUUID()
-    const debouncedBuild = debounce(this.chokidarOnChange(sessionId, remoteExtensionsByPaths, manifestsByEntrypoints), 800)
+    const debouncedBuild = debounce(this.chokidarOnChange(sessionId, remoteExtensionsByEntrypoints, manifestsByEntrypoints), 800)
     chokidar
       .watch(filesToWatch, { cwd: this.projectRoot, ignored: ['node_modules'] })
       .on('change', debouncedBuild)
@@ -227,20 +229,44 @@ class ServeCommand extends Command {
     return extensionsEntrypointsToCheck
   }
 
-  async createUUIDIfItDoesNotExist (extensionsPathsToCheck, remoteExtensionsByPaths, manifestsByEntrypoints) {
+  async createUUIDsIfTheyDontExist (extensionsPathsToCheck, remoteExtensionsByPaths, manifestsByEntrypoints) {
     for (const entrypoint of extensionsPathsToCheck) {
       const manifest = manifestsByEntrypoints[entrypoint]
       const extension = remoteExtensionsByPaths[entrypoint]
-      if (manifest.type === 'build' && !manifest.extensionUUID) {
-        if (extension?.extensionUUID) {
-          manifest.extensionUUID = extension.extensionUUID
-          manifest.save()
-        } else {
-          const extensionService = new ExtensionService(manifest)
-          await extensionService.createExtensionUUID()
-        }
+      const remoteExtensionHasNoUUID = !extension?.extensionUUID
+
+      if (remoteExtensionHasNoUUID) {
+        const extensionService = new ExtensionService(manifest)
+        await extensionService.createExtensionUUID()
       }
     }
+  }
+
+  /**
+   * Adds an UUID to the manifests that don't have it yet, provided that the
+   * corresponding remote extensions have an UUID.
+   *
+   * @param {any} extensionsPathsToCheck
+   * @param {any} remoteExtensionsByPaths
+   * @param {any} manifestsByEntrypoints
+   * @returns {JSONManager[]} The manifests that were updated
+   */
+  addUUIDsToManifestsIfNeeded (extensionsPathsToCheck, remoteExtensionsByPaths, manifestsByEntrypoints) {
+    const manifestsUpdated = []
+    for (const entrypoint of extensionsPathsToCheck) {
+      const manifest = manifestsByEntrypoints[entrypoint]
+      const extension = remoteExtensionsByPaths[entrypoint]
+      const extensionNeedsBuild = manifest.type === 'build'
+      const manifestHasNoUUID = !manifest.extensionUUID
+      const remoteExtensionHasUUID = extension?.extensionUUID
+
+      if (extensionNeedsBuild && manifestHasNoUUID && remoteExtensionHasUUID) {
+        manifest.extensionUUID = extension.extensionUUID
+        manifest.save()
+        manifestsUpdated.push(manifest)
+      }
+    }
+    return manifestsUpdated
   }
 
   getUploadFileName (manifest) {
