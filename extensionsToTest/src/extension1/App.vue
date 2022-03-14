@@ -1,15 +1,26 @@
 <template lang="pug">
-    v-col
-      p Extensão 1(com build)
+    div
       MyComponent
+      p {{value}}
+      p atividade desenvolvida
 </template>
 
 <script>
-import MyComponent from './views/MyComponent'
+// import MyComponent from "./MyComponent";
+import MyComponent from "@/extension1/views/MyComponent";
+import { getMessage } from "./utils/index"
 export default {
-  name: 'extension 1',
+  name: "productsMarketplaceOverview",
   components: {
-    MyComponent
+    MyComponent,
   },
-}
+  data: function() {
+    return { 
+      value: 'Dado nao lido de um arquivo js aaa'
+    };
+  },
+  created(){
+    this.value = getMessage('Dado lido de um arquivo js')
+  }
+};
 </script>

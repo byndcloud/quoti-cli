@@ -1,5 +1,5 @@
 <template lang="pug">
-    h1 Uma extensão feita pela org Marketplace  Date.now() : 1645202443991
+h1 Uma extensão já criada 3
 </template>
 
 <script>
