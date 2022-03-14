@@ -65,14 +65,6 @@ class ServeCommand extends Command {
       manifests[entryPoint] = utils.getManifestFromEntryPoint(entryPoint)
       return manifests
     }, {})
-
-    Object.entries(manifests).forEach(([path, manifest]) => {
-      if (!manifest?.exists()) {
-        throw new Error(
-          `manifest.json não encontrado para a extensão em ${path}, vá para a pasta da extensão e rode qt select-extension`
-        )
-      }
-    })
     return manifests
   }
 

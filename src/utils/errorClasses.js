@@ -17,7 +17,14 @@ class ExtensionsNotFoundError extends TypedError {
   }
 }
 
+class ManifestNotFoundError extends TypedError {
+  constructor ({ message, manifestPath } = {}) {
+    super(message || `"manifest.json" não encontrado para a extensão em "${manifestPath}", Execute "qt link-extension"`, 'manifest-not-found')
+  }
+}
+
 module.exports = {
   ExtensionNotFoundError,
-  ExtensionsNotFoundError
+  ExtensionsNotFoundError,
+  ManifestNotFoundError
 }
