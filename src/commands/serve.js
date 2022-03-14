@@ -192,7 +192,11 @@ class ServeCommand extends Command {
       utils.validateEntryPointIncludedInPackage(this.args.entryPointPath)
     }
 
-    const extensionsPathsToCheck = this.getExtensionsEntrypointsToCheck(this.args?.entryPointPath)
+    const extensionsPathsToCheck = this.getExtensionsEntrypointsToCheck(
+      this.args?.entryPointPath,
+      this.extensionsPaths
+    )
+
     const remoteExtensionsByPaths = await this.getRemoteExtensions(extensionsPathsToCheck)
     this.checkWhichRemoteExtensionsExists(remoteExtensionsByPaths)
     const manifestsByPaths = await this.getManifestObjectFromPaths(extensionsPathsToCheck)
@@ -213,12 +217,12 @@ class ServeCommand extends Command {
     this.logger.info(watchingChangesMessage)
   }
 
-  getExtensionsEntrypointsToCheck (entryPointPathArg) {
+  getExtensionsEntrypointsToCheck (entryPointPath, allExtensionsPaths) {
     const extensionsEntrypointsToCheck = []
-    if (!entryPointPathArg) {
-      extensionsEntrypointsToCheck.push(...this.extensionsPaths)
+    if (!entryPointPath) {
+      extensionsEntrypointsToCheck.push(...allExtensionsPaths)
     } else {
-      extensionsEntrypointsToCheck.push(path.resolve(entryPointPathArg))
+      extensionsEntrypointsToCheck.push(path.resolve(entryPointPath))
     }
     return extensionsEntrypointsToCheck
   }
