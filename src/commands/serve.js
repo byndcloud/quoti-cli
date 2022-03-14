@@ -166,7 +166,7 @@ class ServeCommand extends Command {
     return remoteExtensionsByPaths
   }
 
-  checkWhichRemoteExtensionsExists (remoteExtensionsByPaths) {
+  checkWhichRemoteExtensionsExist (remoteExtensionsByPaths) {
     const orgSlug = credentials.institution
     const remoteExtensionsNotFound = Object.keys(
       pickBy(remoteExtensionsByPaths, extension => !extension)
@@ -198,7 +198,7 @@ class ServeCommand extends Command {
     )
 
     const remoteExtensionsByPaths = await this.getRemoteExtensions(extensionsPathsToCheck)
-    this.checkWhichRemoteExtensionsExists(remoteExtensionsByPaths)
+    this.checkWhichRemoteExtensionsExist(remoteExtensionsByPaths)
     const manifestsByPaths = await this.getManifestObjectFromPaths(extensionsPathsToCheck)
     await this.createUUIDIfItDoesNotExist({ extensionsPathsToCheck, remoteExtensionsByPaths, manifestsByPaths })
 
