@@ -60,10 +60,10 @@ class ServeCommand extends Command {
     return extensionsToUpdate
   }
 
-  getManifestObjectFromPaths (extensionsToUpdate) {
-    const manifests = extensionsToUpdate.reduce((manifestsObj, entryPoint) => {
-      manifestsObj[entryPoint] = utils.getManifestFromEntryPoint(entryPoint)
-      return manifestsObj
+  getManifestsFromEntrypoints (extensionsEntrypoints) {
+    const manifests = extensionsEntrypoints.reduce((manifests, entryPoint) => {
+      manifests[entryPoint] = utils.getManifestFromEntryPoint(entryPoint)
+      return manifests
     }, {})
 
     Object.entries(manifests).forEach(([path, manifest]) => {
@@ -136,7 +136,7 @@ class ServeCommand extends Command {
     })
   }
 
-  chokidarOnChange ({ sessionId, remoteExtensionsByPaths, manifestsByPaths }) {
+  chokidarOnChange (sessionId, remoteExtensionsByPaths, manifestsByPaths) {
     return async changedFilePath => {
       const extensionsEntrypointsToCheck = Object.keys(remoteExtensionsByPaths)
       const extensionsPathsToUpdate = this.getDependentExtensionPath({
@@ -199,13 +199,13 @@ class ServeCommand extends Command {
 
     const remoteExtensionsByPaths = await this.getRemoteExtensions(extensionsPathsToCheck)
     this.checkWhichRemoteExtensionsExist(remoteExtensionsByPaths)
-    const manifestsByPaths = await this.getManifestObjectFromPaths(extensionsPathsToCheck)
-    await this.createUUIDIfItDoesNotExist({ extensionsPathsToCheck, remoteExtensionsByPaths, manifestsByPaths })
+    const manifestsByEntrypoints = await this.getManifestsFromEntrypoints(extensionsPathsToCheck)
+    await this.createUUIDIfItDoesNotExist(extensionsPathsToCheck, remoteExtensionsByPaths, manifestsByEntrypoints)
 
     this.logger.info('Conectado ao Quoti!')
 
     const sessionId = randomUUID()
-    const debouncedBuild = debounce(this.chokidarOnChange({ sessionId, remoteExtensionsByPaths, manifestsByPaths }), 800)
+    const debouncedBuild = debounce(this.chokidarOnChange(sessionId, remoteExtensionsByPaths, manifestsByEntrypoints), 800)
     chokidar
       .watch(filesToWatch, { cwd: this.projectRoot, ignored: ['node_modules'] })
       .on('change', debouncedBuild)
@@ -227,10 +227,10 @@ class ServeCommand extends Command {
     return extensionsEntrypointsToCheck
   }
 
-  async createUUIDIfItDoesNotExist ({ extensionsPathsToCheck, remoteExtensionsByPaths, manifestsByPaths }) {
-    for (const extensionPath of extensionsPathsToCheck) {
-      const manifest = manifestsByPaths[extensionPath]
-      const extension = remoteExtensionsByPaths[extensionPath]
+  async createUUIDIfItDoesNotExist (extensionsPathsToCheck, remoteExtensionsByPaths, manifestsByEntrypoints) {
+    for (const entrypoint of extensionsPathsToCheck) {
+      const manifest = manifestsByEntrypoints[entrypoint]
+      const extension = remoteExtensionsByPaths[entrypoint]
       if (manifest.type === 'build' && !manifest.extensionUUID) {
         if (extension?.extensionUUID) {
           manifest.extensionUUID = extension.extensionUUID
