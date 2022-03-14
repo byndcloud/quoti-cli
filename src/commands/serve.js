@@ -192,7 +192,7 @@ class ServeCommand extends Command {
       utils.validateEntryPointIncludedInPackage(this.args.entryPointPath)
     }
 
-    const extensionsPathsToCheck = this.getExtensionsEntrypointsToCheck(
+    const extensionsPathsToCheck = this.getEntrypointsOfExtensionsToWatch(
       this.args?.entryPointPath,
       this.extensionsPaths
     )
@@ -217,7 +217,7 @@ class ServeCommand extends Command {
     this.logger.info(watchingChangesMessage)
   }
 
-  getExtensionsEntrypointsToCheck (entryPointPath, allExtensionsPaths) {
+  getEntrypointsOfExtensionsToWatch (entryPointPath, allExtensionsPaths) {
     const extensionsEntrypointsToCheck = []
     if (!entryPointPath) {
       extensionsEntrypointsToCheck.push(...allExtensionsPaths)
