@@ -47,12 +47,12 @@ class ServeCommand extends Command {
     }
   }
 
-  getDependentExtensionPath ({ changedFilePath, extensionsEntrypointsToCheck }) {
+  getDependentExtensionPath ({ changedFilePath, extensionsEntrypointsToCheck, alias }) {
     if (!changedFilePath) return
     const changedFileAbsolutePath = path.join(this.projectRoot, changedFilePath)
     const extensionsToUpdate = extensionsEntrypointsToCheck.filter(
       entryPoint => {
-        const { arr: dependencies } = getDependencyTree({ entry: entryPoint })
+        const { arr: dependencies } = getDependencyTree({ entry: entryPoint, alias })
         dependencies.push(entryPoint)
         return dependencies.includes(changedFileAbsolutePath)
       }
@@ -128,12 +128,13 @@ class ServeCommand extends Command {
     })
   }
 
-  chokidarOnChange (sessionId, remoteExtensionsByPaths, manifestsByPaths) {
+  chokidarOnChange (sessionId, remoteExtensionsByPaths, manifestsByPaths, alias) {
     return async changedFilePath => {
       const extensionsEntrypointsToCheck = Object.keys(remoteExtensionsByPaths)
       const extensionsPathsToUpdate = this.getDependentExtensionPath({
         changedFilePath,
-        extensionsEntrypointsToCheck
+        extensionsEntrypointsToCheck,
+        alias
       })
       const extensionsData = await this.buildAndUploadExtension({
         changedFilePath,
@@ -195,11 +196,12 @@ class ServeCommand extends Command {
     const manifestsByEntrypoints = await this.getManifestsFromEntrypoints(entrypointsOfExtensionsToWatch)
     await this.createUUIDsIfTheyDontExist(entrypointsOfExtensionsToWatch, remoteExtensionsByEntrypoints, manifestsByEntrypoints)
     this.addUUIDsToManifestsIfNeeded(entrypointsOfExtensionsToWatch, remoteExtensionsByEntrypoints, manifestsByEntrypoints)
+    const alias = await this.getAliasFromVueConfig()
 
     this.logger.info('Conectado ao Quoti!')
 
     const sessionId = randomUUID()
-    const debouncedBuild = debounce(this.chokidarOnChange(sessionId, remoteExtensionsByEntrypoints, manifestsByEntrypoints), 800)
+    const debouncedBuild = debounce(this.chokidarOnChange(sessionId, remoteExtensionsByEntrypoints, manifestsByEntrypoints, alias), 800)
     chokidar
       .watch(filesToWatch, { cwd: this.projectRoot, ignored: ['node_modules'] })
       .on('change', debouncedBuild)
@@ -209,6 +211,14 @@ class ServeCommand extends Command {
       : 'Observando alterações em qualquer extensão'
 
     this.logger.info(watchingChangesMessage)
+  }
+
+  async getAliasFromVueConfig () {
+    const vueConfigPath = path.join(this.projectRoot, 'vue.config.js')
+    if (fs.existsSync(vueConfigPath)) {
+      const vueConfig = require(vueConfigPath)
+      return vueConfig?.configureWebpack?.resolve?.alias
+    }
   }
 
   getEntrypointsOfExtensionsToWatch (entryPointPath, allExtensionsPaths) {
