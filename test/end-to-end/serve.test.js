@@ -36,7 +36,7 @@ describe('Serve command', () => {
     sandbox.restore()
   })
 
-  const setupServeTestNoBuild = test
+  const commonServeTestSetup = test
     .add('now', Date.now())
     .add('testProjectRootPath', testProjectRootPath)
     .add('extensionsPaths', ctx => {
@@ -46,6 +46,8 @@ describe('Serve command', () => {
       return ctx.extensionsPaths.map(entryPoint => ({ entryPoint: utils.getManifestFromEntryPoint(entryPoint) }))
     })
     .add('distPath', ctx => path.join(ctx.testProjectRootPath, 'dist'))
+
+  const setupServeTestNoBuild = commonServeTestSetup
     .add('modifiedFiles', ctx => {
       return [{
         modifiedFilesPath: path.join(ctx.testProjectRootPath, 'src', 'extension3', 'App.vue'),
@@ -63,16 +65,7 @@ describe('Serve command', () => {
       await delay(1000)
     })
 
-  const setupServeTest = test
-    .add('now', Date.now())
-    .add('testProjectRootPath', testProjectRootPath)
-    .add('extensionsPaths', ctx => {
-      return utils.listExtensionsPaths(ctx.testProjectRootPath)
-    })
-    .add('manifests', ctx => {
-      return ctx.extensionsPaths.map(entryPoint => ({ entryPoint: utils.getManifestFromEntryPoint(entryPoint) }))
-    })
-    .add('distPath', ctx => path.join(ctx.testProjectRootPath, 'dist'))
+  const setupServeTest = commonServeTestSetup
     .add('modifiedFiles', ctx => {
       return [{
         modifiedFilesPath: path.join(ctx.testProjectRootPath, 'src', 'extension1', 'views', 'MyComponent.vue'),
