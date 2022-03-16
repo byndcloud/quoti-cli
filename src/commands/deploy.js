@@ -9,17 +9,12 @@ const RemoteExtensionService = require('../services/remoteExtension')
 const fs = require('fs')
 const path = require('path')
 const inquirer = require('inquirer')
-const {
-  getManifestFromEntryPoint,
-  listExtensionsPaths,
-  validateEntryPointIncludedInPackage,
-  getEntryPointFromUser
-} = require('../utils/index')
+const utils = require('../utils/index')
 
 const { ExtensionNotFoundError } = require('../utils/errorClasses')
 
 class DeployCommand extends Command {
-  constructor () {
+  constructor ({ projectRoot, extensionsPaths }) {
     super(...arguments)
     this.spinnerOptions = {
       spinner: 'arrow3',
@@ -27,7 +22,8 @@ class DeployCommand extends Command {
     }
     this.spinner = ora(this.spinnerOptions)
     try {
-      this.extensionsPaths = listExtensionsPaths()
+      this.projectRoot = projectRoot || utils.getProjectRootPath()
+      this.extensionsPaths = extensionsPaths || utils.listExtensionsPaths(this.projectRoot)
       if (this.extensionsPaths.length === 0) {
         throw new Error(
           'Nenhuma extensão foi selecionada até agora, execute qt select-extension para escolher extensões para desenvolver.'
@@ -43,14 +39,14 @@ class DeployCommand extends Command {
     credentials.load()
     let { entryPointPath } = this.args
     if (!entryPointPath) {
-      entryPointPath = await getEntryPointFromUser({
+      entryPointPath = await utils.getEntryPointFromUser({
         extensionsPaths: this.extensionsPaths,
         message: 'De qual extensão você deseja fazer deploy?'
       })
     } else {
-      validateEntryPointIncludedInPackage(entryPointPath)
+      utils.validateEntryPointIncludedInPackage(entryPointPath, this.projectRoot)
     }
-    this.manifest = getManifestFromEntryPoint(entryPointPath)
+    this.manifest = utils.getManifestFromEntryPoint(entryPointPath)
 
     const token = await firebase.auth().currentUser.getIdToken()
     const remoteExtensionService = new RemoteExtensionService()
