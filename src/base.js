@@ -22,8 +22,12 @@ module.exports = class BaseCommand extends Command {
 
   async catch (err) {
     this.logger.error(err)
-    const oclifHandler = require('@oclif/errors/handle')
-    err.code = 'EEXIT'
-    return oclifHandler(err)
+    if (process.env.NODE_ENV === 'test') {
+      process.kill(process.pid, 'SIGTERM')
+    } else {
+      const oclifHandler = require('@oclif/errors/handle')
+      err.code = 'EEXIT'
+      return oclifHandler(err)
+    }
   }
 }
