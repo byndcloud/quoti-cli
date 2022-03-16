@@ -2,7 +2,7 @@
     div
       MyComponent
       p {{value}}
-      p atividade desenvolvida
+      p atividade desenvolvida Date.now 1647461617555
 </template>
 
 <script>
