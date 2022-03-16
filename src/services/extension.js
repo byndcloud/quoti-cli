@@ -22,7 +22,29 @@ class ExtensionService {
       spinner: 'arrow3',
       color: 'yellow'
     })
-    this.vueCliService = new VueCliService(getProjectRootPath())
+    this.vueCliService = new VueCliService(utils.getProjectRootPath())
+  }
+
+  /**
+   * Create new dynamicComponentFile
+   * @param {Object} data
+   * @param {string} [data.url]
+   * @param {string} [data.versionName]
+   * @param {string} [data.filename]
+   * @param {string} token
+   */
+  async deployVersion ({ url, versionName, filename }, token) {
+    await api.axios.put(
+      `/${credentials.institution}/dynamic-components/${this.manifest.extensionId}`,
+      {
+        url: url,
+        version: versionName,
+        fileVuePrefix: filename,
+        activated: true
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    return true
   }
 
   async upload (buffer, remotePath) {
