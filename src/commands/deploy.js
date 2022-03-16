@@ -3,7 +3,6 @@ const { firebase } = require('../config/firebase')
 const ora = require('ora')
 const credentials = require('../config/credentials')
 const Command = require('../base.js')
-const api = require('../config/axios')
 const ExtensionService = require('../services/extension')
 const RemoteExtensionService = require('../services/remoteExtension')
 const fs = require('fs')
@@ -90,20 +89,18 @@ class DeployCommand extends Command {
     if (this.manifest.type === 'build') {
       extensionPath = await this.extensionService.build(entryPointPath)
     }
-
     await this.extensionService.upload(fs.readFileSync(extensionPath), filename)
     try {
       this.spinner.start('Fazendo deploy...')
-      await api.axios.put(
-        `/${credentials.institution}/dynamic-components/${this.manifest.extensionId}`,
-        {
-          url: url,
+      await this.extensionService.deployVersion({
+        data: {
+          url,
           version: versionName,
           fileVuePrefix: filename,
           activated: true
         },
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
+        token
+      })
       this.spinner.succeed('Deploy feito com sucesso!')
     } catch (error) {
       let errorMessage = 'Erro durante o deploy. '
@@ -111,8 +108,7 @@ class DeployCommand extends Command {
         errorMessage += error?.response?.data?.message
       }
       this.spinner.fail(errorMessage)
-    } finally {
-      process.exit(0)
+      throw error
     }
   }
 
