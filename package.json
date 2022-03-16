@@ -86,7 +86,10 @@
       "@oclif/plugin-autocomplete"
     ],
     "hooks": {
-      "prerun": ["./src/hooks/login","./src/hooks/show-info-on-localhost"],
+      "prerun": [
+        "./src/hooks/login",
+        "./src/hooks/show-info-on-localhost"
+      ],
       "init": "./src/hooks/node-version"
     }
   },
@@ -94,8 +97,8 @@
   "scripts": {
     "postpack": "rm -f oclif.manifest.json",
     "prepack": "oclif-dev manifest && oclif-dev readme",
-    "test:unit": "nyc mocha --forbid-only --exit \"test/unit/**/*.test.js\"",
-    "test:e2e": "nyc mocha --forbid-only --exit \"test/end-to-end/**/*.test.js\"",
+    "test:unit": "NODE_ENV=test nyc mocha --forbid-only --exit \"test/unit/**/*.test.js\"",
+    "test:e2e": "NODE_ENV=test nyc mocha --forbid-only --exit \"test/end-to-end/**/*.test.js\"",
     "version": "oclif-dev readme && git add README.md",
     "lint": "eslint --fix ."
   }
