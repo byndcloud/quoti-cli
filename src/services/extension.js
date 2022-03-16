@@ -6,7 +6,7 @@ const { randomUUID } = require('crypto')
 const api = require('../config/axios')
 const credentials = require('../config/credentials')
 const Logger = require('../config/logger')
-const { getProjectRootPath } = require('../utils/index')
+const utils = require('../utils/index')
 class ExtensionService {
   constructor (manifest, { spinnerOptions } = {}) {
     if (!manifest) {
@@ -98,7 +98,7 @@ class ExtensionService {
       })
       this.logger.info(`⇨ Extensão: ${this.manifest.name}\n`)
       this.spinner.succeed('Build finalizado')
-      return path.join(getProjectRootPath(), dest, `${name}.umd.min.js`)
+      return path.join(utils.getProjectRootPath(), dest, `${name}.umd.min.js`)
     } catch (error) {
       this.spinner.fail('Erro durante o build')
       throw new Error(error)
