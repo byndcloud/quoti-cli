@@ -1,6 +1,16 @@
 const { expect, test } = require('@oclif/test')
 const utilsVueCliService = require('@vue/cli-shared-utils')
 const SodaFriendlyErrorsWebpackPlugin = require('@soda/friendly-errors-webpack-plugin')
+const credentials = require('../../src/config/credentials')
+const fs = require('fs')
+const path = require('path')
+
+function createBeyondCredentialPath () {
+  const beyondCredentials = process.env.TEST_BEYOND_CREDENTIALS
+  const beyondCredentialsPath = path.resolve('./test/beyondCredentials.json')
+  fs.writeFileSync(beyondCredentialsPath, beyondCredentials)
+  return beyondCredentialsPath
+}
 /**
  *
  * @param {require('@oclif/test').test} test
@@ -14,5 +24,8 @@ function vueCli (test) {
 }
 const myTest = vueCli(test)
 module.exports = {
-  test: myTest, expect
+  testStubLoggedIn: myTest.stub(credentials, 'path', createBeyondCredentialPath()),
+  test: myTest,
+  expect
+
 }
