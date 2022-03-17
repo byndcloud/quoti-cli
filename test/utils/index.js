@@ -1,5 +1,11 @@
 const fs = require('fs')
-function changeFile (pathFile, now) {
+
+/**
+ *
+ * @param {string} pathFile
+ * @param {number} now Date.now()
+ */
+function insertDateOnFile (pathFile, now) {
   if (!fs.existsSync(pathFile)) {
     throw new Error(`${pathFile} is invalid path`)
   }
@@ -13,9 +19,14 @@ function changeFile (pathFile, now) {
   fs.writeFileSync(pathFile, newFile)
 }
 
+/**
+ *
+ * @param {number} n Time in milliseconds
+ * @returns Delay promise
+ */
 const delay = n => new Promise((resolve, reject) => setTimeout(resolve, n))
 
 module.exports = {
-  changeFile,
+  insertDateOnFile,
   delay
 }
