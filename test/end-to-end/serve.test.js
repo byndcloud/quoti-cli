@@ -50,8 +50,8 @@ describe('Serve command', () => {
   const setupServeTestNoBuild = commonServeTestSetup
     .add('modifiedFiles', ctx => {
       return [{
-        modifiedFilesPath: path.join(ctx.testProjectRootPath, 'src', 'extension3', 'App.vue'),
-        manifestPath: path.join(ctx.testProjectRootPath, 'src', 'extension3', 'manifest.json')
+        modifiedFilesPath: path.join(ctx.testProjectRootPath, 'src', 'extension2', 'App.vue'),
+        manifestPath: path.join(ctx.testProjectRootPath, 'src', 'extension2', 'manifest.json')
       }]
     })
     .stub(credentials, 'path', beyondCredentialsPath)
