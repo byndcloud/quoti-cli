@@ -69,7 +69,9 @@ describe('Serve command', () => {
 
   setupServeTest.it('When an extension\'s file is modified vueCliService function must be called with name including dc_extensionUUID', async (ctx, done) => {
     const vueCliServiceArgs = VueCliService.prototype.run.args[0][1]
-    expect(vueCliServiceArgs.name).to.equal('dc_b391d67d-3db3-496f-abe0-0dc0d2229dd5')
+    const manifestPath = ctx.modifiedFiles[0].manifestPath
+    const manifest = new JSONManager(manifestPath)
+    expect(vueCliServiceArgs.name).to.equal(`dc_${manifest.extensionUUID}`)
     await delay(1000)
     done()
   })

@@ -235,7 +235,7 @@ class ServeCommand extends Command {
     for (const entrypoint of extensionsPathsToCheck) {
       const manifest = manifestsByEntrypoints[entrypoint]
       const extension = remoteExtensionsByPaths[entrypoint]
-      const remoteExtensionHasNoUUID = !extension?.extensionUUID
+      const remoteExtensionHasNoUUID = !extension?.extension_uuid
 
       if (remoteExtensionHasNoUUID) {
         const extensionService = new ExtensionService(manifest)
