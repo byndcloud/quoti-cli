@@ -48,7 +48,7 @@ describe('Deploy command', () => {
       }]
     })
     .do(async ctx => {
-      utilsTest.insertDateOnFile(ctx.modifiedFiles[0].modifiedFilesPath, now)
+      utilsTest.insertTimestampInFile(ctx.modifiedFiles[0].modifiedFilesPath, now)
     })
     .command(['deploy', testProject.extension2NoBuild.entryPointPath])
   setupDeployTestNoBuild.it('qt deploy to extension without build', async (_, done) => {
@@ -76,7 +76,7 @@ describe('Deploy command', () => {
       }]
     })
     .do(async ctx => {
-      utilsTest.insertDateOnFile(ctx.modifiedFiles[0].modifiedFilesPath, now)
+      utilsTest.insertTimestampInFile(ctx.modifiedFiles[0].modifiedFilesPath, now)
     })
     .command(['deploy', testProject.extension1WithBuild.entryPointPath])
 
@@ -160,7 +160,7 @@ describe('Deploy command', () => {
       }]
     })
     .do(async ctx => {
-      utilsTest.insertDateOnFile(ctx.modifiedFiles[0].modifiedFilesPath, now)
+      utilsTest.insertTimestampInFile(ctx.modifiedFiles[0].modifiedFilesPath, now)
     })
     .stub(inquirer, 'prompt', arg => {
       const promptName = arg[0].name

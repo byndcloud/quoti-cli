@@ -5,7 +5,7 @@ const fs = require('fs')
  * @param {string} pathFile
  * @param {number} now Date.now()
  */
-function insertDateOnFile (pathFile, now) {
+function insertTimestampInFile (pathFile, now) {
   if (!fs.existsSync(pathFile)) {
     throw new Error(`${pathFile} is invalid path`)
   }
@@ -27,6 +27,6 @@ function insertDateOnFile (pathFile, now) {
 const delay = n => new Promise((resolve, reject) => setTimeout(resolve, n))
 
 module.exports = {
-  insertDateOnFile,
+  insertTimestampInFile,
   delay
 }
