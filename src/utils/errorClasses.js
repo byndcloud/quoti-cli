@@ -22,9 +22,15 @@ class ManifestNotFoundError extends TypedError {
     super(message || `"manifest.json" não encontrado para a extensão em "${manifestPath}", Execute "qt link-extension"`, 'manifest-not-found')
   }
 }
+class EntryPointNotFoundInPackageError extends TypedError {
+  constructor ({ message, entryPointPath } = {}) {
+    super(message || `O entrypoint especificado (${entryPointPath}) não está entre as extensões que já foram selecionadas. Tem certeza que o caminho está correto ou que a extensão já foi selecionada com qt link-extension?`)
+  }
+}
 
 module.exports = {
   ExtensionNotFoundError,
   ExtensionsNotFoundError,
-  ManifestNotFoundError
+  ManifestNotFoundError,
+  EntryPointNotFoundInPackageError
 }

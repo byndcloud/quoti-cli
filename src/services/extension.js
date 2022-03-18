@@ -6,7 +6,7 @@ const { randomUUID } = require('crypto')
 const api = require('../config/axios')
 const credentials = require('../config/credentials')
 const Logger = require('../config/logger')
-const { getProjectRootPath } = require('../utils/index')
+const utils = require('../utils/index')
 class ExtensionService {
   constructor (manifest, { spinnerOptions } = {}) {
     if (!manifest) {
@@ -22,7 +22,29 @@ class ExtensionService {
       spinner: 'arrow3',
       color: 'yellow'
     })
-    this.vueCliService = new VueCliService(getProjectRootPath())
+    this.vueCliService = new VueCliService(utils.getProjectRootPath())
+  }
+
+  /**
+   * Create new dynamicComponentFile
+   * @param {Object} data
+   * @param {string} [data.url]
+   * @param {string} [data.versionName]
+   * @param {string} [data.filename]
+   * @param {string} token
+   */
+  async deployVersion ({ url, versionName, filename }, token) {
+    await api.axios.put(
+      `/${credentials.institution}/dynamic-components/${this.manifest.extensionId}`,
+      {
+        url: url,
+        version: versionName,
+        fileVuePrefix: filename,
+        activated: true
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    return true
   }
 
   async upload (buffer, remotePath) {
@@ -98,7 +120,7 @@ class ExtensionService {
       })
       this.logger.info(`⇨ Extensão: ${this.manifest.name}\n`)
       this.spinner.succeed('Build finalizado')
-      return path.join(getProjectRootPath(), dest, `${name}.umd.min.js`)
+      return path.join(utils.getProjectRootPath(), dest, `${name}.umd.min.js`)
     } catch (error) {
       this.spinner.fail('Erro durante o build')
       throw new Error(error)

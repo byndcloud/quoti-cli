@@ -1,13 +1,10 @@
 <template lang="pug">
-    MyComponent
+    h1 {{`Date.now() : ${1647542554390}`}}
 </template>
 
 <script>
-import MyComponent from "./MyComponent";
+
 export default {
   name: "productsMarketplaceOverview",
-  components: {
-    MyComponent,
-  },
 };
 </script>
