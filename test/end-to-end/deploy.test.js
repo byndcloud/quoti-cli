@@ -8,7 +8,7 @@ const inquirer = require('inquirer')
 
 const utilsTest = require('../utils/index')
 const TestProject = require('../services/testProject')
-const { expectDateOnFile } = require('../utils/expects')
+const { expectTimestampInFile } = require('../utils/expects')
 const { EntryPointNotFoundInPackageError, ManifestNotFoundError, ExtensionNotFoundError } = require('../../src/utils/errorClasses')
 const testProject = new TestProject()
 
@@ -60,7 +60,7 @@ describe('Deploy command', () => {
 
     const uploadFirstArgs = extensionServiceSpy.upload.firstCall.args
     const bufferPassedToUploadFunction = uploadFirstArgs[0]
-    expectDateOnFile(bufferPassedToUploadFunction, now)
+    expectTimestampInFile(bufferPassedToUploadFunction, now)
 
     expect(extensionServiceSpy.deployVersion.callCount).to.equal(1)
 
@@ -89,7 +89,7 @@ describe('Deploy command', () => {
 
     const uploadFirstArgs = extensionServiceSpy.upload.firstCall.args
     const bufferPassedToUploadFunction = uploadFirstArgs[0]
-    expectDateOnFile(bufferPassedToUploadFunction, now)
+    expectTimestampInFile(bufferPassedToUploadFunction, now)
 
     expect(extensionServiceSpy.deployVersion.callCount).to.equal(1)
 
@@ -180,7 +180,7 @@ describe('Deploy command', () => {
     expect(extensionServiceSpy.upload.callCount).to.equal(1)
     const uploadFirstArgs = extensionServiceSpy.upload.firstCall.args
     const bufferPassedToUploadFunction = uploadFirstArgs[0]
-    expectDateOnFile(bufferPassedToUploadFunction, now)
+    expectTimestampInFile(bufferPassedToUploadFunction, now)
     expect(extensionServiceSpy.deployVersion.callCount).to.equal(1)
 
     done()
