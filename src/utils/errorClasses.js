@@ -24,7 +24,7 @@ class ManifestNotFoundError extends TypedError {
 }
 class EntryPointNotFoundInPackageError extends TypedError {
   constructor ({ message, entryPointPath } = {}) {
-    super(message || `O entrypoint especificado (${entryPointPath}) não está entre as extensões que já foram selecionadas. Tem certeza que o caminho está correto ou que a extensão já foi selecionada com qt select-extension?`)
+    super(message || `O entrypoint especificado (${entryPointPath}) não está entre as extensões que já foram selecionadas. Tem certeza que o caminho está correto ou que a extensão já foi selecionada com qt link-extension?`)
   }
 }
 
