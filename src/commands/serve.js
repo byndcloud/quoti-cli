@@ -18,9 +18,9 @@ const {
 } = require('../utils/errorClasses')
 
 const { flags } = require('@oclif/command')
-const { randomUUID } = require('crypto')
 const { getFrontBaseURL } = require('../utils/index')
 const RemoteExtensionService = require('../services/remoteExtension')
+const DevSessionIdService = require('../services/devSessionId.js')
 
 class ServeCommand extends Command {
   constructor ({ projectRoot, extensionsPaths }) {
@@ -199,8 +199,9 @@ class ServeCommand extends Command {
     const alias = await this.getAliasFromVueConfig()
 
     this.logger.info('Conectado ao Quoti!')
+    const devSessionIdService = new DevSessionIdService()
+    const sessionId = await devSessionIdService.getSessionId({ forceCreateDevSessionId: this.flags['new-session'] })
 
-    const sessionId = randomUUID()
     const debouncedBuild = debounce(this.chokidarOnChange(sessionId, remoteExtensionsByEntrypoints, manifestsByEntrypoints, alias), 800)
     chokidar
       .watch(filesToWatch, { cwd: this.projectRoot, ignored: ['node_modules'] })
@@ -284,6 +285,9 @@ class ServeCommand extends Command {
 ServeCommand.flags = {
   'deploy-develop': flags.boolean({
     description: 'Indica se devemos salvar o build da extensão de develop no banco de dados da Beyond Company'
+  }),
+  'new-session': flags.boolean({
+    description: 'Força a criação de um novo devSessionId'
   })
 }
 ServeCommand.args = [
