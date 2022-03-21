@@ -5,7 +5,8 @@ require('dotenv').config({ path: pathEnv })
 
 module.exports = async function (options) {
   const command = options.Command
-  if (command.id !== 'logout' || command.id !== 'autocomplete') {
+  console.log(command)
+  if (command.id !== 'logout' && command.id !== 'autocomplete') {
     await Auth.silentLogin()
   }
 }
