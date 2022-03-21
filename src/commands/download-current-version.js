@@ -8,8 +8,8 @@ const JSONManager = require('../config/JSONManager')
 const { confirmQuestion } = require('../utils/index')
 
 class DownloadCurrentVersion extends Command {
-  constructor () {
-    super(...arguments)
+  init () {
+    super.init()
     this.manifest = new JSONManager('./manifest.json')
   }
 
