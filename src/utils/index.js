@@ -1,7 +1,7 @@
-const JSONManager = require('../config/JSONManager')
 const path = require('path')
 const inquirer = require('inquirer')
 const { ManifestNotFoundError, EntryPointNotFoundInPackageError } = require('./errorClasses')
+const ManifestService = require('../services/manifest')
 const readPkgSync = require('read-pkg-up').sync
 function isYes (text) {
   return ['s', 'sim', 'yes', 'y'].includes(text.toLowerCase())
@@ -31,7 +31,7 @@ function getManifestFromEntryPoint (entrypointPath) {
     path.dirname(entrypointPath),
     'manifest.json'
   )
-  const manifest = new JSONManager(manifestPath)
+  const manifest = new ManifestService(manifestPath)
   if (!manifest?.exists()) {
     throw new ManifestNotFoundError({ manifestPath: manifestPath })
   }
