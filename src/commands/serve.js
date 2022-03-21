@@ -25,6 +25,11 @@ const DevSessionIdService = require('../services/devSessionId.js')
 class ServeCommand extends Command {
   constructor ({ projectRoot, extensionsPaths }) {
     super(...arguments)
+    this._argConstructor = { projectRoot, extensionsPaths }
+  }
+
+  init () {
+    super.init()
     this.spinnerOptions = {
       spinner: 'arrow3',
       color: 'yellow'
@@ -32,18 +37,14 @@ class ServeCommand extends Command {
     this.spinner = ora(this.spinnerOptions)
     this.socket = new Socket()
     credentials.load()
-    try {
-      this.projectRoot = projectRoot || utils.getProjectRootPath()
-      this.extensionsPaths =
-        extensionsPaths || utils.listExtensionsPaths(this.projectRoot)
-      if (this.extensionsPaths.length === 0) {
-        throw new Error(
-          'Nenhuma extensão foi selecionada até agora, execute qt select-extension para escolher extensões para desenvolver.'
-        )
-      }
-    } catch (error) {
-      this.logger.error(error)
-      process.exit(0)
+
+    this.projectRoot = this._argConstructor?.projectRoot || utils.getProjectRootPath()
+    this.extensionsPaths =
+        this?.extensionsPaths?.extensionsPaths || utils.listExtensionsPaths(this.projectRoot)
+    if (this.extensionsPaths.length === 0) {
+      throw new Error(
+        'Nenhuma extensão foi selecionada até agora, execute qt select-extension para escolher extensões para desenvolver.'
+      )
     }
   }
 
