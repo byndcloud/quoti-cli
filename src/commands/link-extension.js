@@ -21,14 +21,9 @@ inquirer.registerPrompt('file-tree-selection', inquirerFileTreeSelection)
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'))
 
 class LinkExtensionCommand extends Command {
-  constructor () {
-    super(...arguments)
-    try {
-      this.projectRoot = getProjectRootPath()
-    } catch (error) {
-      this.logger.error(error)
-      process.exit(0)
-    }
+  init () {
+    super.init()
+    this.projectRoot = getProjectRootPath()
   }
 
   async run () {
