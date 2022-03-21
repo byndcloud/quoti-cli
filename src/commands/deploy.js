@@ -15,14 +15,19 @@ const { ExtensionNotFoundError } = require('../utils/errorClasses')
 class DeployCommand extends Command {
   constructor ({ projectRoot, extensionsPaths }) {
     super(...arguments)
+    this._argConstructor = { projectRoot, extensionsPaths }
+  }
+
+  init () {
+    super.init()
     this.spinnerOptions = {
       spinner: 'arrow3',
       color: 'yellow'
     }
     this.spinner = ora(this.spinnerOptions)
     try {
-      this.projectRoot = projectRoot || utils.getProjectRootPath()
-      this.extensionsPaths = extensionsPaths || utils.listExtensionsPaths(this.projectRoot)
+      this.projectRoot = this._argConstructor?.projectRoot || utils.getProjectRootPath()
+      this.extensionsPaths = this._argConstructor?.extensionsPaths || utils.listExtensionsPaths(this.projectRoot)
       if (this.extensionsPaths.length === 0) {
         throw new Error(
           'Nenhuma extensão foi selecionada até agora, execute qt select-extension para escolher extensões para desenvolver.'
