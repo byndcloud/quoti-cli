@@ -159,7 +159,8 @@ class PublishCommand extends Command {
     const bodyPublishExtension = {
       dynamicComponentFileId,
       version,
-      extensionUUID: manifest.extensionUUID
+      extensionUUID: manifest.extensionUUID,
+      manifest: manifest.getManifestToPublish()
     }
     await this.callEndpointPublishExtension(bodyPublishExtension, token)
     this.logger.success(`Nova extensão publicada com sucesso: ${version}`)
@@ -184,7 +185,8 @@ class PublishCommand extends Command {
     const bodyPublishExtensionVersion = {
       dynamicComponentFileId,
       version: flags.version,
-      versionIncrement
+      versionIncrement,
+      manifest: manifest.getManifestToPublish()
     }
     try {
       const data = await this.callEndpointPublishExtensionVersion(
@@ -234,12 +236,16 @@ class PublishCommand extends Command {
   }
 
   async callEndpointPublishExtensionVersion (body, token) {
-    const { data } = await api.axios.post(
+    try {
+      const { data } = await api.axios.post(
       `/${credentials.institution}/marketplace/extensions/publish-version`,
       body,
       { headers: { Authorization: `Bearer ${token}` } }
-    )
-    return data.data
+      )
+      return data.data
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   async callEndpointPublishExtension (body, token) {
