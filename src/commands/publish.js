@@ -16,20 +16,15 @@ const inquirer = require('inquirer')
 const RemoteExtensionService = require('../services/remoteExtension')
 
 class PublishCommand extends Command {
-  constructor () {
-    super(...arguments)
-    try {
-      credentials.load()
-      this.projectRoot = getProjectRootPath()
-      this.extensionsPaths = listExtensionsPaths()
-      if (this.extensionsPaths.length === 0) {
-        throw new Error(
-          'Nenhuma extensão foi selecionada até agora, execute qt select-extension para escolher extensões para desenvolver.'
-        )
-      }
-    } catch (error) {
-      this.logger.error(error)
-      process.exit(0)
+  init () {
+    super.init()
+    credentials.load()
+    this.projectRoot = getProjectRootPath()
+    this.extensionsPaths = listExtensionsPaths()
+    if (this.extensionsPaths.length === 0) {
+      throw new Error(
+        'Nenhuma extensão foi selecionada até agora, execute qt select-extension para escolher extensões para desenvolver.'
+      )
     }
   }
 
