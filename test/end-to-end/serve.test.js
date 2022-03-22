@@ -5,17 +5,9 @@ const path = require('path')
 const fs = require('fs')
 const VueCliService = require('@vue/cli-service')
 const Socket = require('../../src/config/socket')
+const utilsTest = require('../utils/index')
 
 const testProjectRootPath = path.resolve('./extensionsToTest')
-function changeFile (pathFile, now) {
-  if (!fs.existsSync(pathFile)) {
-    throw new Error(`${pathFile} is invalid path`)
-  }
-  const file = fs.readFileSync(pathFile, { encoding: 'utf8' })
-  const UUIDRegex = /[0-9]{13}/
-  const newFile = file.replace(UUIDRegex, now)
-  fs.writeFileSync(pathFile, newFile)
-}
 const delay = n => new Promise((resolve, reject) => setTimeout(resolve, n))
 
 describe('Serve command', () => {
@@ -52,7 +44,7 @@ describe('Serve command', () => {
 
     .do(async ctx => {
       await delay(1000)
-      changeFile(ctx.modifiedFiles[0].modifiedFilesPath, ctx.now)
+      utilsTest.insertTimestampInFile(ctx.modifiedFiles[0].modifiedFilesPath, ctx.now)
       await delay(1000)
     })
 
@@ -69,7 +61,7 @@ describe('Serve command', () => {
 
     .do(async ctx => {
       await delay(1000)
-      changeFile(ctx.modifiedFiles[0].modifiedFilesPath, ctx.now)
+      utilsTest.insertTimestampInFile(ctx.modifiedFiles[0].modifiedFilesPath, ctx.now)
       await delay(1000)
     })
 
