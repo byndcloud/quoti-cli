@@ -112,6 +112,19 @@ class DeployCommand extends Command {
   }
 }
 
+DeployCommand.flags = {
+  all: flags.boolean({
+    char: 'a',
+    description: 'Realiza deploy de todas as extensões presente na propriedade quoti do package.json',
+    exclusive: ['extra-flag']
+  }),
+  version: flags.boolean({
+    char: 'v',
+    description: 'Coloca um timestamp na versão',
+    exclusive: ['extra-flag']
+  })
+}
+
 DeployCommand.args = [
   {
     name: 'entryPointPath',
