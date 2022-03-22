@@ -18,9 +18,18 @@ class DeployCommand extends Command {
 
   async run () {
     credentials.load()
-    let { entryPointPath } = this.args
-    if (!entryPointPath) {
-      entryPointPath = await utils.getEntryPointFromUser({
+    const { entryPointPath: entryPointPathFromArgs } = this.args
+    if (entryPointPathFromArgs && this.flags.all) {
+      this.logger.warning('Flag -all desconsiderada')
+    }
+    let entryPointsPath
+    if (entryPointPathFromArgs) {
+      entryPointsPath = [entryPointPathFromArgs]
+      utils.validateEntryPointIncludedInPackage(entryPointPathFromArgs, this.projectRoot)
+    } else if (this.flags.all) {
+      entryPointsPath = this.extensionsPaths
+    } else {
+      entryPointsPath = await utils.getEntryPointsFromUser({
         extensionsPaths: this.extensionsPaths,
         message: 'De qual extensão você deseja fazer deploy?'
       })
