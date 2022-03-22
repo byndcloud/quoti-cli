@@ -1,6 +1,5 @@
-const { expect, test } = require('@oclif/test')
+const { expect, testStubLoggedIn } = require('../common/test')
 const sinon = require('sinon')
-const credentials = require('../../src/config/credentials')
 const utils = require('../../src/utils/index')
 const path = require('path')
 const fs = require('fs')
@@ -8,13 +7,6 @@ const VueCliService = require('@vue/cli-service')
 const Socket = require('../../src/config/socket')
 
 const testProjectRootPath = path.resolve('./extensionsToTest')
-const utilsVueCliService = require('@vue/cli-shared-utils')
-const SodaFriendlyErrorsWebpackPlugin = require('@soda/friendly-errors-webpack-plugin')
-const ManifestService = require('../../src/services/manifest')
-
-const beyondCredentials = process.env.TEST_BEYOND_CREDENTIALS
-const beyondCredentialsPath = path.resolve('./test/beyondCredentials.json')
-fs.writeFileSync(beyondCredentialsPath, beyondCredentials)
 function changeFile (pathFile, now) {
   if (!fs.existsSync(pathFile)) {
     throw new Error(`${pathFile} is invalid path`)
@@ -36,7 +28,7 @@ describe('Serve command', () => {
     sandbox.restore()
   })
 
-  const commonServeTestSetup = test
+  const commonServeTestSetup = testStubLoggedIn
     .add('now', Date.now())
     .add('testProjectRootPath', testProjectRootPath)
     .add('extensionsPaths', ctx => {
@@ -54,7 +46,6 @@ describe('Serve command', () => {
         manifestPath: path.join(ctx.testProjectRootPath, 'src', 'extension2', 'manifest.json')
       }]
     })
-    .stub(credentials, 'path', beyondCredentialsPath)
     .stub(utils, 'getProjectRootPath', () => testProjectRootPath)
     // .stdout()
     .command(['serve'])
@@ -72,14 +63,7 @@ describe('Serve command', () => {
         manifestPath: path.join(ctx.testProjectRootPath, 'src', 'extension1', 'manifest.json')
       }]
     })
-    .stub(credentials, 'path', beyondCredentialsPath)
     .stub(utils, 'getProjectRootPath', () => testProjectRootPath)
-    .stub(utilsVueCliService, 'logWithSpinner', () => console.log())
-    .stub(utilsVueCliService, 'log', () => console.log())
-    .stub(utilsVueCliService, 'done', () => console.log())
-    .stub(utilsVueCliService, 'warn', () => console.log())
-
-    .stub(SodaFriendlyErrorsWebpackPlugin.prototype, 'displaySuccess', () => console.log())
     // .stdout()
     .command(['serve'])
 
