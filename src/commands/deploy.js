@@ -34,8 +34,6 @@ class DeployCommand extends Command {
         extensionsPaths: this.extensionsPaths,
         message: 'De qual extensão você deseja fazer deploy?'
       })
-    } else {
-      utils.validateEntryPointIncludedInPackage(entryPointPath, this.projectRoot)
     }
     const isVersionTimestamp = this.flags.version
     for (const entryPointPath of entryPointsPath) {
@@ -83,7 +81,10 @@ class DeployCommand extends Command {
       return
     }
 
-    const versionName = await this.inputVersionName(lastVersion)
+    let versionName = Date.now()
+    if (!isVersionTimestamp) {
+      versionName = await this.inputVersionName(lastVersion)
+    }
     const filename = this.getUploadFileNameDeploy(
       new Date().getTime().toString(),
       this.manifest.type === 'build'
