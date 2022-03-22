@@ -7,6 +7,7 @@ const VueCliService = require('@vue/cli-service')
 const Socket = require('../../src/config/socket')
 const utilsTest = require('../utils/index')
 const TestProject = require('../services/testProject')
+const ManifestService = require('../../src/services/manifest')
 
 const testProject = new TestProject()
 
