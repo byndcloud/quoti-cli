@@ -7,7 +7,7 @@ const VueCliService = require('@vue/cli-service')
 const Socket = require('../../src/config/socket')
 const utilsTest = require('../utils/index')
 const TestProject = require('../services/testProject')
-const ManifestService = require('../../src/services/manifest')
+const { expectTimestampInFile } = require('../utils/expects')
 
 const testProject = new TestProject()
 
@@ -71,23 +71,23 @@ describe('Serve command', () => {
     })
 
   setupServeTestNoBuild.it('Test extension without build', async (ctx, done) => {
-    const argsEmit = Socket.prototype.emit.args[0][0]
-    expect(argsEmit?.data?.code.includes(ctx.now)).to.equal(true)
+    const socketSpy = Socket.prototype
+    const emitFirstArgs = socketSpy.emit.firstCall.firstArg
+    expectTimestampInFile(emitFirstArgs.data.code, ctx.now)
     done()
   })
 
   setupServeTest.it('When an extension\'s file is modified vueCliService function must be called with name including dc_extensionUUID', async (ctx, done) => {
-    const vueCliServiceArgs = VueCliService.prototype.run.args[0][1]
-    const manifestPath = ctx.modifiedFiles[0].manifestPath
-    const manifest = new ManifestService(manifestPath)
-    expect(vueCliServiceArgs.name).to.equal(`dc_${manifest.extensionUUID}`)
+    const vueCliServiceSpy = VueCliService.prototype
+    const runLastArg = vueCliServiceSpy.run.firstCall.lastArg
+    const manifest = testProject.extension1WithBuild.getManifestSync()
+    expect(runLastArg.name).to.equal(`dc_${manifest.extensionUUID}`)
     await delay(1000)
     done()
   })
 
   setupServeTest.it('Change in a extension\'s file must be built in dist/dc_uuid.umd.min.js', async (ctx, done) => {
-    const manifestPath = ctx.modifiedFiles[0].manifestPath
-    const manifest = new ManifestService(manifestPath)
+    const manifest = testProject.extension1WithBuild.getManifestSync()
     const distExtensionPath = path.join(ctx.distPath, `dc_${manifest.extensionUUID}.umd.min.js`)
     while (!fs.existsSync(distExtensionPath)) {
       await delay(100)
