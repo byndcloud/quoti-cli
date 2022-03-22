@@ -46,7 +46,6 @@ describe('Serve command', () => {
       }]
     })
     .stub(utils, 'getProjectRootPath', () => testProjectRootPath)
-    // .stdout()
     .command(['serve'])
 
     .do(async ctx => {
@@ -63,7 +62,6 @@ describe('Serve command', () => {
       }]
     })
     .stub(utils, 'getProjectRootPath', () => testProjectRootPath)
-    // .stdout()
     .command(['serve'])
 
     .do(async ctx => {
