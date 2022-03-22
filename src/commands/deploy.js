@@ -74,15 +74,15 @@ class DeployCommand extends Command {
     await this.extensionService.upload(fs.readFileSync(extensionPath), filename)
     try {
       this.spinner.start('Fazendo deploy...')
-      await this.extensionService.deployVersion({
-        data: {
+      await this.extensionService.deployVersion(
+        {
           url,
           version: versionName,
           fileVuePrefix: filename,
           activated: true
         },
         token
-      })
+      )
       this.spinner.succeed('Deploy feito com sucesso!')
     } catch (error) {
       let errorMessage = 'Erro durante o deploy. '

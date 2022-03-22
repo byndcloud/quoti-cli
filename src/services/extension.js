@@ -33,13 +33,13 @@ class ExtensionService {
    * @param {string} [data.filename]
    * @param {string} token
    */
-  async deployVersion ({ url, versionName, filename }, token) {
+  async deployVersion ({ url, version, fileVuePrefix }, token) {
     await api.axios.put(
       `/${credentials.institution}/dynamic-components/${this.manifest.extensionId}`,
       {
-        url: url,
-        version: versionName,
-        fileVuePrefix: filename,
+        url,
+        version,
+        fileVuePrefix,
         activated: true
       },
       { headers: { Authorization: `Bearer ${token}` } }
