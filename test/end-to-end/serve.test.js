@@ -6,15 +6,24 @@ const fs = require('fs')
 const VueCliService = require('@vue/cli-service')
 const Socket = require('../../src/config/socket')
 const utilsTest = require('../utils/index')
+const TestProject = require('../services/testProject')
+
+const testProject = new TestProject()
 
 const testProjectRootPath = path.resolve('./extensionsToTest')
 const delay = n => new Promise((resolve, reject) => setTimeout(resolve, n))
 
 describe('Serve command', () => {
   const sandbox = sinon.createSandbox()
-  beforeEach(function () {
+  beforeEach(async function () {
     sandbox.spy(VueCliService.prototype)
     sandbox.spy(Socket.prototype)
+    await testProject.setExtensionsOnPackage(
+      [
+        testProject.extension1WithBuild,
+        testProject.extension2NoBuild
+      ]
+    )
   })
   afterEach(function () {
     sandbox.restore()
@@ -26,16 +35,13 @@ describe('Serve command', () => {
     .add('extensionsPaths', ctx => {
       return utils.listExtensionsPaths(ctx.testProjectRootPath)
     })
-    .add('manifests', ctx => {
-      return ctx.extensionsPaths.map(entryPoint => ({ entryPoint: utils.getManifestFromEntryPoint(entryPoint) }))
-    })
     .add('distPath', ctx => path.join(ctx.testProjectRootPath, 'dist'))
 
   const setupServeTestNoBuild = commonServeTestSetup
     .add('modifiedFiles', ctx => {
       return [{
-        modifiedFilesPath: path.join(ctx.testProjectRootPath, 'src', 'extension2', 'App.vue'),
-        manifestPath: path.join(ctx.testProjectRootPath, 'src', 'extension2', 'manifest.json')
+        modifiedFilesPath: testProject.extension2NoBuild.entryPointPath,
+        manifestPath: testProject.extension2NoBuild.manifestPath
       }]
     })
     .stub(utils, 'getProjectRootPath', () => testProjectRootPath)
@@ -51,8 +57,8 @@ describe('Serve command', () => {
   const setupServeTest = commonServeTestSetup
     .add('modifiedFiles', ctx => {
       return [{
-        modifiedFilesPath: path.join(ctx.testProjectRootPath, 'src', 'extension1', 'views', 'MyComponent.vue'),
-        manifestPath: path.join(ctx.testProjectRootPath, 'src', 'extension1', 'manifest.json')
+        modifiedFilesPath: testProject.extension1WithBuild.entryPointPath,
+        manifestPath: testProject.extension1WithBuild.manifestPath
       }]
     })
     .stub(utils, 'getProjectRootPath', () => testProjectRootPath)
