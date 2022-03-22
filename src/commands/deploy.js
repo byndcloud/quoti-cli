@@ -8,6 +8,7 @@ const fs = require('fs')
 const path = require('path')
 const inquirer = require('inquirer')
 const utils = require('../utils/index')
+const { flags } = require('@oclif/command')
 
 const { ExtensionNotFoundError } = require('../utils/errorClasses')
 
