@@ -7,12 +7,12 @@ class Extension {
     this.manifestPath = path.join(path.dirname(entryPoint), 'manifest.json')
   }
 
-  getManifestSync () {
+  getManifestBufferSync () {
     return fs.readFileSync(this.manifestPath)
   }
 
   deleteManifestSync () {
-    this.#manifestBufferBackup = this.getManifestSync()
+    this.#manifestBufferBackup = this.getManifestBufferSync()
     fs.unlinkSync(this.manifestPath)
   }
 
@@ -21,7 +21,7 @@ class Extension {
    * @param {number} extensionId
    */
   setExtensionIdOnManifest (extensionId) {
-    const manifestBuffer = this.getManifestSync()
+    const manifestBuffer = this.getManifestBufferSync()
     if (!this.#manifestBufferBackup) {
       this.#manifestBufferBackup = manifestBuffer
     }
