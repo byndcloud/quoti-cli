@@ -1,5 +1,6 @@
 const path = require('path')
 const fs = require('fs')
+const ManifestService = require('../../src/services/manifest')
 class Extension {
   #manifestBufferBackup
   constructor ({ entryPoint }) {
@@ -9,6 +10,10 @@ class Extension {
 
   getManifestBufferSync () {
     return fs.readFileSync(this.manifestPath)
+  }
+
+  getManifestSync () {
+    return new ManifestService(this.manifestPath)
   }
 
   deleteManifestSync () {
