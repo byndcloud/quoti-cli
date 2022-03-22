@@ -27,6 +27,19 @@ class DeployCommand extends Command {
     } else {
       utils.validateEntryPointIncludedInPackage(entryPointPath, this.projectRoot)
     }
+    const isVersionTimestamp = this.flags.version
+    for (const entryPointPath of entryPointsPath) {
+      await this.deployExtension(entryPointPath, isVersionTimestamp)
+    }
+  }
+
+  /**
+   *
+   * @param {string} entryPointPath
+   * @param {boolean} isVersionTimestamp
+   */
+  async deployExtension (entryPointPath, isVersionTimestamp) {
+    this.logger.info('\n----------------------------------------------')
     this.manifest = utils.getManifestFromEntryPoint(entryPointPath)
 
     const token = await firebase.auth().currentUser.getIdToken()
