@@ -14,7 +14,7 @@ $ npm install -g quoti-cli
 $ qt COMMAND
 running command...
 $ qt (-v|--version|version)
-quoti-cli/0.5.2 linux-x64 node-v14.19.0
+quoti-cli/0.6.0-beta.0 linux-x64 node-v14.19.0
 $ qt --help [COMMAND]
 USAGE
   $ qt COMMAND
@@ -68,7 +68,7 @@ ARGUMENTS
   ENTRYPOINTPATH  Endereço do entry point (arquivo principal) da extensão
 ```
 
-_See code: [src/commands/deploy.js](https://github.com/byndcloud/quoti-cli/blob/v0.5.2/src/commands/deploy.js)_
+_See code: [src/commands/deploy.js](https://github.com/byndcloud/quoti-cli/blob/v0.6.0-beta.0/src/commands/deploy.js)_
 
 ## `qt download-current-version [FILEPATH]`
 
@@ -85,24 +85,24 @@ DESCRIPTION
   ...
 ```
 
-_See code: [src/commands/download-current-version.js](https://github.com/byndcloud/quoti-cli/blob/v0.5.2/src/commands/download-current-version.js)_
+_See code: [src/commands/download-current-version.js](https://github.com/byndcloud/quoti-cli/blob/v0.6.0-beta.0/src/commands/download-current-version.js)_
 
 ## `qt help [COMMAND]`
 
-display help for qt
+Display help for qt.
 
 ```
 USAGE
   $ qt help [COMMAND]
 
 ARGUMENTS
-  COMMAND  command to show help for
+  COMMAND  Command to show help for.
 
 OPTIONS
-  --all  see all commands in CLI
+  -n, --nested-commands  Include all nested commands in the output.
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v3.2.18/src/commands/help.ts)_
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.12/src/commands/help.ts)_
 
 ## `qt link-extension [ENTRYPOINTPATH]`
 
@@ -123,7 +123,7 @@ ALIASES
   $ qt select-extension
 ```
 
-_See code: [src/commands/link-extension.js](https://github.com/byndcloud/quoti-cli/blob/v0.5.2/src/commands/link-extension.js)_
+_See code: [src/commands/link-extension.js](https://github.com/byndcloud/quoti-cli/blob/v0.6.0-beta.0/src/commands/link-extension.js)_
 
 ## `qt login`
 
@@ -134,7 +134,7 @@ USAGE
   $ qt login
 ```
 
-_See code: [src/commands/login.js](https://github.com/byndcloud/quoti-cli/blob/v0.5.2/src/commands/login.js)_
+_See code: [src/commands/login.js](https://github.com/byndcloud/quoti-cli/blob/v0.6.0-beta.0/src/commands/login.js)_
 
 ## `qt logout`
 
@@ -145,7 +145,7 @@ USAGE
   $ qt logout
 ```
 
-_See code: [src/commands/logout.js](https://github.com/byndcloud/quoti-cli/blob/v0.5.2/src/commands/logout.js)_
+_See code: [src/commands/logout.js](https://github.com/byndcloud/quoti-cli/blob/v0.6.0-beta.0/src/commands/logout.js)_
 
 ## `qt publish [ENTRYPOINTPATH]`
 
@@ -165,7 +165,7 @@ OPTIONS
   -v, --version=version  Versão da extensão
 ```
 
-_See code: [src/commands/publish.js](https://github.com/byndcloud/quoti-cli/blob/v0.5.2/src/commands/publish.js)_
+_See code: [src/commands/publish.js](https://github.com/byndcloud/quoti-cli/blob/v0.6.0-beta.0/src/commands/publish.js)_
 
 ## `qt serve [ENTRYPOINTPATH]`
 
@@ -180,11 +180,12 @@ ARGUMENTS
 
 OPTIONS
   --deploy-develop  Indica se devemos salvar o build da extensão de develop no banco de dados da Beyond Company
+  --new-session     Força a criação de um novo devSessionId
 
 DESCRIPTION
   ...
   Cria um serve local e realiza upload automaticamente para o Quoti
 ```
 
-_See code: [src/commands/serve.js](https://github.com/byndcloud/quoti-cli/blob/v0.5.2/src/commands/serve.js)_
+_See code: [src/commands/serve.js](https://github.com/byndcloud/quoti-cli/blob/v0.6.0-beta.0/src/commands/serve.js)_
 <!-- commandsstop -->

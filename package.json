@@ -1,7 +1,7 @@
 {
   "name": "quoti-cli",
   "description": "A Quoti Extensions CLI",
-  "version": "0.5.2",
+  "version": "0.6.0-beta.0",
   "author": "Nathan @nmf2",
   "preferGlobal": true,
   "bin": {
@@ -61,7 +61,7 @@
     "sinon": "^13.0.1"
   },
   "engines": {
-    "node": ">=14.18.0"
+    "node": ">=14.19.1"
   },
   "files": [
     "/bin",
