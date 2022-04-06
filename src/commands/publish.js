@@ -174,6 +174,14 @@ class PublishCommand extends Command {
     this.logger.success(`Nova extensão publicada com sucesso: ${version}`)
   }
 
+  /**
+   *
+   * @param {*} flags
+   * @param {*} dynamicComponentFileId
+   * @param {*} token
+   * @param {import('../services/manifest')} manifest
+   * @param {*} targetVersion
+   */
   async publishNewVersion (
     flags,
     dynamicComponentFileId,
