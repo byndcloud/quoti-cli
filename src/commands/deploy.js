@@ -1,6 +1,5 @@
 const md5 = require('md5')
 const { firebase } = require('../config/firebase')
-const ora = require('ora')
 const credentials = require('../config/credentials')
 const Command = require('../base.js')
 const ExtensionService = require('../services/extension')
@@ -13,25 +12,8 @@ const utils = require('../utils/index')
 const { ExtensionNotFoundError } = require('../utils/errorClasses')
 
 class DeployCommand extends Command {
-  constructor ({ projectRoot, extensionsPaths }) {
-    super(...arguments)
-    this.spinnerOptions = {
-      spinner: 'arrow3',
-      color: 'yellow'
-    }
-    this.spinner = ora(this.spinnerOptions)
-    try {
-      this.projectRoot = projectRoot || utils.getProjectRootPath()
-      this.extensionsPaths = extensionsPaths || utils.listExtensionsPaths(this.projectRoot)
-      if (this.extensionsPaths.length === 0) {
-        throw new Error(
-          'Nenhuma extensão foi selecionada até agora, execute qt select-extension para escolher extensões para desenvolver.'
-        )
-      }
-    } catch (error) {
-      this.logger.error(error)
-      process.exit(0)
-    }
+  init () {
+    super.init({ injectProjectRoot: true, injectExtensionsPaths: true })
   }
 
   async run () {
