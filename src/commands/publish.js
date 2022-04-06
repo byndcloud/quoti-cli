@@ -7,8 +7,6 @@ const semver = require('semver')
 const {
   getManifestFromEntryPoint,
   confirmQuestion,
-  listExtensionsPaths,
-  getProjectRootPath,
   validateEntryPointIncludedInPackage,
   getEntryPointFromUser
 } = require('../utils/index')
@@ -17,15 +15,8 @@ const RemoteExtensionService = require('../services/remoteExtension')
 
 class PublishCommand extends Command {
   init () {
-    super.init()
+    super.init({ injectProjectRoot: true, injectExtensionsPaths: true })
     credentials.load()
-    this.projectRoot = getProjectRootPath()
-    this.extensionsPaths = listExtensionsPaths()
-    if (this.extensionsPaths.length === 0) {
-      throw new Error(
-        'Nenhuma extensão foi selecionada até agora, execute qt select-extension para escolher extensões para desenvolver.'
-      )
-    }
   }
 
   async run () {

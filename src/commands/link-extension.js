@@ -15,15 +15,13 @@ const { app } = require('../config/firebase')
 const credentials = require('../config/credentials')
 const api = require('../config/axios')
 const fuzzy = require('fuzzy')
-const { getProjectRootPath } = require('../utils/index')
 const ManifestService = require('../services/manifest.js')
 inquirer.registerPrompt('file-tree-selection', inquirerFileTreeSelection)
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'))
 
 class LinkExtensionCommand extends Command {
   init () {
-    super.init()
-    this.projectRoot = getProjectRootPath()
+    super.init({ injectProjectRoot: true })
   }
 
   async run () {
