@@ -1,7 +1,9 @@
+const semver = require('semver')
+const Logger = require('../config/logger')
 module.exports = async function (options) {
-  const nodeMajorVersion = process.versions.node.split('.')[0]
-  if (nodeMajorVersion < 14) {
-    console.error('Node >= 14.0.0 is required to run quoti-cli.')
-    process.exit(-1)
+  const nodeVersion = process.versions.node
+  if (!semver.gte(nodeVersion, '14.17.0')) {
+    Logger.error('É necessário que a versão do Node seja no mínimo 14.17.0.')
+    process.exit(0)
   }
 }
