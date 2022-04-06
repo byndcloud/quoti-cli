@@ -14,9 +14,9 @@ const { app } = require('../config/firebase')
 
 const credentials = require('../config/credentials')
 const api = require('../config/axios')
-const JSONManager = require('../config/JSONManager')
 const fuzzy = require('fuzzy')
 const { getProjectRootPath } = require('../utils/index')
+const ManifestService = require('../services/manifest.js')
 inquirer.registerPrompt('file-tree-selection', inquirerFileTreeSelection)
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'))
 
@@ -122,7 +122,7 @@ class LinkExtensionCommand extends Command {
   }
 
   upsertManifest (manifestPath, extensionData) {
-    const manifest = new JSONManager(manifestPath)
+    const manifest = new ManifestService(manifestPath)
 
     manifest.extensionId = extensionData.id
     manifest.extensionStorageId = extensionData.extensionStorageId
