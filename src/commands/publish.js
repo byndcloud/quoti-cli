@@ -301,39 +301,40 @@ class PublishCommand extends Command {
   existIncrementVersion (flags) {
     return flags.patch || flags.minor || flags.major
   }
-}
 
-PublishCommand.description = 'Publica uma nova extensão'
+  static args = [
+    {
+      name: 'entryPointPath',
+      required: false,
+      description: 'Endereço do entry point (arquivo principal) da extensão'
+    }
+  ]
 
-PublishCommand.flags = {
-  version: flags.string({
-    char: 'v',
-    description: 'Versão da extensão'
-  }),
+  static description =
+    'Publica uma nova extensão ou atualiza uma extensão já publicada no Marketplace'
 
-  // incrementVersion [patch, minor, major]
-  patch: flags.boolean({
-    char: 'p',
-    description: 'x.x.x -> x.x.x+1'
-  }),
+  static flags = {
+    version: flags.string({
+      char: 'v',
+      description: 'Versão da extensão'
+    }),
 
-  minor: flags.boolean({
-    char: 'm',
-    description: 'x.x.x -> x.x+1.x'
-  }),
+    // incrementVersion [patch, minor, major]
+    patch: flags.boolean({
+      char: 'p',
+      description: 'x.x.x -> x.x.x+1'
+    }),
 
-  major: flags.boolean({
-    char: 'M',
-    description: 'x.x.x -> x+1.x.x'
-  })
-}
+    minor: flags.boolean({
+      char: 'm',
+      description: 'x.x.x -> x.x+1.x'
+    }),
 
-PublishCommand.args = [
-  {
-    name: 'entryPointPath',
-    required: false,
-    description: 'Endereço do entry point (arquivo principal) da extensão'
+    major: flags.boolean({
+      char: 'M',
+      description: 'x.x.x -> x+1.x.x'
+    })
   }
-]
+}
 
 module.exports = PublishCommand
