@@ -89,8 +89,7 @@
       "prerun": [
         "./src/hooks/login",
         "./src/hooks/show-info-on-localhost"
-      ],
-      "init": "./src/hooks/node-version"
+      ]
     }
   },
   "repository": "https://github.com/byndcloud/quoti-cli",
