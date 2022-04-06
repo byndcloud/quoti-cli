@@ -236,16 +236,12 @@ class PublishCommand extends Command {
   }
 
   async callEndpointPublishExtensionVersion (body, token) {
-    try {
-      const { data } = await api.axios.post(
+    const { data } = await api.axios.post(
       `/${credentials.institution}/marketplace/extensions/publish-version`,
       body,
       { headers: { Authorization: `Bearer ${token}` } }
-      )
-      return data.data
-    } catch (error) {
-      console.log(error)
-    }
+    )
+    return data.data
   }
 
   async callEndpointPublishExtension (body, token) {
