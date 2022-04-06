@@ -61,7 +61,7 @@
     "sinon": "^13.0.1"
   },
   "engines": {
-    "node": ">=14.19.1"
+    "node": ">=14.17.0"
   },
   "files": [
     "/bin",
@@ -89,8 +89,7 @@
       "prerun": [
         "./src/hooks/login",
         "./src/hooks/show-info-on-localhost"
-      ],
-      "init": "./src/hooks/node-version"
+      ]
     }
   },
   "repository": "https://github.com/byndcloud/quoti-cli",
