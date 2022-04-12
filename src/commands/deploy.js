@@ -148,7 +148,7 @@ class DeployCommand extends Command {
     } else if (userWantsToDeployAllExtensions) {
       return this.extensionsPaths
     } else {
-      return utils.getEntryPointsFromUser({
+      return utils.promptExtensionEntryPointsFromUser({
         extensionsPaths: this.extensionsPaths,
         message: 'De qual extensão você deseja fazer deploy?'
       })

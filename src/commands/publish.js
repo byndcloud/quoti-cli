@@ -8,7 +8,7 @@ const {
   getManifestFromEntryPoint,
   confirmQuestion,
   validateEntryPointIncludedInPackage,
-  getEntryPointsFromUser
+  promptExtensionEntryPointsFromUser
 } = require('../utils/index')
 const inquirer = require('inquirer')
 const RemoteExtensionService = require('../services/remoteExtension')
@@ -285,7 +285,7 @@ class PublishCommand extends Command {
     if (entryPointPath) {
       return getManifestFromEntryPoint(entryPointPath)
     }
-    entryPointPath = await getEntryPointsFromUser({
+    entryPointPath = await promptExtensionEntryPointsFromUser({
       extensionsPaths: this.extensionsPaths,
       message: 'Qual extensão deseja publicar?',
       multiSelect: false

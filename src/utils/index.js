@@ -73,7 +73,7 @@ function validateEntryPointIncludedInPackage (entryPointPath, projectRootPath) {
  * @param {boolean} [data.multiSelect]
  * @returns {Promise<string[]>} entryPointsSelected
  */
-async function getEntryPointsFromUser ({ extensionsPaths, message = 'Selecione uma extensão', multiSelect = true }) {
+async function promptExtensionEntryPointsFromUser ({ extensionsPaths, message = 'Selecione uma extensão', multiSelect = true }) {
   let entryPointPath
   const extensionsChoices = extensionsPaths.map(e => ({
     name: path.relative('./', e),
@@ -113,5 +113,5 @@ module.exports = {
   listExtensionsPaths,
   validateEntryPointIncludedInPackage,
   getFrontBaseURL,
-  getEntryPointsFromUser
+  promptExtensionEntryPointsFromUser
 }
