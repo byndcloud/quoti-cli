@@ -20,26 +20,16 @@ class DeployCommand extends Command {
   async run () {
     credentials.load()
     const { entryPointPath: entryPointPathFromArgs } = this.args
+
     if (entryPointPathFromArgs && this.flags.all) {
       this.logger.warning(
         `Flag --all desconsiderada pois o entrypoint ${entryPointPathFromArgs} foi informado`
       )
     }
-    let entryPointsPath
-    if (entryPointPathFromArgs) {
-      entryPointsPath = [entryPointPathFromArgs]
-      utils.validateEntryPointIncludedInPackage(
-        entryPointPathFromArgs,
-        this.projectRoot
-      )
-    } else if (this.flags.all) {
-      entryPointsPath = this.extensionsPaths
-    } else {
-      entryPointsPath = await utils.getEntryPointsFromUser({
-        extensionsPaths: this.extensionsPaths,
-        message: 'De qual extensão você deseja fazer deploy?'
-      })
-    }
+
+    const entryPointsPath = await this.getExtensionsEntrypointsToDeploy(
+      entryPointPathFromArgs
+    )
     const isVersionTimestamp = this.flags.version
     for (const entryPointPath of entryPointsPath) {
       await this.deployExtension(entryPointPath, isVersionTimestamp)
@@ -143,6 +133,26 @@ class DeployCommand extends Command {
     return encodeURI(
       `${credentials.institution}/${md5(currentTime)}.${isBuild ? 'js' : 'vue'}`
     )
+  }
+
+  async getExtensionsEntrypointsToDeploy (entryPointFromUser) {
+    const userProvidedAnEntryPoint = !!entryPointFromUser
+    const userWantsToDeployAllExtensions = this.flags.all
+
+    if (userProvidedAnEntryPoint) {
+      utils.validateEntryPointIncludedInPackage(
+        entryPointFromUser,
+        this.projectRoot
+      )
+      return [entryPointFromUser]
+    } else if (userWantsToDeployAllExtensions) {
+      return this.extensionsPaths
+    } else {
+      return utils.getEntryPointsFromUser({
+        extensionsPaths: this.extensionsPaths,
+        message: 'De qual extensão você deseja fazer deploy?'
+      })
+    }
   }
 }
 
