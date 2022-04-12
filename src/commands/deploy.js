@@ -21,7 +21,7 @@ class DeployCommand extends Command {
     credentials.load()
     const { entryPointPath: entryPointPathFromArgs } = this.args
     if (entryPointPathFromArgs && this.flags.all) {
-      this.logger.warning('Flag -all desconsiderada')
+      this.logger.warning(`Flag --all desconsiderada pois o entrypoint ${entryPointPathFromArgs} foi informado`)
     }
     let entryPointsPath
     if (entryPointPathFromArgs) {
