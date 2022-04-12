@@ -21,12 +21,17 @@ class DeployCommand extends Command {
     credentials.load()
     const { entryPointPath: entryPointPathFromArgs } = this.args
     if (entryPointPathFromArgs && this.flags.all) {
-      this.logger.warning(`Flag --all desconsiderada pois o entrypoint ${entryPointPathFromArgs} foi informado`)
+      this.logger.warning(
+        `Flag --all desconsiderada pois o entrypoint ${entryPointPathFromArgs} foi informado`
+      )
     }
     let entryPointsPath
     if (entryPointPathFromArgs) {
       entryPointsPath = [entryPointPathFromArgs]
-      utils.validateEntryPointIncludedInPackage(entryPointPathFromArgs, this.projectRoot)
+      utils.validateEntryPointIncludedInPackage(
+        entryPointPathFromArgs,
+        this.projectRoot
+      )
     } else if (this.flags.all) {
       entryPointsPath = this.extensionsPaths
     } else {
@@ -52,11 +57,12 @@ class DeployCommand extends Command {
 
     const token = await firebase.auth().currentUser.getIdToken()
     const remoteExtensionService = new RemoteExtensionService()
-    const remoteExtension = await remoteExtensionService.getRemoteExtensionsByIds({
-      ids: [this.manifest.extensionId],
-      orgSlug: credentials.institution,
-      token
-    })
+    const remoteExtension =
+      await remoteExtensionService.getRemoteExtensionsByIds({
+        ids: [this.manifest.extensionId],
+        orgSlug: credentials.institution,
+        token
+      })
     if (!remoteExtension) {
       throw new ExtensionNotFoundError(
         `Você não possui a extensão ${path.relative(
@@ -66,8 +72,12 @@ class DeployCommand extends Command {
       )
     }
 
-    const lastVersion = remoteExtension[0].DynamicComponentsFiles.find(item => item.activated).version
-    this.logger.info(`* Você está realizando deploy de uma nova versão para a extensão ${remoteExtension[0].title}`)
+    const lastVersion = remoteExtension[0].DynamicComponentsFiles.find(
+      item => item.activated
+    ).version
+    this.logger.info(
+      `* Você está realizando deploy de uma nova versão para a extensão ${remoteExtension[0].title}`
+    )
     if (lastVersion) {
       this.logger.info(`* Última versão ${lastVersion}`)
     }
@@ -139,7 +149,8 @@ class DeployCommand extends Command {
 DeployCommand.flags = {
   all: flags.boolean({
     char: 'a',
-    description: 'Realiza deploy de todas as extensões presente na propriedade quoti do package.json',
+    description:
+      'Realiza deploy de todas as extensões presente na propriedade quoti do package.json',
     exclusive: ['extra-flag']
   }),
   version: flags.boolean({
