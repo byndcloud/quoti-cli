@@ -19,17 +19,21 @@ class DeployCommand extends Command {
 
   async run () {
     credentials.load()
-    const { entryPointPath: entryPointPathFromArgs } = this.args
 
-    if (entryPointPathFromArgs && this.flags.all) {
+    const userProvidedEntryPoint = this.args.entryPointPath
+
+    const userWantsToDeployAllExtensions = this.flags.all
+
+    if (userProvidedEntryPoint && userWantsToDeployAllExtensions) {
       this.logger.warning(
-        `Flag --all desconsiderada pois o entrypoint ${entryPointPathFromArgs} foi informado`
+        `Flag --all desconsiderada pois o entrypoint ${userProvidedEntryPoint} foi informado`
       )
     }
 
     const entryPointsPath = await this.getExtensionsEntrypointsToDeploy(
-      entryPointPathFromArgs
+      userProvidedEntryPoint
     )
+
     const isVersionTimestamp = this.flags.version
     for (const entryPointPath of entryPointsPath) {
       await this.deployExtension(entryPointPath, isVersionTimestamp)
