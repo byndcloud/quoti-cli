@@ -50,10 +50,13 @@
     "eslint": "^8.10.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-mocha": "^10.0.4",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^6.0.0",
     "findup-sync": "^5.0.0",
     "globby": "^10.0.2",
+    "husky": "^7.0.4",
+    "lint-staged": "^12.3.7",
     "mocha": "^5.2.0",
     "nyc": "^14.1.1",
     "prettier": "^2.5.1",
@@ -99,6 +102,14 @@
     "test:unit": "NODE_ENV=test nyc mocha --forbid-only --exit \"test/unit/**/*.test.js\"",
     "test:e2e": "NODE_ENV=test nyc mocha --forbid-only --exit \"test/end-to-end/**/*.test.js\"",
     "version": "oclif-dev readme && git add README.md",
-    "lint": "eslint --fix ."
+    "lint": "eslint --fix -c .eslintrc.json src/**/*.js test/**/*.js",
+    "format": "prettier --write src/**/*.js test/**/*.js",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --cache --fix",
+      "prettier --write"
+    ]
   }
 }

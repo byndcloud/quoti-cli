@@ -8,3 +8,4 @@ marketplace
 extensionsToTest/dist
 test/beyondCredentials.json
 quoti-cli*tgz
+.eslintcache
