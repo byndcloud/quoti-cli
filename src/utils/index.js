@@ -98,11 +98,15 @@ async function promptExtensionEntryPointsFromUser ({ extensionsPaths, message = 
   return entryPointPath || []
 }
 function getFrontBaseURL () {
-  if (process.env.API_BASE_URL) {
-    return process.env.QUOTI_FRONT_BASE_URL || 'http://localhost:8080'
-  } else {
-    return 'https://quoti.cloud'
+  if (process.env.QUOTI_FRONT_BASE_URL) {
+    return process.env.QUOTI_FRONT_BASE_URL
   }
+
+  if (process.env.API_BASE_URL) {
+    return 'http://localhost:8080'
+  }
+
+  return 'https://quoti.cloud'
 }
 module.exports = {
   isYes,
