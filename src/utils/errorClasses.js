@@ -6,8 +6,8 @@ class TypedError extends Error {
 }
 
 class ExtensionNotFoundError extends TypedError {
-  constructor (message, { name, orgSlug }) {
-    super(message || `A extensão ${name} não foi encontrada na organização "${orgSlug}", na qual você está logado.`)
+  constructor (message, { name, orgSlug } = {}) {
+    super(message || `A extensão "${name}" não foi encontrada na organização "${orgSlug}", na qual você está logado.`)
   }
 }
 
