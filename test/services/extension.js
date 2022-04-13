@@ -12,7 +12,7 @@ class Extension {
     return fs.readFileSync(this.manifestPath)
   }
 
-  getManifestSync () {
+  getManifest () {
     return new ManifestService(this.manifestPath)
   }
 

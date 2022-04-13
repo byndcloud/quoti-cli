@@ -80,14 +80,14 @@ describe('Serve command', () => {
   setupServeTest.it('When an extension\'s file is modified vueCliService function must be called with name including dc_extensionUUID', async (ctx, done) => {
     const vueCliServiceSpy = VueCliService.prototype
     const runLastArg = vueCliServiceSpy.run.firstCall.lastArg
-    const manifest = testProject.extension1WithBuild.getManifestSync()
+    const manifest = testProject.extension1WithBuild.getManifest()
     expect(runLastArg.name).to.equal(`dc_${manifest.extensionUUID}`)
     await delay(1000)
     done()
   })
 
   setupServeTest.it('Change in a extension\'s file must be built in dist/dc_uuid.umd.min.js', async (ctx, done) => {
-    const manifest = testProject.extension1WithBuild.getManifestSync()
+    const manifest = testProject.extension1WithBuild.getManifest()
     const distExtensionPath = path.join(ctx.distPath, `dc_${manifest.extensionUUID}.umd.min.js`)
     while (!fs.existsSync(distExtensionPath)) {
       await delay(100)
