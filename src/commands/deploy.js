@@ -34,9 +34,9 @@ class DeployCommand extends Command {
       userProvidedEntryPoint
     )
 
-    const isVersionTimestamp = this.flags.version
+    const promptVersion = this.flags['ask-version']
     for (const entryPointPath of entryPointsPath) {
-      await this.deployExtension(entryPointPath, isVersionTimestamp)
+      await this.deployExtension(entryPointPath, promptVersion)
     }
   }
 
@@ -45,58 +45,57 @@ class DeployCommand extends Command {
    * @param {string} entryPointPath
    * @param {boolean} isVersionTimestamp
    */
-  async deployExtension (entryPointPath, isVersionTimestamp) {
+  async deployExtension (entryPointPath, promptVersion) {
     this.logger.info('\n----------------------------------------------')
-    this.manifest = utils.getManifestFromEntryPoint(entryPointPath)
+    const manifest = utils.getManifestFromEntryPoint(entryPointPath)
 
     const token = await firebase.auth().currentUser.getIdToken()
     const remoteExtensionService = new RemoteExtensionService()
-    const remoteExtension =
+    const [remoteExtension] =
       await remoteExtensionService.getRemoteExtensionsByIds({
-        ids: [this.manifest.extensionId],
+        ids: [manifest.extensionId],
         orgSlug: credentials.institution,
         token
       })
+
     if (!remoteExtension) {
-      throw new ExtensionNotFoundError(
-        `Você não possui a extensão ${path.relative(
-          './',
-          entryPointPath
-        )} em sua organização`
-      )
+      throw new ExtensionNotFoundError({
+        name: manifest.name,
+        orgSlug: credentials.institution
+      })
     }
 
-    const lastVersion = remoteExtension[0].DynamicComponentsFiles.find(
+    const lastVersion = remoteExtension.DynamicComponentsFiles.find(
       item => item.activated
     ).version
     this.logger.info(
       `* Você está realizando deploy de uma nova versão para a extensão ${remoteExtension[0].title}`
     )
     if (lastVersion) {
-      this.logger.info(`* Última versão ${lastVersion}`)
+      this.logger.info(`* Versão atual: ${lastVersion}`)
     }
 
-    this.extensionService = new ExtensionService(this.manifest)
+    this.extensionService = new ExtensionService(manifest)
 
-    if (!this.manifest.exists()) {
+    if (!manifest.exists()) {
       this.logger.warning(
-        'Por favor selecione sua extensão. Execute qt selectExtension no diretório onde encontra a extensão'
+        'Execute qt link-extension antes de realizar o deploy da sua extensão'
       )
       return
     }
 
     let versionName = Date.now()
-    if (!isVersionTimestamp) {
-      versionName = await this.inputVersionName(lastVersion)
+    if (promptVersion) {
+      versionName = await this.promptVersionName(lastVersion)
     }
     const filename = this.getUploadFileNameDeploy(
       new Date().getTime().toString(),
-      this.manifest.type === 'build'
+      manifest.type === 'build'
     )
     const url = `https://storage.cloud.google.com/dynamic-components/${filename}`
 
     let extensionPath = entryPointPath
-    if (this.manifest.type === 'build') {
+    if (manifest.type === 'build') {
       extensionPath = await this.extensionService.build(entryPointPath)
     }
     await this.extensionService.upload(fs.readFileSync(extensionPath), filename)
@@ -122,7 +121,7 @@ class DeployCommand extends Command {
     }
   }
 
-  async inputVersionName () {
+  async promptVersionName () {
     const { versionName } = await inquirer.prompt([
       {
         name: 'versionName',
@@ -167,9 +166,10 @@ DeployCommand.flags = {
       'Realiza deploy de todas as extensões presente na propriedade quoti do package.json',
     exclusive: ['extra-flag']
   }),
-  version: flags.boolean({
-    char: 'v',
-    description: 'Coloca um timestamp na versão',
+  'ask-version': flags.boolean({
+    char: 'av',
+    description:
+      'Permite selecionar uma versão para o deploy quando a flag --all for passada também. Por padrão, um timestamp será usado para identificar a versão.',
     exclusive: ['extra-flag']
   })
 }
