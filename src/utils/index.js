@@ -1,16 +1,19 @@
 const path = require('path')
 const inquirer = require('inquirer')
-const { ManifestNotFoundError, EntryPointNotFoundInPackageError } = require('./errorClasses')
+const {
+  ManifestNotFoundError,
+  EntryPointNotFoundInPackageError
+} = require('./errorClasses')
 const ManifestService = require('../services/manifest')
 const readPkgSync = require('read-pkg-up').sync
-function isYes (text) {
+function isYes(text) {
   return ['s', 'sim', 'yes', 'y'].includes(text.toLowerCase())
 }
-function isNo (text) {
+function isNo(text) {
   return ['n', 'não', 'nao', 'no'].includes(text.toLowerCase())
 }
 
-async function confirmQuestion (text) {
+async function confirmQuestion(text) {
   const { confirmVersion } = await inquirer.prompt([
     {
       name: 'confirmVersion',
@@ -26,7 +29,7 @@ async function confirmQuestion (text) {
   ])
   return isYes(confirmVersion)
 }
-function getManifestFromEntryPoint (entrypointPath) {
+function getManifestFromEntryPoint(entrypointPath) {
   const manifestPath = path.resolve(
     path.dirname(entrypointPath),
     'manifest.json'
@@ -37,7 +40,7 @@ function getManifestFromEntryPoint (entrypointPath) {
   }
   return manifest
 }
-function getProjectRootPath () {
+function getProjectRootPath() {
   const pkgInfo = readPkgSync()
   if (!pkgInfo?.packageJson) {
     throw new Error(
@@ -47,7 +50,7 @@ function getProjectRootPath () {
 
   return path.resolve(path.dirname(pkgInfo.path))
 }
-function listExtensionsPaths (projectRootPath) {
+function listExtensionsPaths(projectRootPath) {
   const projectRoot = projectRootPath || getProjectRootPath()
   const pkgInfo = readPkgSync({ cwd: path.resolve(projectRoot) })
   if (!pkgInfo.packageJson?.quoti?.extensions?.length) {
@@ -59,7 +62,7 @@ function listExtensionsPaths (projectRootPath) {
     path.resolve(projectRoot, extPath)
   )
 }
-function validateEntryPointIncludedInPackage (entryPointPath, projectRootPath) {
+function validateEntryPointIncludedInPackage(entryPointPath, projectRootPath) {
   const entryPointPaths = listExtensionsPaths(projectRootPath)
   if (!entryPointPaths.includes(path.resolve(entryPointPath))) {
     throw new EntryPointNotFoundInPackageError({ entryPointPath })
@@ -73,7 +76,11 @@ function validateEntryPointIncludedInPackage (entryPointPath, projectRootPath) {
  * @param {boolean} [data.multiSelect]
  * @returns {Promise<string[]>} entryPointsSelected
  */
-async function promptExtensionEntryPointsFromUser ({ extensionsPaths, message = 'Selecione uma extensão', multiSelect = true }) {
+async function promptExtensionEntryPointsFromUser({
+  extensionsPaths,
+  message = 'Selecione uma extensão',
+  multiSelect = true
+}) {
   let entryPointPath
   const extensionsChoices = extensionsPaths.map(e => ({
     name: path.relative('./', e),
@@ -97,7 +104,7 @@ async function promptExtensionEntryPointsFromUser ({ extensionsPaths, message = 
   }
   return entryPointPath || []
 }
-function getFrontBaseURL () {
+function getFrontBaseURL() {
   if (process.env.QUOTI_FRONT_BASE_URL) {
     return process.env.QUOTI_FRONT_BASE_URL
   }

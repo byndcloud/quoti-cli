@@ -8,7 +8,7 @@ const credentials = require('../config/credentials')
 const Logger = require('../config/logger')
 const utils = require('../utils/index')
 class ExtensionService {
-  constructor (manifest, { spinnerOptions } = {}) {
+  constructor(manifest, { spinnerOptions } = {}) {
     if (!manifest) {
       throw new Error(
         'The manifest parameter is required to use the ExtensionService'
@@ -18,10 +18,12 @@ class ExtensionService {
     this.logger = Logger.child({
       tag: 'command/publish'
     })
-    this.spinner = ora(spinnerOptions || {
-      spinner: 'arrow3',
-      color: 'yellow'
-    })
+    this.spinner = ora(
+      spinnerOptions || {
+        spinner: 'arrow3',
+        color: 'yellow'
+      }
+    )
     this.vueCliService = new VueCliService(utils.getProjectRootPath())
   }
 
@@ -33,7 +35,7 @@ class ExtensionService {
    * @param {string} [data.filename]
    * @param {string} token
    */
-  async deployVersion ({ url, version, fileVuePrefix }, token) {
+  async deployVersion({ url, version, fileVuePrefix }, token) {
     await api.axios.put(
       `/${credentials.institution}/dynamic-components/${this.manifest.extensionId}`,
       {
@@ -47,9 +49,11 @@ class ExtensionService {
     return true
   }
 
-  async upload (buffer, remotePath) {
+  async upload(buffer, remotePath) {
     if (!this.manifest.exists()) {
-      this.logger.warning('Por favor selecione sua extensão. Execute qt select-extension')
+      this.logger.warning(
+        'Por favor selecione sua extensão. Execute qt select-extension'
+      )
       process.exit(0)
     } else if (!buffer) {
       this.logger.error('Buffer é null!')
@@ -68,16 +72,20 @@ class ExtensionService {
             cacheControl: 'public, max-age=0'
           }
         })
-      this.spinner.succeed(`Upload da extensão ${this.manifest.name} finalizado!`)
+      this.spinner.succeed(
+        `Upload da extensão ${this.manifest.name} finalizado!`
+      )
     } catch (error) {
       this.spinner.fail('Erro durante o upload')
       throw new Error(error)
     }
   }
 
-  async createExtensionUUID () {
+  async createExtensionUUID() {
     this.logger.success('Criando nova extension_UUID')
-    this.logger.warning(`Sempre que você atualizar para uma versão anterior a ${new Date()}, você deve compilar primeiro.`)
+    this.logger.warning(
+      `Sempre que você atualizar para uma versão anterior a ${new Date()}, você deve compilar primeiro.`
+    )
 
     const uuid = randomUUID()
     await credentials.load()
@@ -93,7 +101,7 @@ class ExtensionService {
     return uuid
   }
 
-  async build (entry, { mode } = { mode: 'production' }) {
+  async build(entry, { mode } = { mode: 'production' }) {
     if (!this.manifest.extensionUUID) {
       const extension = await this.getExtension(this.manifest.extensionId)
       if (this.extension?.extensionUUID) {

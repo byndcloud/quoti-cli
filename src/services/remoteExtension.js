@@ -10,19 +10,24 @@ class RemoteExtension {
     if (this.#isLoadExtensionVersionsOnMarketplace) {
       return this.#extensionVersionsOnMarketplace
     }
-    throw new Error('You must first perform load loadExtensionVersionsOnMarketplace')
+    throw new Error(
+      'You must first perform load loadExtensionVersionsOnMarketplace'
+    )
   }
 
-  async loadExtensionVersionsOnMarketplace ({ extensionVersionId, token, orgSlug }) {
+  async loadExtensionVersionsOnMarketplace({
+    extensionVersionId,
+    token,
+    orgSlug
+  }) {
     if (!token) {
       token = await firebase.auth().currentUser.getIdToken()
     }
 
     const address = `/${orgSlug}/marketplace/extensions/${extensionVersionId}/versions`
-    const { data } = await api.axios.get(
-      address,
-      { headers: { Authorization: `Bearer ${token}` } }
-    )
+    const { data } = await api.axios.get(address, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
     if (!data || data?.length === 0) {
       return
     }
@@ -31,25 +36,32 @@ class RemoteExtension {
   }
 
   // extension on Marketplace
-  async getExtensionVersionsOnMarketplace () {
+  async getExtensionVersionsOnMarketplace() {
     this.#checkLoadExtensionVersions()
     return this.#checkLoadExtensionVersions
   }
 
-  getLastVersionOnMarketplace () {
+  getLastVersionOnMarketplace() {
     this.#checkLoadExtensionVersions()
-    const lastVersion = this.#extensionVersionsOnMarketplace.map(item => {
-      if (item.version) {
-        return semver.valid(item.version)
-      }
-      return null
-    }
-    ).filter(lv => lv).sort(semver.rcompare)[0]
+    const lastVersion = this.#extensionVersionsOnMarketplace
+      .map(item => {
+        if (item.version) {
+          return semver.valid(item.version)
+        }
+        return null
+      })
+      .filter(lv => lv)
+      .sort(semver.rcompare)[0]
     return lastVersion
   }
 
   // extension on Org
-  async getRemoteExtensionsByIds ({ ids, orgSlug, token, parameters = ['title', 'extension_uuid'] }) {
+  async getRemoteExtensionsByIds({
+    ids,
+    orgSlug,
+    token,
+    parameters = ['title', 'extension_uuid']
+  }) {
     const baseURI = `/${orgSlug}/dynamic-components`
 
     const params = new URLSearchParams()
@@ -68,7 +80,12 @@ class RemoteExtension {
     return data || []
   }
 
-  async getRemoteExtensions ({ extensionsPathsArg, orgSlug, token, parameters = ['title', 'extension_uuid'] }) {
+  async getRemoteExtensions({
+    extensionsPathsArg,
+    orgSlug,
+    token,
+    parameters = ['title', 'extension_uuid']
+  }) {
     let extensionsPaths = extensionsPathsArg
     if (!extensionsPaths) {
       const projectRoot = utils.getProjectRootPath()

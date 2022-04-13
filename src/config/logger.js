@@ -30,9 +30,15 @@ const logger = createLogger({
     printf(msg => {
       if (msg.level === 'debug' && NODE_ENV === 'development') {
         if (msg.tag) {
-          return colorizer.colorize(msg.level, `${msg.timestamp} - ${msg.tag} - ${msg.level}: ${msg.message}`)
+          return colorizer.colorize(
+            msg.level,
+            `${msg.timestamp} - ${msg.tag} - ${msg.level}: ${msg.message}`
+          )
         } else {
-          return colorizer.colorize(msg.level, `${msg.timestamp} - ${msg.level}: ${msg.message}`)
+          return colorizer.colorize(
+            msg.level,
+            `${msg.timestamp} - ${msg.level}: ${msg.message}`
+          )
         }
       } else if (msg.stack && NODE_ENV === 'development') {
         return colorizer.colorize(msg.level, `${msg.stack}`)
@@ -41,12 +47,11 @@ const logger = createLogger({
     })
   ),
   transports: [
-    new (transports.Console)({
+    new transports.Console({
       level: 'success',
       prettyPrint: true,
       colorize: true,
       timestamp: true
-
     })
   ]
 })

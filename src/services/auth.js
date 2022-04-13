@@ -8,7 +8,7 @@ const api = require('../config/axios')
 const Logger = require('../config/logger')
 
 class Auth {
-  async login () {
+  async login() {
     console.log(chalk`${logo}`)
     const institution = await this.insertOrgSLug()
     const customToken = await this.insertToken()
@@ -19,14 +19,15 @@ class Auth {
         institution: institution,
         user: authFirebase.user.toJSON()
       }
-      await api.axios.get(
-        `/${data.institution}/users`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
+      await api.axios.get(`/${data.institution}/users`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
       credentials.save(data)
     } catch (e) {
       if (e?.response?.status === 406) {
-        Logger.error('Falha ao realizar login. Verifique se escreveu o nome da organização corretamente')
+        Logger.error(
+          'Falha ao realizar login. Verifique se escreveu o nome da organização corretamente'
+        )
       } else {
         Logger.error('Falha ao realizar login.')
       }
@@ -34,7 +35,7 @@ class Auth {
     }
   }
 
-  async insertOrgSLug () {
+  async insertOrgSLug() {
     const { inputOrgSlug } = await inquirer.prompt([
       {
         name: 'inputOrgSlug',
@@ -45,12 +46,11 @@ class Auth {
     return inputOrgSlug
   }
 
-  async insertToken () {
+  async insertToken() {
     const { inputToken } = await inquirer.prompt([
       {
         name: 'inputToken',
-        message:
-          'Informe seu token de login',
+        message: 'Informe seu token de login',
         type: 'input',
         transformer: input => {
           if (!input) {
@@ -64,7 +64,7 @@ class Auth {
     return inputToken
   }
 
-  async silentLogin () {
+  async silentLogin() {
     if (!credentials.exists()) {
       await this.login()
       credentials.load()

@@ -10,21 +10,23 @@ const inquirer = require('inquirer')
 const utilsTest = require('../utils/index')
 const TestProject = require('../services/testProject')
 const { expectTimestampInFile } = require('../utils/expects')
-const { EntryPointNotFoundInPackageError, ManifestNotFoundError, ExtensionNotFoundError } = require('../../src/utils/errorClasses')
+const {
+  EntryPointNotFoundInPackageError,
+  ManifestNotFoundError,
+  ExtensionNotFoundError
+} = require('../../src/utils/errorClasses')
 const testProject = new TestProject()
 
-describe('Deploy command', () => {
+describe('Deploy command', function () {
   // setup
   const sandbox = sinon.createSandbox()
   beforeEach(async function () {
     sandbox.spy(ExtensionService.prototype)
     sandbox.spy(BaseCommand.prototype)
-    await testProject.setExtensionsOnPackage(
-      [
-        testProject.extension1WithBuild,
-        testProject.extension2NoBuild
-      ]
-    )
+    await testProject.setExtensionsOnPackage([
+      testProject.extension1WithBuild,
+      testProject.extension2NoBuild
+    ])
   })
   afterEach(async function () {
     await testProject.restore()
@@ -38,81 +40,98 @@ describe('Deploy command', () => {
   // test 1
   const setupDeployTestNoBuild = commonDeployTestSetup
     .add('modifiedFiles', ctx => {
-      return [{
-        modifiedFilesPath: testProject.extension2NoBuild.entryPointPath,
-        manifestPath: testProject.extension2NoBuild.manifestPath
-      }]
+      return [
+        {
+          modifiedFilesPath: testProject.extension2NoBuild.entryPointPath,
+          manifestPath: testProject.extension2NoBuild.manifestPath
+        }
+      ]
     })
     .do(async ctx => {
-      utilsTest.insertTimestampInFile(ctx.modifiedFiles[0].modifiedFilesPath, now)
+      utilsTest.insertTimestampInFile(
+        ctx.modifiedFiles[0].modifiedFilesPath,
+        now
+      )
     })
     .command(['deploy', testProject.extension2NoBuild.entryPointPath])
-  setupDeployTestNoBuild.it('qt deploy to extension without build', async (_, done) => {
-    const extensionServiceSpy = ExtensionService.prototype
+  setupDeployTestNoBuild.it(
+    'qt deploy to extension without build',
+    async (_, done) => {
+      const extensionServiceSpy = ExtensionService.prototype
 
-    expect(extensionServiceSpy.build.notCalled)
+      expect(extensionServiceSpy.build.notCalled)
 
-    expect(extensionServiceSpy.upload.callCount).to.equal(1)
+      expect(extensionServiceSpy.upload.callCount).to.equal(1)
 
-    const uploadFirstArgs = extensionServiceSpy.upload.firstCall.args
-    const bufferPassedToUploadFunction = uploadFirstArgs[0]
-    expectTimestampInFile(bufferPassedToUploadFunction, now)
+      const uploadFirstArgs = extensionServiceSpy.upload.firstCall.args
+      const bufferPassedToUploadFunction = uploadFirstArgs[0]
+      expectTimestampInFile(bufferPassedToUploadFunction, now)
 
-    expect(extensionServiceSpy.deployVersion.callCount).to.equal(1)
+      expect(extensionServiceSpy.deployVersion.callCount).to.equal(1)
 
-    done()
-  })
+      done()
+    }
+  )
 
   // test 2
   const setupDeployTestWithBuild = commonDeployTestSetup
     .add('modifiedFiles', ctx => {
-      return [{
-        modifiedFilesPath: testProject.extension1WithBuild.entryPointPath,
-        manifestPath: testProject.extension1WithBuild.manifestPath
-      }]
+      return [
+        {
+          modifiedFilesPath: testProject.extension1WithBuild.entryPointPath,
+          manifestPath: testProject.extension1WithBuild.manifestPath
+        }
+      ]
     })
     .do(async ctx => {
-      utilsTest.insertTimestampInFile(ctx.modifiedFiles[0].modifiedFilesPath, now)
+      utilsTest.insertTimestampInFile(
+        ctx.modifiedFiles[0].modifiedFilesPath,
+        now
+      )
     })
     .command(['deploy', testProject.extension1WithBuild.entryPointPath])
 
-  setupDeployTestWithBuild.it('qt deploy to extension with build', async (_, done) => {
-    const extensionServiceSpy = ExtensionService.prototype
+  setupDeployTestWithBuild.it(
+    'qt deploy to extension with build',
+    async (_, done) => {
+      const extensionServiceSpy = ExtensionService.prototype
 
-    expect(extensionServiceSpy.build.callCount).to.equal(1)
+      expect(extensionServiceSpy.build.callCount).to.equal(1)
 
-    expect(extensionServiceSpy.upload.callCount).to.equal(1)
+      expect(extensionServiceSpy.upload.callCount).to.equal(1)
 
-    const uploadFirstArgs = extensionServiceSpy.upload.firstCall.args
-    const bufferPassedToUploadFunction = uploadFirstArgs[0]
-    expectTimestampInFile(bufferPassedToUploadFunction, now)
+      const uploadFirstArgs = extensionServiceSpy.upload.firstCall.args
+      const bufferPassedToUploadFunction = uploadFirstArgs[0]
+      expectTimestampInFile(bufferPassedToUploadFunction, now)
 
-    expect(extensionServiceSpy.deployVersion.callCount).to.equal(1)
+      expect(extensionServiceSpy.deployVersion.callCount).to.equal(1)
 
-    done()
-  })
+      done()
+    }
+  )
 
   // test 3
   const setupDeployTestNoEntrypointOnPackage = commonDeployTestSetup
     .do(async _ => {
-      await testProject.setExtensionsOnPackage(
-        [
-          testProject.extension1WithBuild
-        ]
-      )
+      await testProject.setExtensionsOnPackage([
+        testProject.extension1WithBuild
+      ])
     })
     .command(['deploy', testProject.extension2NoBuild.entryPointPath])
     .catch(err => {
       expect(err).to.be.an.instanceof(EntryPointNotFoundInPackageError)
     })
 
-  setupDeployTestNoEntrypointOnPackage.it('qt deploy to extension not listed in package', async (_, done) => {
-    const extensionServiceSpy = ExtensionService.prototype
-    expect(extensionServiceSpy.build.notCalled)
-    expect(extensionServiceSpy.upload.notCalled)
-    expect(extensionServiceSpy.deployVersion.notCalled)
-    done()
-  })
+  setupDeployTestNoEntrypointOnPackage.it(
+    'qt deploy to extension not listed in package',
+    async (_, done) => {
+      const extensionServiceSpy = ExtensionService.prototype
+      expect(extensionServiceSpy.build.notCalled)
+      expect(extensionServiceSpy.upload.notCalled)
+      expect(extensionServiceSpy.deployVersion.notCalled)
+      done()
+    }
+  )
   // test 4
   const setupDeployTestNoManifest = commonDeployTestSetup
     .do(async _ => {
@@ -123,13 +142,16 @@ describe('Deploy command', () => {
       expect(err).to.be.an.instanceof(ManifestNotFoundError)
     })
 
-  setupDeployTestNoManifest.it('qt deploy to extension no manifest', async (_, done) => {
-    const extensionServiceSpy = ExtensionService.prototype
-    expect(extensionServiceSpy.build.notCalled)
-    expect(extensionServiceSpy.upload.notCalled)
-    expect(extensionServiceSpy.deployVersion.notCalled)
-    done()
-  })
+  setupDeployTestNoManifest.it(
+    'qt deploy to extension no manifest',
+    async (_, done) => {
+      const extensionServiceSpy = ExtensionService.prototype
+      expect(extensionServiceSpy.build.notCalled)
+      expect(extensionServiceSpy.upload.notCalled)
+      expect(extensionServiceSpy.deployVersion.notCalled)
+      done()
+    }
+  )
   // test 5
   const setupDeployTestRemoteExtensionNotFound = commonDeployTestSetup
     .do(async _ => {
@@ -140,23 +162,31 @@ describe('Deploy command', () => {
       expect(err).to.be.an.instanceof(ExtensionNotFoundError)
     })
 
-  setupDeployTestRemoteExtensionNotFound.it('qt deploy to extension without remote extension', async (_, done) => {
-    const extensionServiceSpy = ExtensionService.prototype
-    expect(extensionServiceSpy.build.notCalled)
-    expect(extensionServiceSpy.upload.notCalled)
-    expect(extensionServiceSpy.deployVersion.notCalled)
-    done()
-  })
+  setupDeployTestRemoteExtensionNotFound.it(
+    'qt deploy to extension without remote extension',
+    async (_, done) => {
+      const extensionServiceSpy = ExtensionService.prototype
+      expect(extensionServiceSpy.build.notCalled)
+      expect(extensionServiceSpy.upload.notCalled)
+      expect(extensionServiceSpy.deployVersion.notCalled)
+      done()
+    }
+  )
   // test 6
   const setupDeployTestWithoutArgs = commonDeployTestSetup
     .add('modifiedFiles', ctx => {
-      return [{
-        modifiedFilesPath: testProject.extension2NoBuild.entryPointPath,
-        manifestPath: testProject.extension2NoBuild.manifestPath
-      }]
+      return [
+        {
+          modifiedFilesPath: testProject.extension2NoBuild.entryPointPath,
+          manifestPath: testProject.extension2NoBuild.manifestPath
+        }
+      ]
     })
     .do(async ctx => {
-      utilsTest.insertTimestampInFile(ctx.modifiedFiles[0].modifiedFilesPath, now)
+      utilsTest.insertTimestampInFile(
+        ctx.modifiedFiles[0].modifiedFilesPath,
+        now
+      )
     })
     .stub(inquirer, 'prompt', arg => {
       const promptName = arg[0].name
@@ -170,17 +200,20 @@ describe('Deploy command', () => {
     })
     .command(['deploy'])
 
-  setupDeployTestWithoutArgs.it('qt deploy to extension no build without argument', async (_, done) => {
-    const extensionServiceSpy = ExtensionService.prototype
-    expect(extensionServiceSpy.build.notCalled)
-    expect(extensionServiceSpy.upload.callCount).to.equal(1)
-    const uploadFirstArgs = extensionServiceSpy.upload.firstCall.args
-    const bufferPassedToUploadFunction = uploadFirstArgs[0]
-    expectTimestampInFile(bufferPassedToUploadFunction, now)
-    expect(extensionServiceSpy.deployVersion.callCount).to.equal(1)
+  setupDeployTestWithoutArgs.it(
+    'qt deploy to extension no build without argument',
+    async (_, done) => {
+      const extensionServiceSpy = ExtensionService.prototype
+      expect(extensionServiceSpy.build.notCalled)
+      expect(extensionServiceSpy.upload.callCount).to.equal(1)
+      const uploadFirstArgs = extensionServiceSpy.upload.firstCall.args
+      const bufferPassedToUploadFunction = uploadFirstArgs[0]
+      expectTimestampInFile(bufferPassedToUploadFunction, now)
+      expect(extensionServiceSpy.deployVersion.callCount).to.equal(1)
 
-    done()
-  })
+      done()
+    }
+  )
   // test 7
   const setupDeployTestAllExtensions = commonDeployTestSetup
     .add('modifiedFiles', ctx => {
@@ -196,27 +229,36 @@ describe('Deploy command', () => {
       ]
     })
     .do(async ctx => {
-      utilsTest.insertTimestampInFile(ctx.modifiedFiles[0].modifiedFilesPath, now)
-      utilsTest.insertTimestampInFile(ctx.modifiedFiles[1].modifiedFilesPath, now)
+      utilsTest.insertTimestampInFile(
+        ctx.modifiedFiles[0].modifiedFilesPath,
+        now
+      )
+      utilsTest.insertTimestampInFile(
+        ctx.modifiedFiles[1].modifiedFilesPath,
+        now
+      )
     })
     .command(['deploy', '-a'])
-  setupDeployTestAllExtensions.it('qt deploy all extensions', async (_, done) => {
-    const extensionServiceSpy = ExtensionService.prototype
+  setupDeployTestAllExtensions.it(
+    'qt deploy all extensions',
+    async (_, done) => {
+      const extensionServiceSpy = ExtensionService.prototype
 
-    expect(extensionServiceSpy.build.callCount).to.equal(1)
+      expect(extensionServiceSpy.build.callCount).to.equal(1)
 
-    expect(extensionServiceSpy.upload.callCount).to.equal(2)
+      expect(extensionServiceSpy.upload.callCount).to.equal(2)
 
-    const uploadFirstArgs = extensionServiceSpy.upload.firstCall.args
-    let bufferPassedToUploadFunction = uploadFirstArgs[0]
-    expectTimestampInFile(bufferPassedToUploadFunction, now)
+      const uploadFirstArgs = extensionServiceSpy.upload.firstCall.args
+      let bufferPassedToUploadFunction = uploadFirstArgs[0]
+      expectTimestampInFile(bufferPassedToUploadFunction, now)
 
-    const uploadSecondArgs = extensionServiceSpy.upload.firstCall.args
-    bufferPassedToUploadFunction = uploadSecondArgs[0]
-    expectTimestampInFile(bufferPassedToUploadFunction, now)
+      const uploadSecondArgs = extensionServiceSpy.upload.firstCall.args
+      bufferPassedToUploadFunction = uploadSecondArgs[0]
+      expectTimestampInFile(bufferPassedToUploadFunction, now)
 
-    expect(extensionServiceSpy.deployVersion.callCount).to.equal(2)
+      expect(extensionServiceSpy.deployVersion.callCount).to.equal(2)
 
-    done()
-  })
+      done()
+    }
+  )
 })

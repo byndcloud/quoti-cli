@@ -1,30 +1,504 @@
 const chalk = require('chalk')
 const logo = `
                                                                       
-                                                 ${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}               
-                                     ${chalk.blue('b')} ${chalk.blue('b')} ${chalk.blue('b')}  ${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}       
-                ${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}  ${chalk.blue('b')}  ${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')} ${chalk.blue('b')}       
-         ${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}         
-     ${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')} ${chalk.blue('b')}       
-   ${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')} ${chalk.blue('b')}       
-    ${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}         
-     ${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')} ${chalk.blue('b')}       
-      ${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}         
-        ${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}         
-          ${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}         
-             ${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}          
-                ${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}           
-                     ${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}            
-                ${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')} ${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}           
-                ${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}           
-                ${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}          
-                 ${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}           
-                 ${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')} ${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}            
-                               ${chalk.blue('b')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}           
-                                   ${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}             
-                                      ${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}              
-                                         ${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}               
-                                          ${chalk.red('r')}${chalk.red('r')} ${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}                 
-                                                ${chalk.red('r')}                    `
+                                                 ${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}               
+                                     ${chalk.blue('b')} ${chalk.blue(
+  'b'
+)} ${chalk.blue('b')}  ${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}       
+                ${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}  ${chalk.blue('b')}  ${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')} ${chalk.blue('b')}       
+         ${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}         
+     ${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)} ${chalk.blue('b')}       
+   ${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')} ${chalk.blue('b')}       
+    ${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}         
+     ${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)} ${chalk.blue('b')}       
+      ${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}         
+        ${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}         
+          ${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}         
+             ${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}          
+                ${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}           
+                     ${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow(
+  'y'
+)}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.yellow('y')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}            
+                ${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')} ${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}           
+                ${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}           
+                ${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}          
+                 ${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}           
+                 ${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)} ${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue(
+  'b'
+)}${chalk.blue('b')}${chalk.blue('b')}${chalk.blue('b')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}            
+                               ${chalk.blue('b')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}           
+                                   ${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}             
+                                      ${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}              
+                                         ${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}               
+                                          ${chalk.red('r')}${chalk.red(
+  'r'
+)} ${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}${chalk.red('r')}${chalk.red('r')}${chalk.red('r')}${chalk.red(
+  'r'
+)}                 
+                                                ${chalk.red(
+                                                  'r'
+                                                )}                    `
 
 module.exports = logo
