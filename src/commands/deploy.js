@@ -5,7 +5,6 @@ const Command = require('../base.js')
 const ExtensionService = require('../services/extension')
 const RemoteExtensionService = require('../services/remoteExtension')
 const fs = require('fs')
-const path = require('path')
 const inquirer = require('inquirer')
 const utils = require('../utils/index')
 const { flags } = require('@oclif/command')
@@ -59,7 +58,7 @@ class DeployCommand extends Command {
       })
 
     if (!remoteExtension) {
-      throw new ExtensionNotFoundError({
+      throw new ExtensionNotFoundError(null, {
         name: manifest.name,
         orgSlug: credentials.institution
       })
@@ -69,7 +68,7 @@ class DeployCommand extends Command {
       item => item.activated
     ).version
     this.logger.info(
-      `* Você está realizando deploy de uma nova versão para a extensão ${remoteExtension[0].title}`
+      `* Você está realizando deploy de uma nova versão para a extensão ${remoteExtension?.[0]?.title}`
     )
     if (lastVersion) {
       this.logger.info(`* Versão atual: ${lastVersion}`)

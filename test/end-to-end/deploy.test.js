@@ -4,6 +4,7 @@ const utils = require('../../src/utils/index')
 const ExtensionService = require('../../src/services/extension')
 
 const BaseCommand = require('../../src/base')
+const DeployCommand = require('../../src/commands/deploy')
 const inquirer = require('inquirer')
 
 const utilsTest = require('../utils/index')
@@ -32,12 +33,7 @@ describe('Deploy command', () => {
   const now = Date.now()
   const commonDeployTestSetup = testStubLoggedIn
     .stub(utils, 'getProjectRootPath', () => testProject.rootPath)
-    .stub(inquirer, 'prompt', arg => {
-      const promptName = arg[0].name
-      if (promptName === 'versionName') {
-        return { versionName: `Version ${now}` }
-      }
-    })
+    .stub(DeployCommand.prototype, 'promptVersionName', () => `Version ${now}`)
 
   // test 1
   const setupDeployTestNoBuild = commonDeployTestSetup
@@ -203,7 +199,7 @@ describe('Deploy command', () => {
       utilsTest.insertTimestampInFile(ctx.modifiedFiles[0].modifiedFilesPath, now)
       utilsTest.insertTimestampInFile(ctx.modifiedFiles[1].modifiedFilesPath, now)
     })
-    .command(['deploy', '-a', '-v'])
+    .command(['deploy', '-a'])
   setupDeployTestAllExtensions.it('qt deploy all extensions', async (_, done) => {
     const extensionServiceSpy = ExtensionService.prototype
 
