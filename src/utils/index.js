@@ -90,12 +90,12 @@ async function promptExtensionEntryPointsFromUser ({ extensionsPaths, message = 
     ])
     entryPointPath = selectedEntryPoint
   } else {
-    entryPointPath = extensionsChoices[0].value
+    entryPointPath = extensionsChoices[0]?.value
   }
-  if (!Array.isArray(entryPointPath)) {
+  if (!Array.isArray(entryPointPath) && entryPointPath) {
     return [entryPointPath]
   }
-  return entryPointPath
+  return entryPointPath || []
 }
 function getFrontBaseURL () {
   if (process.env.API_BASE_URL) {
