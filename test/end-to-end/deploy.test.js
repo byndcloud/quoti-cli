@@ -185,4 +185,42 @@ describe('Deploy command', () => {
 
     done()
   })
+  // test 7
+  const setupDeployTestAllExtensions = commonDeployTestSetup
+    .add('modifiedFiles', ctx => {
+      return [
+        {
+          modifiedFilesPath: testProject.extension1WithBuild.entryPointPath,
+          manifestPath: testProject.extension1WithBuild.manifestPath
+        },
+        {
+          modifiedFilesPath: testProject.extension2NoBuild.entryPointPath,
+          manifestPath: testProject.extension2NoBuild.manifestPath
+        }
+      ]
+    })
+    .do(async ctx => {
+      utilsTest.insertTimestampInFile(ctx.modifiedFiles[0].modifiedFilesPath, now)
+      utilsTest.insertTimestampInFile(ctx.modifiedFiles[1].modifiedFilesPath, now)
+    })
+    .command(['deploy', '-a', '-v'])
+  setupDeployTestAllExtensions.it('qt deploy all extensions', async (_, done) => {
+    const extensionServiceSpy = ExtensionService.prototype
+
+    expect(extensionServiceSpy.build.callCount).to.equal(1)
+
+    expect(extensionServiceSpy.upload.callCount).to.equal(2)
+
+    const uploadFirstArgs = extensionServiceSpy.upload.firstCall.args
+    let bufferPassedToUploadFunction = uploadFirstArgs[0]
+    expectTimestampInFile(bufferPassedToUploadFunction, now)
+
+    const uploadSecondArgs = extensionServiceSpy.upload.firstCall.args
+    bufferPassedToUploadFunction = uploadSecondArgs[0]
+    expectTimestampInFile(bufferPassedToUploadFunction, now)
+
+    expect(extensionServiceSpy.deployVersion.callCount).to.equal(2)
+
+    done()
+  })
 })

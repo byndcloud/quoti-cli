@@ -65,11 +65,7 @@ class RemoteExtension {
       headers: { Authorization: `Bearer ${token}` }
     })
 
-    if (!data || data?.length === 0) {
-      return
-    }
-
-    return data
+    return data || []
   }
 
   async getRemoteExtensions ({ extensionsPathsArg, orgSlug, token, parameters = ['title', 'extension_uuid'] }) {

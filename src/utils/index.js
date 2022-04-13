@@ -65,7 +65,15 @@ function validateEntryPointIncludedInPackage (entryPointPath, projectRootPath) {
     throw new EntryPointNotFoundInPackageError({ entryPointPath })
   }
 }
-async function getEntryPointFromUser ({ extensionsPaths, message = 'Selecione uma extensão' }) {
+/**
+ *
+ * @param {Object} data
+ * @param {string[]} [data.extensionsPaths]
+ * @param {string} [data.message]
+ * @param {boolean} [data.multiSelect]
+ * @returns {Promise<string[]>} entryPointsSelected
+ */
+async function promptExtensionEntryPointsFromUser ({ extensionsPaths, message = 'Selecione uma extensão', multiSelect = true }) {
   let entryPointPath
   const extensionsChoices = extensionsPaths.map(e => ({
     name: path.relative('./', e),
@@ -76,15 +84,18 @@ async function getEntryPointFromUser ({ extensionsPaths, message = 'Selecione um
       {
         name: 'selectedEntryPoint',
         message,
-        type: 'list',
+        type: multiSelect ? 'checkbox' : 'list',
         choices: extensionsChoices
       }
     ])
     entryPointPath = selectedEntryPoint
   } else {
-    entryPointPath = extensionsChoices[0].value
+    entryPointPath = extensionsChoices[0]?.value
   }
-  return entryPointPath
+  if (!Array.isArray(entryPointPath) && entryPointPath) {
+    return [entryPointPath]
+  }
+  return entryPointPath || []
 }
 function getFrontBaseURL () {
   if (process.env.API_BASE_URL) {
@@ -102,5 +113,5 @@ module.exports = {
   listExtensionsPaths,
   validateEntryPointIncludedInPackage,
   getFrontBaseURL,
-  getEntryPointFromUser
+  promptExtensionEntryPointsFromUser
 }

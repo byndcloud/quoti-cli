@@ -20,7 +20,10 @@ module.exports = class BaseCommand extends Command {
     this.spinner = ora(this.spinnerOptions)
   }
 
-  async init ({ injectProjectRoot = false, injectExtensionsPaths = false }) {
+  async init ({
+    injectProjectRoot = false,
+    injectExtensionsPaths = false
+  } = {}) {
     try {
       const { flags, args } = this.parse(this.constructor)
       this.flags = flags
