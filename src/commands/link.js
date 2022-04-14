@@ -203,7 +203,7 @@ class LinkExtensionCommand extends Command {
     return filesNames.map(fileName => ({ name: fileName, value: fileName }))
   }
 
-  static aliases = ['select-extension', 'link-extension', 'l']
+  static aliases = ['l', 'link-extension', 'select-extension']
 
   static description = 'Faça um link de uma extensão no Quoti com o seu código'
 
