@@ -157,6 +157,17 @@ class DeployCommand extends Command {
     }
   }
 
+  finally () {
+    /**
+     * This is necessary due to a bug in the google cloud storage library
+     * which causes the command to hang when the command is run not in a test
+     * environment
+     */
+    if (process.env.NODE_ENV !== 'test') {
+      process.exit(0)
+    }
+  }
+
   static aliases = ['d']
 
   static flags = {
