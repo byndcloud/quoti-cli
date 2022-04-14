@@ -7,30 +7,16 @@ const semver = require('semver')
 const {
   getManifestFromEntryPoint,
   confirmQuestion,
-  listExtensionsPaths,
-  getProjectRootPath,
   validateEntryPointIncludedInPackage,
-  getEntryPointFromUser
+  promptExtensionEntryPointsFromUser
 } = require('../utils/index')
 const inquirer = require('inquirer')
 const RemoteExtensionService = require('../services/remoteExtension')
 
 class PublishCommand extends Command {
-  constructor () {
-    super(...arguments)
-    try {
-      credentials.load()
-      this.projectRoot = getProjectRootPath()
-      this.extensionsPaths = listExtensionsPaths()
-      if (this.extensionsPaths.length === 0) {
-        throw new Error(
-          'Nenhuma extensão foi selecionada até agora, execute qt select-extension para escolher extensões para desenvolver.'
-        )
-      }
-    } catch (error) {
-      this.logger.error(error)
-      process.exit(0)
-    }
+  init () {
+    super.init({ injectProjectRoot: true, injectExtensionsPaths: true })
+    credentials.load()
   }
 
   async run () {
@@ -92,7 +78,9 @@ class PublishCommand extends Command {
       process.exit(0)
     }
 
-    this.logger.info(`* Você está realizando publish de uma nova versão para a extensão ${dynamicComponentFile.title}`)
+    this.logger.info(
+      `* Você está realizando publish de uma nova versão para a extensão ${dynamicComponentFile.title}`
+    )
 
     if (!dynamicComponentFile.marketplaceExtensionId) {
       await this.publishExtension(
@@ -108,13 +96,19 @@ class PublishCommand extends Command {
         token,
         orgSlug: credentials.institution
       })
-      const lastVersionOnMarketplace = remoteExtensionService.getLastVersionOnMarketplace()
-      const targetVersion = this.getTargetVersion(this.flags, lastVersionOnMarketplace)
+      const lastVersionOnMarketplace =
+        remoteExtensionService.getLastVersionOnMarketplace()
+      const targetVersion = this.getTargetVersion(
+        this.flags,
+        lastVersionOnMarketplace
+      )
       await this.validateVersionSemantics({
         targetVersion,
         lastVersion: lastVersionOnMarketplace
       })
-      this.logger.info(`Atualmente a versão mais recente para esta extensão no Marketplace é ${lastVersionOnMarketplace}`)
+      this.logger.info(
+        `Atualmente a versão mais recente para esta extensão no Marketplace é ${lastVersionOnMarketplace}`
+      )
       await this.publishNewVersion(
         this.flags,
         dynamicComponentFileActivated.id,
@@ -159,18 +153,35 @@ class PublishCommand extends Command {
     const bodyPublishExtension = {
       dynamicComponentFileId,
       version,
-      extensionUUID: manifest.extensionUUID
+      extensionUUID: manifest.extensionUUID,
+      manifest: manifest.getManifestToPublish()
     }
     await this.callEndpointPublishExtension(bodyPublishExtension, token)
     this.logger.success(`Nova extensão publicada com sucesso: ${version}`)
   }
 
-  async publishNewVersion (flags, dynamicComponentFileId, token, manifest, targetVersion) {
+  /**
+   *
+   * @param {*} flags
+   * @param {*} dynamicComponentFileId
+   * @param {*} token
+   * @param {import('../services/manifest')} manifest
+   * @param {*} targetVersion
+   */
+  async publishNewVersion (
+    flags,
+    dynamicComponentFileId,
+    token,
+    manifest,
+    targetVersion
+  ) {
     const confirmed = await confirmQuestion(
       `Deseja publicar uma nova versão "${targetVersion}" para a extensão "${manifest.name}" já publicada no Marketplace? Sim/Não\n`
     )
     if (!confirmed) {
-      this.logger.info('Operação cancelada. Caso queira saber mais sobre o comando publish execute qt help publish')
+      this.logger.info(
+        'Operação cancelada. Caso queira saber mais sobre o comando publish execute qt help publish'
+      )
       process.exit(0)
     }
     let versionIncrement
@@ -184,22 +195,37 @@ class PublishCommand extends Command {
     const bodyPublishExtensionVersion = {
       dynamicComponentFileId,
       version: flags.version,
-      versionIncrement
+      versionIncrement,
+      manifest: manifest.getManifestToPublish()
     }
     try {
       const data = await this.callEndpointPublishExtensionVersion(
         bodyPublishExtensionVersion,
         token
       )
-      this.logger.success(`Nova versão ${data.newVersion} foi publicada com sucesso`)
+      this.logger.success(
+        `Nova versão ${data.newVersion} foi publicada com sucesso`
+      )
       if (data.orgsUpdatedWithSuccess.length > 0) {
-        this.logger.success(`Organizações que tiveram sua extensão atualizada: ${data.orgsUpdatedWithSuccess.join(', ')}`)
+        this.logger.success(
+          `Organizações que tiveram sua extensão atualizada: ${data.orgsUpdatedWithSuccess.join(
+            ', '
+          )}`
+        )
       }
       if (data.orgsWithoutAutomaticUpdate.length > 0) {
-        this.logger.success(`Organizações sem a atualização automática para esta extensão: ${data.orgsWithoutAutomaticUpdate.join(', ')}`)
+        this.logger.success(
+          `Organizações sem a atualização automática para esta extensão: ${data.orgsWithoutAutomaticUpdate.join(
+            ', '
+          )}`
+        )
       }
       if (data.orgsWithErrorOnUpdate.length > 0) {
-        this.logger.error(`Houveram erros durante a atualização nessas organizações:  ${data.orgsWithErrorOnUpdate.join(', ')}`)
+        this.logger.error(
+          `Houveram erros durante a atualização nessas organizações:  ${data.orgsWithErrorOnUpdate.join(
+            ', '
+          )}`
+        )
       }
     } catch (error) {
       if (error.response.status === 422) {
@@ -219,8 +245,13 @@ class PublishCommand extends Command {
 
   async validateVersionSemantics ({ targetVersion, lastVersion }) {
     if (lastVersion) {
-      if (semver.valid(targetVersion) && semver.gte(lastVersion, targetVersion)) {
-        throw new Error(`A versão desejada "${targetVersion}" é menor ou igual à versão atual "${lastVersion}"`)
+      if (
+        semver.valid(targetVersion) &&
+        semver.gte(lastVersion, targetVersion)
+      ) {
+        throw new Error(
+          `A versão desejada "${targetVersion}" é menor ou igual à versão atual "${lastVersion}"`
+        )
       }
     }
   }
@@ -254,46 +285,53 @@ class PublishCommand extends Command {
     if (entryPointPath) {
       return getManifestFromEntryPoint(entryPointPath)
     }
-    entryPointPath = await getEntryPointFromUser({ extensionsPaths: this.extensionsPaths, message: 'Qual extensão deseja publicar?' })
-    return getManifestFromEntryPoint(entryPointPath)
+    entryPointPath = await promptExtensionEntryPointsFromUser({
+      extensionsPaths: this.extensionsPaths,
+      message: 'Qual extensão deseja publicar?',
+      multiSelect: false
+    })
+    return getManifestFromEntryPoint(entryPointPath[0])
   }
 
   existIncrementVersion (flags) {
     return flags.patch || flags.minor || flags.major
   }
-}
 
-PublishCommand.description = 'Publica uma nova extensão'
+  static aliases = ['p']
 
-PublishCommand.flags = {
-  version: flags.string({
-    char: 'v',
-    description: 'Versão da extensão'
-  }),
+  static args = [
+    {
+      name: 'entryPointPath',
+      required: false,
+      description: 'Endereço do entry point (arquivo principal) da extensão'
+    }
+  ]
 
-  // incrementVersion [patch, minor, major]
-  patch: flags.boolean({
-    char: 'p',
-    description: 'x.x.x -> x.x.x+1'
-  }),
+  static description =
+    'Publica uma nova extensão ou atualiza uma extensão já publicada no Marketplace'
 
-  minor: flags.boolean({
-    char: 'm',
-    description: 'x.x.x -> x.x+1.x'
-  }),
+  static flags = {
+    version: flags.string({
+      char: 'v',
+      description: 'Versão da extensão'
+    }),
 
-  major: flags.boolean({
-    char: 'M',
-    description: 'x.x.x -> x+1.x.x'
-  })
-}
+    // incrementVersion [patch, minor, major]
+    patch: flags.boolean({
+      char: 'p',
+      description: 'x.x.x -> x.x.x+1'
+    }),
 
-PublishCommand.args = [
-  {
-    name: 'entryPointPath',
-    required: false,
-    description: 'Endereço do entry point (arquivo principal) da extensão'
+    minor: flags.boolean({
+      char: 'm',
+      description: 'x.x.x -> x.x+1.x'
+    }),
+
+    major: flags.boolean({
+      char: 'M',
+      description: 'x.x.x -> x+1.x.x'
+    })
   }
-]
+}
 
 module.exports = PublishCommand

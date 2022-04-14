@@ -1,11 +1,9 @@
 <template lang="pug">
-  div 
-    h1 Uma extensão já criada.{{value}} 
-    h1 Uma extensão feita pela org Marketplace1. Date.now() : 1647450202148
+h1 Uma extensão já criada. Luiz A s s PSasdsad dsa{{value}}
 </template>
 
 <script>
-import { getPiNumber } from "../utils/index2"
+import { getPiNumber } from "./utils/index2"
 export default {
   name: "productsMarketplaceOverview",
   data: function() {

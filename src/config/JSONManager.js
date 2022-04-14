@@ -1,9 +1,11 @@
 const fs = require('fs')
-const { omit } = require('lodash')
 
 class JSONManager {
+  /** @type {string} */
+  #path
+
   constructor (jsonPath) {
-    this.path = jsonPath
+    this.#path = jsonPath
 
     if (this.exists()) {
       this.load()
@@ -14,26 +16,26 @@ class JSONManager {
     if (!this.exists()) {
       return false
     }
-    fs.rmSync(this.path)
+    fs.rmSync(this.#path)
     return true
   }
 
   exists () {
-    return fs.existsSync(this.path)
+    return fs.existsSync(this.#path)
   }
 
   load () {
     if (!this.exists()) {
-      throw new Error(`File ${this.path} doesn't exist`)
+      throw new Error(`File ${this.#path} doesn't exist`)
     }
 
     let raw
     try {
-      raw = fs.readFileSync(this.path)
+      raw = fs.readFileSync(this.#path)
     } catch (e) {
       // TODO: Auto remove on build?
       console.error(e)
-      throw new Error(`Error reading file ${this.path}`)
+      throw new Error(`Error reading file ${this.#path}`)
     }
 
     let manifest
@@ -41,7 +43,7 @@ class JSONManager {
       manifest = JSON.parse(raw)
     } catch (e) {
       console.error(e)
-      throw new Error(`Error parsing file: ${this.path}`)
+      throw new Error(`Error parsing file: ${this.#path}`)
     }
 
     Object.assign(this, manifest)
@@ -52,10 +54,10 @@ class JSONManager {
   save (data = {}) {
     try {
       Object.assign(this, data)
-      fs.writeFileSync(this.path, JSON.stringify(omit(this, 'path'), null, 2))
+      fs.writeFileSync(this.#path, JSON.stringify(this, null, 2))
     } catch (e) {
       console.error(e)
-      throw new Error(`Error saving file ${this.path}`)
+      throw new Error(`Error saving file ${this.#path}`)
     }
   }
 }

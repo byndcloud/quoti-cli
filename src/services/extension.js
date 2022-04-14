@@ -6,7 +6,7 @@ const { randomUUID } = require('crypto')
 const api = require('../config/axios')
 const credentials = require('../config/credentials')
 const Logger = require('../config/logger')
-const { getProjectRootPath } = require('../utils/index')
+const utils = require('../utils/index')
 class ExtensionService {
   constructor (manifest, { spinnerOptions } = {}) {
     if (!manifest) {
@@ -18,16 +18,42 @@ class ExtensionService {
     this.logger = Logger.child({
       tag: 'command/publish'
     })
-    this.spinner = ora(spinnerOptions || {
-      spinner: 'arrow3',
-      color: 'yellow'
-    })
-    this.vueCliService = new VueCliService(getProjectRootPath())
+    this.spinner = ora(
+      spinnerOptions || {
+        spinner: 'arrow3',
+        color: 'yellow'
+      }
+    )
+    this.vueCliService = new VueCliService(utils.getProjectRootPath())
+  }
+
+  /**
+   * Create new dynamicComponentFile
+   * @param {Object} data
+   * @param {string} [data.url]
+   * @param {string} [data.versionName]
+   * @param {string} [data.filename]
+   * @param {string} token
+   */
+  async deployVersion ({ url, version, fileVuePrefix }, token) {
+    await api.axios.put(
+      `/${credentials.institution}/dynamic-components/${this.manifest.extensionId}`,
+      {
+        url,
+        version,
+        fileVuePrefix,
+        activated: true
+      },
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    return true
   }
 
   async upload (buffer, remotePath) {
     if (!this.manifest.exists()) {
-      this.logger.warning('Por favor selecione sua extensão. Execute qt select-extension')
+      this.logger.warning(
+        'Por favor selecione sua extensão. Execute qt select-extension'
+      )
       process.exit(0)
     } else if (!buffer) {
       this.logger.error('Buffer é null!')
@@ -46,7 +72,9 @@ class ExtensionService {
             cacheControl: 'public, max-age=0'
           }
         })
-      this.spinner.succeed(`Upload da extensão ${this.manifest.name} finalizado!`)
+      this.spinner.succeed(
+        `Upload da extensão ${this.manifest.name} finalizado!`
+      )
     } catch (error) {
       this.spinner.fail('Erro durante o upload')
       throw new Error(error)
@@ -55,7 +83,9 @@ class ExtensionService {
 
   async createExtensionUUID () {
     this.logger.success('Criando nova extension_UUID')
-    this.logger.warning(`Sempre que você atualizar para uma versão anterior a ${new Date()}, você deve compilar primeiro.`)
+    this.logger.warning(
+      `Sempre que você atualizar para uma versão anterior a ${new Date()}, você deve compilar primeiro.`
+    )
 
     const uuid = randomUUID()
     await credentials.load()
@@ -69,25 +99,6 @@ class ExtensionService {
     this.manifest.extensionUUID = uuid
     this.manifest.save()
     return uuid
-  }
-
-  async getExtension (extensionId) {
-    const token = await firebase.auth().currentUser.getIdToken()
-    const url = `${credentials.institution}/dynamic-components?where[id]=${extensionId}`
-    const path = encodeURI(url)
-    const { data } = await api.axios.get(
-      path,
-      { headers: { Authorization: `Bearer ${token}` } }
-    )
-    if (data.length === 1) {
-      return data[0]
-    } else if (data.length === 0) {
-      this.logger.error('Verifique se realmente possui esta extensão')
-      process.exit(0)
-    } else {
-      this.logger.error('Existe mais de uma extensão com o mesmo id')
-      process.exit(0)
-    }
   }
 
   async build (entry, { mode } = { mode: 'production' }) {
@@ -117,7 +128,7 @@ class ExtensionService {
       })
       this.logger.info(`⇨ Extensão: ${this.manifest.name}\n`)
       this.spinner.succeed('Build finalizado')
-      return path.join(getProjectRootPath(), dest, `${name}.umd.min.js`)
+      return path.join(utils.getProjectRootPath(), dest, `${name}.umd.min.js`)
     } catch (error) {
       this.spinner.fail('Erro durante o build')
       throw new Error(error)

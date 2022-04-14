@@ -1,6 +1,10 @@
-const JSONManager = require('../config/JSONManager')
 const path = require('path')
 const inquirer = require('inquirer')
+const {
+  ManifestNotFoundError,
+  EntryPointNotFoundInPackageError
+} = require('./errorClasses')
+const ManifestService = require('../services/manifest')
 const readPkgSync = require('read-pkg-up').sync
 function isYes (text) {
   return ['s', 'sim', 'yes', 'y'].includes(text.toLowerCase())
@@ -30,7 +34,10 @@ function getManifestFromEntryPoint (entrypointPath) {
     path.dirname(entrypointPath),
     'manifest.json'
   )
-  const manifest = new JSONManager(manifestPath)
+  const manifest = new ManifestService(manifestPath)
+  if (!manifest?.exists()) {
+    throw new ManifestNotFoundError({ manifestPath: manifestPath })
+  }
   return manifest
 }
 function getProjectRootPath () {
@@ -55,15 +62,25 @@ function listExtensionsPaths (projectRootPath) {
     path.resolve(projectRoot, extPath)
   )
 }
-function validateEntryPointIncludedInPackage (entryPointPath) {
-  const entryPointPaths = listExtensionsPaths()
+function validateEntryPointIncludedInPackage (entryPointPath, projectRootPath) {
+  const entryPointPaths = listExtensionsPaths(projectRootPath)
   if (!entryPointPaths.includes(path.resolve(entryPointPath))) {
-    throw new Error(
-      `O entrypoint especificado (${entryPointPath}) não está entre as extensões que já foram selecionadas. Tem certeza que o caminho está correto ou que a extensão já foi selecionada com qt select-extension?`
-    )
+    throw new EntryPointNotFoundInPackageError({ entryPointPath })
   }
 }
-async function getEntryPointFromUser ({ extensionsPaths, message = 'Selecione uma extensão' }) {
+/**
+ *
+ * @param {Object} data
+ * @param {string[]} [data.extensionsPaths]
+ * @param {string} [data.message]
+ * @param {boolean} [data.multiSelect]
+ * @returns {Promise<string[]>} entryPointsSelected
+ */
+async function promptExtensionEntryPointsFromUser ({
+  extensionsPaths,
+  message = 'Selecione uma extensão',
+  multiSelect = true
+}) {
   let entryPointPath
   const extensionsChoices = extensionsPaths.map(e => ({
     name: path.relative('./', e),
@@ -74,22 +91,29 @@ async function getEntryPointFromUser ({ extensionsPaths, message = 'Selecione um
       {
         name: 'selectedEntryPoint',
         message,
-        type: 'list',
+        type: multiSelect ? 'checkbox' : 'list',
         choices: extensionsChoices
       }
     ])
     entryPointPath = selectedEntryPoint
   } else {
-    entryPointPath = extensionsChoices[0].value
+    entryPointPath = extensionsChoices[0]?.value
   }
-  return entryPointPath
+  if (!Array.isArray(entryPointPath) && entryPointPath) {
+    return [entryPointPath]
+  }
+  return entryPointPath || []
 }
 function getFrontBaseURL () {
-  if (process.env.API_BASE_URL) {
-    return process.env.QUOTI_FRONT_BASE_URL || 'http://localhost:8080'
-  } else {
-    return 'https://quoti.cloud'
+  if (process.env.QUOTI_FRONT_BASE_URL) {
+    return process.env.QUOTI_FRONT_BASE_URL
   }
+
+  if (process.env.API_BASE_URL) {
+    return 'http://localhost:8080'
+  }
+
+  return 'https://quoti.cloud'
 }
 module.exports = {
   isYes,
@@ -100,5 +124,5 @@ module.exports = {
   listExtensionsPaths,
   validateEntryPointIncludedInPackage,
   getFrontBaseURL,
-  getEntryPointFromUser
+  promptExtensionEntryPointsFromUser
 }

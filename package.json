@@ -1,7 +1,7 @@
 {
   "name": "quoti-cli",
   "description": "A Quoti Extensions CLI",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "author": "Nathan @nmf2",
   "preferGlobal": true,
   "bin": {
@@ -50,10 +50,13 @@
     "eslint": "^8.10.0",
     "eslint-config-standard": "^16.0.3",
     "eslint-plugin-import": "^2.25.4",
+    "eslint-plugin-mocha": "^10.0.4",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^6.0.0",
     "findup-sync": "^5.0.0",
     "globby": "^10.0.2",
+    "husky": "^7.0.4",
+    "lint-staged": "^12.3.7",
     "mocha": "^5.2.0",
     "nyc": "^14.1.1",
     "prettier": "^2.5.1",
@@ -61,7 +64,7 @@
     "sinon": "^13.0.1"
   },
   "engines": {
-    "node": ">=14.0.0"
+    "node": ">=14.17.0"
   },
   "files": [
     "/bin",
@@ -86,17 +89,27 @@
       "@oclif/plugin-autocomplete"
     ],
     "hooks": {
-      "prerun": "./src/hooks/login",
-      "init": "./src/hooks/node-version"
+      "prerun": [
+        "./src/hooks/login",
+        "./src/hooks/show-info-on-localhost"
+      ]
     }
   },
   "repository": "https://github.com/byndcloud/quoti-cli",
   "scripts": {
     "postpack": "rm -f oclif.manifest.json",
     "prepack": "oclif-dev manifest && oclif-dev readme",
-    "test:unit": "nyc mocha --forbid-only --exit \"test/unit/**/*.test.js\"",
-    "test:e2e": "nyc mocha --forbid-only --exit \"test/end-to-end/**/*.test.js\"",
-    "version": "oclif-dev readme && git add README.md",
-    "lint": "eslint --fix ."
+    "test:unit": "NODE_ENV=test nyc mocha --forbid-only --exit \"test/unit/**/*.test.js\"",
+    "test:e2e": "NODE_ENV=test nyc mocha --forbid-only --exit \"test/end-to-end/**/*.test.js\"",
+    "generate:docs": "npm pack && git add README.md",
+    "lint": "eslint --fix -c .eslintrc.json src/**/*.js test/**/*.js",
+    "format": "prettier --write src/**/*.js test/**/*.js",
+    "prepare": "husky install"
+  },
+  "lint-staged": {
+    "*.js": [
+      "prettier --write",
+      "eslint --cache --fix"
+    ]
   }
 }

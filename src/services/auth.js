@@ -19,14 +19,15 @@ class Auth {
         institution: institution,
         user: authFirebase.user.toJSON()
       }
-      await api.axios.get(
-        `/${data.institution}/users`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
+      await api.axios.get(`/${data.institution}/users`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
       credentials.save(data)
     } catch (e) {
       if (e?.response?.status === 406) {
-        Logger.error('Falha ao realizar login. Verifique se escreveu o nome da organização corretamente')
+        Logger.error(
+          'Falha ao realizar login. Verifique se escreveu o nome da organização corretamente'
+        )
       } else {
         Logger.error('Falha ao realizar login.')
       }
@@ -49,8 +50,7 @@ class Auth {
     const { inputToken } = await inquirer.prompt([
       {
         name: 'inputToken',
-        message:
-          'Informe seu token de login',
+        message: 'Informe seu token de login',
         type: 'input',
         transformer: input => {
           if (!input) {

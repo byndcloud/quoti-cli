@@ -10,7 +10,8 @@ class LoginCommand extends Command {
       this.logger.error('Erro no login')
     }
   }
+
+  static description = 'Realiza login em uma organização do Quoti'
 }
-LoginCommand.description = 'Realiza login em uma organização do Quoti'
 
 module.exports = LoginCommand

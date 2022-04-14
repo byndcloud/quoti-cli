@@ -1,112 +1,113 @@
 const md5 = require('md5')
 const { firebase } = require('../config/firebase')
-const ora = require('ora')
 const credentials = require('../config/credentials')
 const Command = require('../base.js')
-const api = require('../config/axios')
 const ExtensionService = require('../services/extension')
 const RemoteExtensionService = require('../services/remoteExtension')
 const fs = require('fs')
-const path = require('path')
 const inquirer = require('inquirer')
-const {
-  getManifestFromEntryPoint,
-  listExtensionsPaths,
-  validateEntryPointIncludedInPackage,
-  getEntryPointFromUser
-} = require('../utils/index')
+const utils = require('../utils/index')
+const { flags } = require('@oclif/command')
 
 const { ExtensionNotFoundError } = require('../utils/errorClasses')
 
 class DeployCommand extends Command {
-  constructor () {
-    super(...arguments)
-    this.spinnerOptions = {
-      spinner: 'arrow3',
-      color: 'yellow'
-    }
-    this.spinner = ora(this.spinnerOptions)
-    try {
-      this.extensionsPaths = listExtensionsPaths()
-      if (this.extensionsPaths.length === 0) {
-        throw new Error(
-          'Nenhuma extensão foi selecionada até agora, execute qt select-extension para escolher extensões para desenvolver.'
-        )
-      }
-    } catch (error) {
-      this.logger.error(error)
-      process.exit(0)
-    }
+  init () {
+    super.init({ injectProjectRoot: true, injectExtensionsPaths: true })
   }
 
   async run () {
     credentials.load()
-    let { entryPointPath } = this.args
-    if (!entryPointPath) {
-      entryPointPath = await getEntryPointFromUser({
-        extensionsPaths: this.extensionsPaths,
-        message: 'De qual extensão você deseja fazer deploy?'
-      })
-    } else {
-      validateEntryPointIncludedInPackage(entryPointPath)
-    }
-    this.manifest = getManifestFromEntryPoint(entryPointPath)
 
-    const token = await firebase.auth().currentUser.getIdToken()
-    const remoteExtensionService = new RemoteExtensionService()
-    const remoteExtension = await remoteExtensionService.getRemoteExtensionsByIds({
-      ids: [this.manifest.extensionId],
-      orgSlug: credentials.institution,
-      token
-    })
-    if (!remoteExtension) {
-      throw new ExtensionNotFoundError(
-        `Você não possui a extensão ${path.relative(
-          './',
-          entryPointPath
-        )} em sua organização`
+    const userProvidedEntryPoint = this.args.entryPointPath
+
+    const userWantsToDeployAllExtensions = this.flags.all
+
+    if (userProvidedEntryPoint && userWantsToDeployAllExtensions) {
+      this.logger.warning(
+        `Flag --all desconsiderada pois o entrypoint ${userProvidedEntryPoint} foi informado`
       )
     }
 
-    const lastVersion = remoteExtension[0].DynamicComponentsFiles.find(item => item.activated).version
-    this.logger.info(`* Você está realizando deploy de uma nova versão para a extensão ${remoteExtension[0].title}`)
-    if (lastVersion) {
-      this.logger.info(`* Última versão ${lastVersion}`)
+    const entryPointsPath = await this.getExtensionsEntrypointsToDeploy(
+      userProvidedEntryPoint
+    )
+
+    const promptVersion = this.flags['ask-version']
+    for (const entryPointPath of entryPointsPath) {
+      await this.deployExtension(entryPointPath, promptVersion)
+    }
+  }
+
+  /**
+   *
+   * @param {string} entryPointPath
+   * @param {boolean} isVersionTimestamp
+   */
+  async deployExtension (entryPointPath, promptVersion) {
+    this.logger.info('\n----------------------------------------------')
+    const manifest = utils.getManifestFromEntryPoint(entryPointPath)
+
+    const token = await firebase.auth().currentUser.getIdToken()
+    const remoteExtensionService = new RemoteExtensionService()
+    const [remoteExtension] =
+      await remoteExtensionService.getRemoteExtensionsByIds({
+        ids: [manifest.extensionId],
+        orgSlug: credentials.institution,
+        token
+      })
+
+    if (!remoteExtension) {
+      throw new ExtensionNotFoundError(null, {
+        name: manifest.name,
+        orgSlug: credentials.institution
+      })
     }
 
-    this.extensionService = new ExtensionService(this.manifest)
+    const lastVersion = remoteExtension.DynamicComponentsFiles.find(
+      item => item.activated
+    ).version
+    this.logger.info(
+      `* Você está realizando deploy de uma nova versão para a extensão ${remoteExtension?.[0]?.title}`
+    )
+    if (lastVersion) {
+      this.logger.info(`* Versão atual: ${lastVersion}`)
+    }
 
-    if (!this.manifest.exists()) {
+    this.extensionService = new ExtensionService(manifest)
+
+    if (!manifest.exists()) {
       this.logger.warning(
-        'Por favor selecione sua extensão. Execute qt selectExtension no diretório onde encontra a extensão'
+        'Execute qt link-extension antes de realizar o deploy da sua extensão'
       )
       return
     }
 
-    const versionName = await this.inputVersionName(lastVersion)
+    let versionName = Date.now()
+    if (promptVersion) {
+      versionName = await this.promptVersionName(lastVersion)
+    }
     const filename = this.getUploadFileNameDeploy(
       new Date().getTime().toString(),
-      this.manifest.type === 'build'
+      manifest.type === 'build'
     )
     const url = `https://storage.cloud.google.com/dynamic-components/${filename}`
 
     let extensionPath = entryPointPath
-    if (this.manifest.type === 'build') {
+    if (manifest.type === 'build') {
       extensionPath = await this.extensionService.build(entryPointPath)
     }
-
     await this.extensionService.upload(fs.readFileSync(extensionPath), filename)
     try {
       this.spinner.start('Fazendo deploy...')
-      await api.axios.put(
-        `/${credentials.institution}/dynamic-components/${this.manifest.extensionId}`,
+      await this.extensionService.deployVersion(
         {
-          url: url,
+          url,
           version: versionName,
           fileVuePrefix: filename,
           activated: true
         },
-        { headers: { Authorization: `Bearer ${token}` } }
+        token
       )
       this.spinner.succeed('Deploy feito com sucesso!')
     } catch (error) {
@@ -115,12 +116,11 @@ class DeployCommand extends Command {
         errorMessage += error?.response?.data?.message
       }
       this.spinner.fail(errorMessage)
-    } finally {
-      process.exit(0)
+      throw error
     }
   }
 
-  async inputVersionName () {
+  async promptVersionName () {
     const { versionName } = await inquirer.prompt([
       {
         name: 'versionName',
@@ -136,16 +136,64 @@ class DeployCommand extends Command {
       `${credentials.institution}/${md5(currentTime)}.${isBuild ? 'js' : 'vue'}`
     )
   }
-}
 
-DeployCommand.args = [
-  {
-    name: 'entryPointPath',
-    required: false,
-    description: 'Endereço do entry point (arquivo principal) da extensão'
+  async getExtensionsEntrypointsToDeploy (entryPointFromUser) {
+    const userProvidedAnEntryPoint = !!entryPointFromUser
+    const userWantsToDeployAllExtensions = this.flags.all
+
+    if (userProvidedAnEntryPoint) {
+      utils.validateEntryPointIncludedInPackage(
+        entryPointFromUser,
+        this.projectRoot
+      )
+      return [entryPointFromUser]
+    } else if (userWantsToDeployAllExtensions) {
+      return this.extensionsPaths
+    } else {
+      return utils.promptExtensionEntryPointsFromUser({
+        extensionsPaths: this.extensionsPaths,
+        message: 'De qual extensão você deseja fazer deploy?'
+      })
+    }
   }
-]
 
-DeployCommand.description = 'Realiza deploy da sua extensão para o Quoti'
+  finally () {
+    /**
+     * This is necessary due to a bug in the google cloud storage library
+     * which causes the command to hang when the command is run not in a test
+     * environment
+     */
+    if (process.env.NODE_ENV !== 'test') {
+      process.exit(0)
+    }
+  }
+
+  static aliases = ['d']
+
+  static flags = {
+    all: flags.boolean({
+      char: 'a',
+      description:
+        'Realiza deploy de todas as extensões presente na propriedade quoti do package.json',
+      exclusive: ['extra-flag']
+    }),
+    'ask-version': flags.boolean({
+      char: 'av',
+      description:
+        'Permite selecionar uma versão para o deploy quando a flag --all for passada também. Por padrão, um timestamp será usado para identificar a versão.',
+      exclusive: ['extra-flag']
+    })
+  }
+
+  static args = [
+    {
+      name: 'entryPointPath',
+      required: false,
+      description: 'Endereço do entry point (arquivo principal) da extensão'
+    }
+  ]
+
+  static description = 'Realiza deploy da sua extensão para o Quoti'
+}
 
 module.exports = DeployCommand

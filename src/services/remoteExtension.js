@@ -10,19 +10,24 @@ class RemoteExtension {
     if (this.#isLoadExtensionVersionsOnMarketplace) {
       return this.#extensionVersionsOnMarketplace
     }
-    throw new Error('You must first perform load loadExtensionVersionsOnMarketplace')
+    throw new Error(
+      'You must first perform load loadExtensionVersionsOnMarketplace'
+    )
   }
 
-  async loadExtensionVersionsOnMarketplace ({ extensionVersionId, token, orgSlug }) {
+  async loadExtensionVersionsOnMarketplace ({
+    extensionVersionId,
+    token,
+    orgSlug
+  }) {
     if (!token) {
       token = await firebase.auth().currentUser.getIdToken()
     }
 
     const address = `/${orgSlug}/marketplace/extensions/${extensionVersionId}/versions`
-    const { data } = await api.axios.get(
-      address,
-      { headers: { Authorization: `Bearer ${token}` } }
-    )
+    const { data } = await api.axios.get(address, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
     if (!data || data?.length === 0) {
       return
     }
@@ -38,23 +43,32 @@ class RemoteExtension {
 
   getLastVersionOnMarketplace () {
     this.#checkLoadExtensionVersions()
-    const lastVersion = this.#extensionVersionsOnMarketplace.map(item => {
-      if (item.version) {
-        return semver.valid(item.version)
-      }
-      return null
-    }
-    ).filter(lv => lv).sort(semver.rcompare)[0]
+    const lastVersion = this.#extensionVersionsOnMarketplace
+      .map(item => {
+        if (item.version) {
+          return semver.valid(item.version)
+        }
+        return null
+      })
+      .filter(lv => lv)
+      .sort(semver.rcompare)[0]
     return lastVersion
   }
 
   // extension on Org
-  async getRemoteExtensionsByIds ({ ids, orgSlug, token }) {
+  async getRemoteExtensionsByIds ({
+    ids,
+    orgSlug,
+    token,
+    parameters = ['title', 'extension_uuid']
+  }) {
     const baseURI = `/${orgSlug}/dynamic-components`
 
     const params = new URLSearchParams()
-    params.append('attributes', 'title')
     params.append('attributes', 'id')
+    for (const parameter of parameters) {
+      params.append('attributes', parameter)
+    }
 
     ids.forEach(id => params.append('where[or][id]', id))
 
@@ -63,14 +77,15 @@ class RemoteExtension {
       headers: { Authorization: `Bearer ${token}` }
     })
 
-    if (!data || data?.length === 0) {
-      return
-    }
-
-    return data
+    return data || []
   }
 
-  async getRemoteExtensions ({ extensionsPathsArg, orgSlug, token }) {
+  async getRemoteExtensions ({
+    extensionsPathsArg,
+    orgSlug,
+    token,
+    parameters = ['title', 'extension_uuid']
+  }) {
     let extensionsPaths = extensionsPathsArg
     if (!extensionsPaths) {
       const projectRoot = utils.getProjectRootPath()
@@ -84,7 +99,8 @@ class RemoteExtension {
     const remoteExtensions = await this.getRemoteExtensionsByIds({
       ids,
       orgSlug,
-      token
+      token,
+      parameters
     })
     const remoteExtensionsObj = {}
     ids.forEach((id, index) => {

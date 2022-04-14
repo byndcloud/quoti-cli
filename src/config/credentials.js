@@ -12,7 +12,9 @@ const baseConfigDirectory = path.join(home, '.config/quoti-cli/')
 try {
   fs.mkdirSync(baseConfigDirectory, { recursive: true })
 } catch (e) {
-  this.logger.error(`Não foi possível criar a pasta em ${baseConfigDirectory}, mensagem `)
+  this.logger.error(
+    `Não foi possível criar a pasta em ${baseConfigDirectory}, mensagem `
+  )
   this.logger.error(e)
 }
 

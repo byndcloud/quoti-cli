@@ -8,8 +8,8 @@ const JSONManager = require('../config/JSONManager')
 const { confirmQuestion } = require('../utils/index')
 
 class DownloadCurrentVersion extends Command {
-  constructor () {
-    super(...arguments)
+  init () {
+    super.init()
     this.manifest = new JSONManager('./manifest.json')
   }
 
@@ -17,7 +17,9 @@ class DownloadCurrentVersion extends Command {
     await credentials.load()
 
     if (!this.manifest.exists()) {
-      this.logger.warning('Por favor selecione sua extensão. Execute qt selectExtension')
+      this.logger.warning(
+        'Por favor selecione sua extensão. Execute qt selectExtension'
+      )
       process.exit(0)
     }
     await this.manifest.load()
@@ -56,7 +58,9 @@ class DownloadCurrentVersion extends Command {
     }
     this.logger.info(pathFile)
     if (fs.existsSync(pathFile)) {
-      const confirmReplace = await confirmQuestion(`Já existe um arquivo neste endereço ${pathFile}. Deseja substituir? Sim/Não`)
+      const confirmReplace = await confirmQuestion(
+        `Já existe um arquivo neste endereço ${pathFile}. Deseja substituir? Sim/Não`
+      )
       if (confirmReplace) {
         return pathFile
       } else {
@@ -76,7 +80,9 @@ class DownloadCurrentVersion extends Command {
       })
       file.on('error', function (err) {
         fs.unlink(dest) // Delete the file async. (But we don't check the result)
-        if (callback) { callback(err.message) }
+        if (callback) {
+          callback(err.message)
+        }
       })
     })
   }

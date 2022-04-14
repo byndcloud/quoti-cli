@@ -27,5 +27,8 @@ const firebaseExtensionConfig = {
 // Initialize Firebase
 exports.firebase = firebase
 exports.app = firebase.initializeApp(firebaseQuotiConfig)
-exports.appExtension = firebase.initializeApp(firebaseExtensionConfig, 'Extensions')
+exports.appExtension = firebase.initializeApp(
+  firebaseExtensionConfig,
+  'Extensions'
+)
 exports.storage = this.app.storage('gs://dynamic-components')
