@@ -156,31 +156,31 @@ class DeployCommand extends Command {
       })
     }
   }
-}
 
-DeployCommand.flags = {
-  all: flags.boolean({
-    char: 'a',
-    description:
-      'Realiza deploy de todas as extensões presente na propriedade quoti do package.json',
-    exclusive: ['extra-flag']
-  }),
-  'ask-version': flags.boolean({
-    char: 'av',
-    description:
-      'Permite selecionar uma versão para o deploy quando a flag --all for passada também. Por padrão, um timestamp será usado para identificar a versão.',
-    exclusive: ['extra-flag']
-  })
-}
-
-DeployCommand.args = [
-  {
-    name: 'entryPointPath',
-    required: false,
-    description: 'Endereço do entry point (arquivo principal) da extensão'
+  static flags = {
+    all: flags.boolean({
+      char: 'a',
+      description:
+        'Realiza deploy de todas as extensões presente na propriedade quoti do package.json',
+      exclusive: ['extra-flag']
+    }),
+    'ask-version': flags.boolean({
+      char: 'av',
+      description:
+        'Permite selecionar uma versão para o deploy quando a flag --all for passada também. Por padrão, um timestamp será usado para identificar a versão.',
+      exclusive: ['extra-flag']
+    })
   }
-]
 
-DeployCommand.description = 'Realiza deploy da sua extensão para o Quoti'
+  static args = [
+    {
+      name: 'entryPointPath',
+      required: false,
+      description: 'Endereço do entry point (arquivo principal) da extensão'
+    }
+  ]
+
+  static description = 'Realiza deploy da sua extensão para o Quoti'
+}
 
 module.exports = DeployCommand
