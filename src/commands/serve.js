@@ -313,25 +313,26 @@ class ServeCommand extends Command {
     }
     return encodeURI(path)
   }
-}
-ServeCommand.flags = {
-  'deploy-develop': flags.boolean({
-    description:
-      'Indica se devemos salvar o build da extensão de develop no banco de dados da Beyond Company'
-  }),
-  'new-session': flags.boolean({
-    description: 'Força a criação de um novo devSessionId'
-  })
-}
-ServeCommand.args = [
-  {
-    name: 'entryPointPath',
-    required: false,
-    description: 'Endereço do entry point (arquivo principal) da extensão'
+
+  static flags = {
+    'deploy-develop': flags.boolean({
+      description:
+        'Indica se devemos salvar o build da extensão de develop no banco de dados da Beyond Company'
+    }),
+    'new-session': flags.boolean({
+      description: 'Força a criação de um novo devSessionId'
+    })
   }
-]
-ServeCommand.description = `Cria um serve local e realiza upload automaticamente para o Quoti
-...
-Cria um serve local e realiza upload automaticamente para o Quoti
-`
+
+  static args = [
+    {
+      name: 'entryPointPath',
+      required: false,
+      description: 'Endereço do entry point (arquivo principal) da extensão'
+    }
+  ]
+
+  static description =
+    'Observa mudanças no código local e as envia para o ambiente de desenvolvimento do Quoti'
+}
 module.exports = ServeCommand
