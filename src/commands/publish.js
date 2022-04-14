@@ -297,6 +297,8 @@ class PublishCommand extends Command {
     return flags.patch || flags.minor || flags.major
   }
 
+  static aliases = ['p']
+
   static args = [
     {
       name: 'entryPointPath',

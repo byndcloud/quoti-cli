@@ -314,6 +314,8 @@ class ServeCommand extends Command {
     return encodeURI(path)
   }
 
+  static aliases = ['s', 'dev']
+
   static flags = {
     'deploy-develop': flags.boolean({
       description:

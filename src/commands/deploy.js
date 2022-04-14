@@ -157,6 +157,8 @@ class DeployCommand extends Command {
     }
   }
 
+  static aliases = ['d']
+
   static flags = {
     all: flags.boolean({
       char: 'a',
