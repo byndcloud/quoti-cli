@@ -15,7 +15,7 @@ class RemoteExtension {
     )
   }
 
-  async loadExtensionVersionsOnMarketplace({
+  async loadExtensionVersionsOnMarketplace ({
     extensionVersionId,
     token,
     orgSlug
@@ -36,12 +36,12 @@ class RemoteExtension {
   }
 
   // extension on Marketplace
-  async getExtensionVersionsOnMarketplace() {
+  async getExtensionVersionsOnMarketplace () {
     this.#checkLoadExtensionVersions()
     return this.#checkLoadExtensionVersions
   }
 
-  getLastVersionOnMarketplace() {
+  getLastVersionOnMarketplace () {
     this.#checkLoadExtensionVersions()
     const lastVersion = this.#extensionVersionsOnMarketplace
       .map(item => {
@@ -56,7 +56,7 @@ class RemoteExtension {
   }
 
   // extension on Org
-  async getRemoteExtensionsByIds({
+  async getRemoteExtensionsByIds ({
     ids,
     orgSlug,
     token,
@@ -80,7 +80,7 @@ class RemoteExtension {
     return data || []
   }
 
-  async getRemoteExtensions({
+  async getRemoteExtensions ({
     extensionsPathsArg,
     orgSlug,
     token,

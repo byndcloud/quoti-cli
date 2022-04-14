@@ -8,7 +8,7 @@ const api = require('../config/axios')
 const Logger = require('../config/logger')
 
 class Auth {
-  async login() {
+  async login () {
     console.log(chalk`${logo}`)
     const institution = await this.insertOrgSLug()
     const customToken = await this.insertToken()
@@ -35,7 +35,7 @@ class Auth {
     }
   }
 
-  async insertOrgSLug() {
+  async insertOrgSLug () {
     const { inputOrgSlug } = await inquirer.prompt([
       {
         name: 'inputOrgSlug',
@@ -46,7 +46,7 @@ class Auth {
     return inputOrgSlug
   }
 
-  async insertToken() {
+  async insertToken () {
     const { inputToken } = await inquirer.prompt([
       {
         name: 'inputToken',
@@ -64,7 +64,7 @@ class Auth {
     return inputToken
   }
 
-  async silentLogin() {
+  async silentLogin () {
     if (!credentials.exists()) {
       await this.login()
       credentials.load()

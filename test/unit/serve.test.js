@@ -16,7 +16,7 @@ describe('[getDependentExtensionPath]', function () {
     const ServeCommandWithDependency = proxyquire('../../src/commands/serve', {
       'get-dependency-tree': getDependencyTree
     })
-    getDependencyTree.callsFake(function fakeFn(arg) {
+    getDependencyTree.callsFake(function fakeFn (arg) {
       if (arg.entry.includes('extension1')) {
         return {
           arr: [

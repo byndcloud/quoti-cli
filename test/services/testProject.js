@@ -4,7 +4,7 @@ const readJSON = require('json-file-plus')
 const Extension = require('./extension')
 
 class TestProject {
-  constructor() {
+  constructor () {
     this.rootPath = path.resolve('./extensionsToTest')
     this.packagePath = path.join(this.rootPath, 'package.json')
     this.extension1WithBuild = new Extension({
@@ -56,7 +56,7 @@ class TestProject {
    *
    * @param {Array<Extension>} extensions
    */
-  async setExtensionsOnPackage(extensions) {
+  async setExtensionsOnPackage (extensions) {
     const extensionsPaths = extensions.map(e => {
       return e.entryPointPath
     })
@@ -64,7 +64,7 @@ class TestProject {
     await this.#setExtensionsToPackageJson(extensionsPaths, this.rootPath)
   }
 
-  async restore() {
+  async restore () {
     await this.setExtensionsOnPackage([
       this.extension1WithBuild,
       this.extension2NoBuild

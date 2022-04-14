@@ -5,7 +5,7 @@ const credentials = require('../../src/config/credentials')
 const fs = require('fs')
 const path = require('path')
 
-function createBeyondCredentialPath() {
+function createBeyondCredentialPath () {
   const beyondCredentials = process.env.TEST_BEYOND_CREDENTIALS
   const beyondCredentialsPath = path.resolve('./test/beyondCredentials.json')
   fs.writeFileSync(beyondCredentialsPath, beyondCredentials)
@@ -15,7 +15,7 @@ function createBeyondCredentialPath() {
  *
  * @param {require('@oclif/test').test} test
  */
-function suppressVueCliLogs(test) {
+function suppressVueCliLogs (test) {
   return test
     .stub(utilsVueCliService, 'logWithSpinner', () => console.log())
     .stub(utilsVueCliService, 'log', () => console.log())

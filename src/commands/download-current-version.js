@@ -8,12 +8,12 @@ const JSONManager = require('../config/JSONManager')
 const { confirmQuestion } = require('../utils/index')
 
 class DownloadCurrentVersion extends Command {
-  init() {
+  init () {
     super.init()
     this.manifest = new JSONManager('./manifest.json')
   }
 
-  async run() {
+  async run () {
     await credentials.load()
 
     if (!this.manifest.exists()) {
@@ -45,7 +45,7 @@ class DownloadCurrentVersion extends Command {
     return result.data
   }
 
-  async isReplaceFile(path) {
+  async isReplaceFile (path) {
     let pathFile
     if (path.includes('.vue')) {
       pathFile = path
@@ -71,7 +71,7 @@ class DownloadCurrentVersion extends Command {
     }
   }
 
-  async downloadFile(url, dest, callback) {
+  async downloadFile (url, dest, callback) {
     const file = fs.createWriteStream(dest)
     http.get(url, function (response) {
       response.pipe(file)
