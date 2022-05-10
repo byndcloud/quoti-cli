@@ -103,10 +103,14 @@ class LinkExtensionCommand extends Command {
 
     await this.addExtensionToPackageJson(absoluteExtensionPath)
 
-    this.upsertManifest(
-      path.resolve(path.dirname(absoluteExtensionPath), 'manifest.json'),
-      selectedExtension
-    )
+    this.upsertManifest({
+      manifestPath: path.resolve(
+        path.dirname(absoluteExtensionPath),
+        'manifest.json'
+      ),
+      extensionData: selectedExtension,
+      institution: credentials.institution
+    })
 
     this.logger.success('Extensão selecionada! \\o/')
     this.logger.success(
@@ -114,7 +118,7 @@ class LinkExtensionCommand extends Command {
     )
   }
 
-  upsertManifest (manifestPath, extensionData) {
+  upsertManifest ({ manifestPath, extensionData, institution }) {
     const manifest = new ManifestService(manifestPath)
 
     manifest.extensionId = extensionData.id
@@ -122,6 +126,7 @@ class LinkExtensionCommand extends Command {
     manifest.type = extensionData.type === 'Com build' ? 'build' : 'noBuild'
     manifest.name = extensionData.title
     manifest.extensionUUID = extensionData.extensionUUID
+    manifest.institution = institution
 
     manifest.save()
 

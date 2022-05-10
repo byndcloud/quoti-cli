@@ -1,3 +1,4 @@
+const path = require('path')
 class TypedError extends Error {
   constructor (message, type) {
     super(message)
@@ -38,9 +39,25 @@ class EntryPointNotFoundInPackageError extends TypedError {
   }
 }
 
+class ManifestFromAnotherOrgError extends TypedError {
+  constructor ({
+    message,
+    manifestPath,
+    manifestInstitution,
+    credentialsInstitution
+  } = {}) {
+    const relativeManifestPath = path.relative('./', manifestPath)
+    super(
+      message ||
+        `O manifest localizado em (${relativeManifestPath}) está registrado com a organização ${manifestInstitution}, porém você está logado na organização ${credentialsInstitution}. Execute qt link-extension ou realize login na organização ${credentialsInstitution}`
+    )
+  }
+}
+
 module.exports = {
   ExtensionNotFoundError,
   ExtensionsNotFoundError,
   ManifestNotFoundError,
-  EntryPointNotFoundInPackageError
+  EntryPointNotFoundInPackageError,
+  ManifestFromAnotherOrgError
 }
