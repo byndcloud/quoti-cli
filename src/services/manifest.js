@@ -11,7 +11,8 @@ class ManifestService extends JSONManager {
       'extensionId',
       'type',
       'name',
-      'extensionUUID'
+      'extensionUUID',
+      'institution'
     ])
 
     if (Object.keys(manifestToPublish).length === 0) {
