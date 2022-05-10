@@ -61,8 +61,7 @@ function getProjectRootPath () {
 
   return path.resolve(path.dirname(pkgInfo.path))
 }
-function listExtensionsPaths (projectRootPath) {
-  const projectRoot = projectRootPath || getProjectRootPath()
+function listExtensionsPaths (projectRoot) {
   const pkgInfo = readPkgSync({ cwd: path.resolve(projectRoot) })
   if (!pkgInfo.packageJson?.quoti?.extensions?.length) {
     throw new Error(

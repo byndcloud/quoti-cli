@@ -22,7 +22,7 @@ class PublishCommand extends Command {
   async run () {
     const { entryPointPath } = this.args
     if (entryPointPath) {
-      validateEntryPointIncludedInPackage(entryPointPath)
+      validateEntryPointIncludedInPackage(entryPointPath, this.projectRoot)
     }
     const manifest = await this.getManifest(entryPointPath)
     if (!manifest.extensionUUID) {
