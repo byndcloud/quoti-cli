@@ -7,7 +7,6 @@ this.logger = Logger.child({
   tag: 'command/publish'
 })
 const baseConfigDirectory = path.join(home, '.config/quoti-cli/')
-const CredentialsTest = require('../../test/services/credentials')
 
 try {
   fs.mkdirSync(baseConfigDirectory, { recursive: true })
@@ -20,8 +19,7 @@ try {
 
 let credentialsPath = path.join(baseConfigDirectory, 'credentials.json')
 if (process.env.NODE_ENV === 'test') {
-  const credentials = new CredentialsTest()
-  credentialsPath = credentials.credentialsPath
+  credentialsPath = path.resolve(process.env.TEST_BEYOND_CREDENTIALS_PATH)
 }
 
 module.exports = new JSONManager(credentialsPath)
