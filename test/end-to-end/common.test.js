@@ -31,33 +31,21 @@ describe('Common command', function () {
     'getProjectRootPath',
     () => testProject.rootPath
   )
-
-  const setupCredentialsWithDifferentOrg = commonTestSetup
-    .do(() => {
-      credentials.institution = 'marketplace' // could it be any other org
-      credentials.save()
-    })
-    .command(['deploy', testProject.extension1WithBuild.entryPointPath])
-    .catch(err => {
-      expect(err).to.be.an.instanceof(ManifestFromAnotherOrgError)
-    })
-    .command(['serve', testProject.extension1WithBuild.entryPointPath])
-    .catch(err => {
-      expect(err).to.be.an.instanceof(ManifestFromAnotherOrgError)
-    })
-    .command(['publish', testProject.extension1WithBuild.entryPointPath])
-    .catch(err => {
-      expect(err).to.be.an.instanceof(ManifestFromAnotherOrgError)
-    })
-    .do(() => {
-      credentials.institution = 'beyond' // could it be any other org
-      credentials.save()
-    })
-
-  setupCredentialsWithDifferentOrg.it(
-    'qt serve/deploy/publish when manifest has no institution attribute',
-    async (_, done) => {
-      done()
-    }
-  )
+  const commands = ['deploy', 'serve', 'publish']
+  for (const command of commands) {
+    commonTestSetup
+      .do(() => {
+        credentials.institution = 'marketplace' // could it be any other org
+        credentials.save()
+      })
+      .command([command, testProject.extension1WithBuild.entryPointPath])
+      .catch(err => {
+        expect(err).to.be.an.instanceof(ManifestFromAnotherOrgError)
+      })
+      .do(() => {
+        credentials.institution = 'beyond' // could it be any other org
+        credentials.save()
+      })
+      .it('qt serve/deploy/publish when manifest has no institution attribute')
+  }
 })
