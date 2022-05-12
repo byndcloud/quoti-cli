@@ -2,10 +2,12 @@ const path = require('path')
 const inquirer = require('inquirer')
 const {
   ManifestNotFoundError,
-  EntryPointNotFoundInPackageError
+  EntryPointNotFoundInPackageError,
+  ManifestFromAnotherOrgError
 } = require('./errorClasses')
 const ManifestService = require('../services/manifest')
 const readPkgSync = require('read-pkg-up').sync
+const credentials = require('../config/credentials')
 function isYes (text) {
   return ['s', 'sim', 'yes', 'y'].includes(text.toLowerCase())
 }
@@ -38,6 +40,15 @@ function getManifestFromEntryPoint (entrypointPath) {
   if (!manifest?.exists()) {
     throw new ManifestNotFoundError({ manifestPath: manifestPath })
   }
+  const manifestInstitution = manifest.institution
+  const credentialsInstitution = credentials.institution
+  if (manifestInstitution !== credentialsInstitution) {
+    throw new ManifestFromAnotherOrgError({
+      manifestPath,
+      manifestInstitution,
+      credentialsInstitution
+    })
+  }
   return manifest
 }
 function getProjectRootPath () {
@@ -50,8 +61,7 @@ function getProjectRootPath () {
 
   return path.resolve(path.dirname(pkgInfo.path))
 }
-function listExtensionsPaths (projectRootPath) {
-  const projectRoot = projectRootPath || getProjectRootPath()
+function listExtensionsPaths (projectRoot) {
   const pkgInfo = readPkgSync({ cwd: path.resolve(projectRoot) })
   if (!pkgInfo.packageJson?.quoti?.extensions?.length) {
     throw new Error(

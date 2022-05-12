@@ -1,7 +1,6 @@
 const JSONManager = require('./JSONManager')
 const fs = require('fs')
 const path = require('path')
-
 const home = require('os').homedir()
 const Logger = require('../config/logger')
 this.logger = Logger.child({
@@ -18,6 +17,9 @@ try {
   this.logger.error(e)
 }
 
-module.exports = new JSONManager(
-  path.join(baseConfigDirectory, 'credentials.json')
-)
+let credentialsPath = path.join(baseConfigDirectory, 'credentials.json')
+if (process.env.NODE_ENV === 'test') {
+  credentialsPath = path.resolve(process.env.TEST_BEYOND_CREDENTIALS_PATH)
+}
+
+module.exports = new JSONManager(credentialsPath)

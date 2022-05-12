@@ -183,7 +183,10 @@ class ServeCommand extends Command {
     const filesToWatch = ['*.js', './**/*.vue', './**/*.js']
 
     if (this.args.entryPointPath) {
-      utils.validateEntryPointIncludedInPackage(this.args.entryPointPath)
+      utils.validateEntryPointIncludedInPackage(
+        this.args.entryPointPath,
+        this.projectRoot
+      )
     }
 
     const entrypointsOfExtensionsToWatch =
