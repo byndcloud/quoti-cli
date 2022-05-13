@@ -11,6 +11,7 @@ const credentials = require('../config/credentials')
 function isYes (text) {
   return ['s', 'sim', 'yes', 'y'].includes(text.toLowerCase())
 }
+
 function isNo (text) {
   return ['n', 'não', 'nao', 'no'].includes(text.toLowerCase())
 }
@@ -31,6 +32,7 @@ async function confirmQuestion (text) {
   ])
   return isYes(confirmVersion)
 }
+
 function getManifestFromEntryPoint (entrypointPath) {
   const manifestPath = path.resolve(
     path.dirname(entrypointPath),
@@ -51,6 +53,7 @@ function getManifestFromEntryPoint (entrypointPath) {
   }
   return manifest
 }
+
 function getProjectRootPath () {
   const pkgInfo = readPkgSync()
   if (!pkgInfo?.packageJson) {
@@ -61,6 +64,7 @@ function getProjectRootPath () {
 
   return path.resolve(path.dirname(pkgInfo.path))
 }
+
 function listExtensionsPaths (projectRoot) {
   const pkgInfo = readPkgSync({ cwd: path.resolve(projectRoot) })
   if (!pkgInfo.packageJson?.quoti?.extensions?.length) {
@@ -72,12 +76,14 @@ function listExtensionsPaths (projectRoot) {
     path.resolve(projectRoot, extPath)
   )
 }
+
 function validateEntryPointIncludedInPackage (entryPointPath, projectRootPath) {
   const entryPointPaths = listExtensionsPaths(projectRootPath)
   if (!entryPointPaths.includes(path.resolve(entryPointPath))) {
     throw new EntryPointNotFoundInPackageError({ entryPointPath })
   }
 }
+
 /**
  *
  * @param {Object} data
@@ -114,6 +120,7 @@ async function promptExtensionEntryPointsFromUser ({
   }
   return entryPointPath || []
 }
+
 function getFrontBaseURL () {
   if (process.env.QUOTI_FRONT_BASE_URL) {
     return process.env.QUOTI_FRONT_BASE_URL
@@ -125,6 +132,7 @@ function getFrontBaseURL () {
 
   return 'https://quoti.cloud'
 }
+
 module.exports = {
   isYes,
   isNo,

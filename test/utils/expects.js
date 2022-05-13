@@ -8,6 +8,7 @@ function expectTimestampInFile (buffer, now) {
   const file = buffer?.toString()
   expect(file.includes(now)).to.equal(true)
 }
+
 module.exports = {
   expectTimestampInFile
 }
