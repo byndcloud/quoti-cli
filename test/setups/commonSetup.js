@@ -19,6 +19,7 @@ function suppressVueCliLogs (test) {
       console.log()
     )
 }
+
 const myTest = suppressVueCliLogs(test)
 module.exports = {
   testStubLoggedIn: myTest,

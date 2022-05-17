@@ -80,6 +80,7 @@ function noManifest ({ extensionA }) {
     })
     .command(['serve', extensionA.entryPointPath])
 }
+
 function remoteExtensionNotFound ({ extensionA }) {
   return commonServeTestSetup
     .do(async _ => {
@@ -116,6 +117,7 @@ function serve ({
       await delay(1000)
     })
 }
+
 function serveWithNewSession (extensionA) {
   return commonServeTestSetup
     .add('now', Date.now())

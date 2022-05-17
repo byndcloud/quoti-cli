@@ -2,7 +2,6 @@ const { testStubLoggedIn } = require('../common/test')
 const utils = require('../../src/utils/index')
 const DeployCommand = require('../../src/commands/deploy')
 const inquirer = require('inquirer')
-const utilsTest = require('../utils/index')
 const TestProject = require('../services/testProject')
 const testProjectDeploy = new TestProject()
 const version = Date.now()
@@ -52,6 +51,7 @@ function remoteExtensionNotFound ({ extensionA }) {
     })
     .command(['deploy', extensionA.entryPointPath])
 }
+
 function deployExtensionNoBuildWithoutArgs (testProject) {
   return commonDeployTestSetup
     .modifyFiles([testProject.extension2NoBuild])

@@ -21,6 +21,7 @@ function suppressVueCliLogs (test) {
       console.log()
     )
 }
+
 let myTest = suppressVueCliLogs(test)
 myTest = test.register('modifyFiles', extensions => {
   return {
