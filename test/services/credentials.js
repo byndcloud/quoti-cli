@@ -16,5 +16,10 @@ class Credentials extends JSONManager {
     this.load()
     return this.credentialsPath
   }
+
+  deleteSessionId () {
+    delete this.devSessionId
+    this.save()
+  }
 }
 module.exports = Credentials
