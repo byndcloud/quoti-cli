@@ -19,39 +19,13 @@ const commonDeployTestSetup = testStubLoggedIn
 
 function noBuild (testProject) {
   return commonDeployTestSetup
-    .add('modifiedFiles', ctx => {
-      return [
-        {
-          modifiedFilesPath: testProject.extension2NoBuild.entryPointPath,
-          manifestPath: testProject.extension2NoBuild.manifestPath
-        }
-      ]
-    })
-    .do(async ctx => {
-      utilsTest.insertTimestampInFile(
-        ctx.modifiedFiles[0].modifiedFilesPath,
-        ctx.now
-      )
-    })
+    .modifyFiles([testProject.extension2NoBuild])
     .command(['deploy', testProject.extension2NoBuild.entryPointPath])
 }
 
 function withBuild (testProject) {
   return commonDeployTestSetup
-    .add('modifiedFiles', ctx => {
-      return [
-        {
-          modifiedFilesPath: testProject.extension1WithBuild.entryPointPath,
-          manifestPath: testProject.extension1WithBuild.manifestPath
-        }
-      ]
-    })
-    .do(async ctx => {
-      utilsTest.insertTimestampInFile(
-        ctx.modifiedFiles[0].modifiedFilesPath,
-        ctx.now
-      )
-    })
+    .modifyFiles([testProject.extension1WithBuild])
     .command(['deploy', testProject.extension1WithBuild.entryPointPath])
 }
 
@@ -80,20 +54,7 @@ function remoteExtensionNotFound ({ extensionA }) {
 }
 function deployExtensionNoBuildWithoutArgs (testProject) {
   return commonDeployTestSetup
-    .add('modifiedFiles', ctx => {
-      return [
-        {
-          modifiedFilesPath: testProject.extension2NoBuild.entryPointPath,
-          manifestPath: testProject.extension2NoBuild.manifestPath
-        }
-      ]
-    })
-    .do(async ctx => {
-      utilsTest.insertTimestampInFile(
-        ctx.modifiedFiles[0].modifiedFilesPath,
-        ctx.now
-      )
-    })
+    .modifyFiles([testProject.extension2NoBuild])
     .stub(inquirer, 'prompt', arg => {
       const promptName = arg[0].name
       if (promptName === 'versionName') {
@@ -109,28 +70,10 @@ function deployExtensionNoBuildWithoutArgs (testProject) {
 
 function deployAllExtensions (testProject) {
   return commonDeployTestSetup
-    .add('modifiedFiles', ctx => {
-      return [
-        {
-          modifiedFilesPath: testProject.extension1WithBuild.entryPointPath,
-          manifestPath: testProject.extension1WithBuild.manifestPath
-        },
-        {
-          modifiedFilesPath: testProject.extension2NoBuild.entryPointPath,
-          manifestPath: testProject.extension2NoBuild.manifestPath
-        }
-      ]
-    })
-    .do(async ctx => {
-      utilsTest.insertTimestampInFile(
-        ctx.modifiedFiles[0].modifiedFilesPath,
-        ctx.now
-      )
-      utilsTest.insertTimestampInFile(
-        ctx.modifiedFiles[1].modifiedFilesPath,
-        ctx.now
-      )
-    })
+    .modifyFiles([
+      testProject.extension1WithBuild,
+      testProject.extension2NoBuild
+    ])
     .command(['deploy', '-a'])
 }
 
