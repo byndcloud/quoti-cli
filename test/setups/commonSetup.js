@@ -2,7 +2,6 @@ const { expect, test } = require('@oclif/test')
 const utilsVueCliService = require('@vue/cli-shared-utils')
 const SodaFriendlyErrorsWebpackPlugin = require('@soda/friendly-errors-webpack-plugin')
 const CredentialsTest = require('../services/credentials')
-const utilsTest = require('../utils/index')
 
 const credentials = new CredentialsTest()
 credentials.createBeyondCredential()
@@ -20,28 +19,7 @@ function suppressVueCliLogs (test) {
       console.log()
     )
 }
-let myTest = suppressVueCliLogs(test)
-myTest = test.register('modifyFiles', extensions => {
-  return {
-    run (ctx) {
-      if (!Array.isArray(ctx.modifiedFiles)) {
-        ctx.modifiedFiles = []
-      }
-      for (const extension of extensions) {
-        ctx.modifiedFiles = [
-          {
-            modifiedFilesPath: extension.entryPointPath,
-            manifestPath: extension.manifestPath
-          }
-        ]
-        utilsTest.insertTimestampInFile(
-          ctx.modifiedFiles[0].modifiedFilesPath,
-          ctx.now
-        )
-      }
-    }
-  }
-})
+const myTest = suppressVueCliLogs(test)
 module.exports = {
   testStubLoggedIn: myTest,
   expect

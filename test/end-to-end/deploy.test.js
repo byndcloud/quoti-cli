@@ -1,15 +1,10 @@
-const { expect, testStubLoggedIn } = require('../common/test')
+const { expect } = require('../common/test')
 const sinon = require('sinon')
-const utils = require('../../src/utils/index')
 const ExtensionService = require('../../src/services/extension')
-
 const BaseCommand = require('../../src/base')
-const DeployCommand = require('../../src/commands/deploy')
-const inquirer = require('inquirer')
-
-const utilsTest = require('../utils/index')
-const TestProject = require('../services/testProject')
 const { expectTimestampInFile } = require('../utils/expects')
+const deploySetup = require('../setups/deploySetup')
+const TestProject = require('../services/testProject')
 const {
   EntryPointNotFoundInPackageError,
   ManifestNotFoundError,
@@ -32,233 +27,147 @@ describe('Deploy command', function () {
     await testProject.restore()
     sandbox.restore()
   })
-  const now = Date.now()
-  const commonDeployTestSetup = testStubLoggedIn
-    .stub(utils, 'getProjectRootPath', () => testProject.rootPath)
-    .stub(DeployCommand.prototype, 'promptVersionName', () => `Version ${now}`)
 
-  // test 1
-  const setupDeployTestNoBuild = commonDeployTestSetup
-    .add('modifiedFiles', ctx => {
-      return [
-        {
-          modifiedFilesPath: testProject.extension2NoBuild.entryPointPath,
-          manifestPath: testProject.extension2NoBuild.manifestPath
+  describe('Deploy no build', () => {
+    // test 1
+    deploySetup
+      .noBuild(testProject)
+      .it('qt deploy to extension without build', async (ctx, done) => {
+        const extensionServiceSpy = ExtensionService.prototype
+        expect(extensionServiceSpy.build.notCalled)
+        expect(extensionServiceSpy.upload.callCount).to.equal(1)
+
+        const uploadFirstArgs = extensionServiceSpy.upload.firstCall.args
+        const bufferPassedToUploadFunction = uploadFirstArgs[0]
+        expectTimestampInFile(bufferPassedToUploadFunction, ctx.now)
+
+        expect(extensionServiceSpy.deployVersion.callCount).to.equal(1)
+
+        done()
+      })
+    // test 2
+    deploySetup
+      .deployExtensionNoBuildWithoutArgs(testProject)
+      .it(
+        'qt deploy to extension no build without argument',
+        async (ctx, done) => {
+          const extensionServiceSpy = ExtensionService.prototype
+          expect(extensionServiceSpy.build.notCalled)
+          expect(extensionServiceSpy.upload.callCount).to.equal(1)
+          const uploadFirstArgs = extensionServiceSpy.upload.firstCall.args
+          const bufferPassedToUploadFunction = uploadFirstArgs[0]
+          expectTimestampInFile(bufferPassedToUploadFunction, ctx.now)
+          expect(extensionServiceSpy.deployVersion.callCount).to.equal(1)
+
+          done()
         }
-      ]
-    })
-    .do(async ctx => {
-      utilsTest.insertTimestampInFile(
-        ctx.modifiedFiles[0].modifiedFilesPath,
-        now
       )
-    })
-    .command(['deploy', testProject.extension2NoBuild.entryPointPath])
-  setupDeployTestNoBuild.it(
-    'qt deploy to extension without build',
-    async (_, done) => {
-      const extensionServiceSpy = ExtensionService.prototype
+  })
+  describe('Deploy with build', () => {
+    // test 3
+    deploySetup
+      .withBuild(testProject)
+      .it('qt deploy to extension with build', async (ctx, done) => {
+        const extensionServiceSpy = ExtensionService.prototype
 
-      expect(extensionServiceSpy.build.notCalled)
+        expect(extensionServiceSpy.build.callCount).to.equal(1)
 
-      expect(extensionServiceSpy.upload.callCount).to.equal(1)
+        expect(extensionServiceSpy.upload.callCount).to.equal(1)
 
-      const uploadFirstArgs = extensionServiceSpy.upload.firstCall.args
-      const bufferPassedToUploadFunction = uploadFirstArgs[0]
-      expectTimestampInFile(bufferPassedToUploadFunction, now)
+        const uploadFirstArgs = extensionServiceSpy.upload.firstCall.args
+        const bufferPassedToUploadFunction = uploadFirstArgs[0]
+        expectTimestampInFile(bufferPassedToUploadFunction, ctx.now)
 
-      expect(extensionServiceSpy.deployVersion.callCount).to.equal(1)
+        expect(extensionServiceSpy.deployVersion.callCount).to.equal(1)
 
-      done()
-    }
-  )
+        done()
+      })
+  })
 
-  // test 2
-  const setupDeployTestWithBuild = commonDeployTestSetup
-    .add('modifiedFiles', ctx => {
-      return [
-        {
-          modifiedFilesPath: testProject.extension1WithBuild.entryPointPath,
-          manifestPath: testProject.extension1WithBuild.manifestPath
-        }
-      ]
-    })
-    .do(async ctx => {
-      utilsTest.insertTimestampInFile(
-        ctx.modifiedFiles[0].modifiedFilesPath,
-        now
-      )
-    })
-    .command(['deploy', testProject.extension1WithBuild.entryPointPath])
-
-  setupDeployTestWithBuild.it(
-    'qt deploy to extension with build',
-    async (_, done) => {
-      const extensionServiceSpy = ExtensionService.prototype
-
-      expect(extensionServiceSpy.build.callCount).to.equal(1)
-
-      expect(extensionServiceSpy.upload.callCount).to.equal(1)
-
-      const uploadFirstArgs = extensionServiceSpy.upload.firstCall.args
-      const bufferPassedToUploadFunction = uploadFirstArgs[0]
-      expectTimestampInFile(bufferPassedToUploadFunction, now)
-
-      expect(extensionServiceSpy.deployVersion.callCount).to.equal(1)
-
-      done()
-    }
-  )
-
-  // test 3
-  const setupDeployTestNoEntrypointOnPackage = commonDeployTestSetup
-    .do(async _ => {
-      await testProject.setExtensionsOnPackage([
-        testProject.extension1WithBuild
-      ])
-    })
-    .command(['deploy', testProject.extension2NoBuild.entryPointPath])
-    .catch(err => {
-      expect(err).to.be.an.instanceof(EntryPointNotFoundInPackageError)
-    })
-
-  setupDeployTestNoEntrypointOnPackage.it(
-    'qt deploy to extension not listed in package',
-    async (_, done) => {
-      const extensionServiceSpy = ExtensionService.prototype
-      expect(extensionServiceSpy.build.notCalled)
-      expect(extensionServiceSpy.upload.notCalled)
-      expect(extensionServiceSpy.deployVersion.notCalled)
-      done()
-    }
-  )
-  // test 4
-  const setupDeployTestNoManifest = commonDeployTestSetup
-    .do(async _ => {
-      testProject.extension1WithBuild.deleteManifestSync()
-    })
-    .command(['deploy', testProject.extension1WithBuild.entryPointPath])
-    .catch(err => {
-      expect(err).to.be.an.instanceof(ManifestNotFoundError)
-    })
-
-  setupDeployTestNoManifest.it(
-    'qt deploy to extension no manifest',
-    async (_, done) => {
-      const extensionServiceSpy = ExtensionService.prototype
-      expect(extensionServiceSpy.build.notCalled)
-      expect(extensionServiceSpy.upload.notCalled)
-      expect(extensionServiceSpy.deployVersion.notCalled)
-      done()
-    }
-  )
-  // test 5
-  const setupDeployTestRemoteExtensionNotFound = commonDeployTestSetup
-    .do(async _ => {
-      testProject.extension1WithBuild.setExtensionIdOnManifest(99999999)
-    })
-    .command(['deploy', testProject.extension1WithBuild.entryPointPath])
-    .catch(err => {
-      expect(err).to.be.an.instanceof(ExtensionNotFoundError)
-    })
-
-  setupDeployTestRemoteExtensionNotFound.it(
-    'qt deploy to extension without remote extension',
-    async (_, done) => {
-      const extensionServiceSpy = ExtensionService.prototype
-      expect(extensionServiceSpy.build.notCalled)
-      expect(extensionServiceSpy.upload.notCalled)
-      expect(extensionServiceSpy.deployVersion.notCalled)
-      done()
-    }
-  )
-  // test 6
-  const setupDeployTestWithoutArgs = commonDeployTestSetup
-    .add('modifiedFiles', ctx => {
-      return [
-        {
-          modifiedFilesPath: testProject.extension2NoBuild.entryPointPath,
-          manifestPath: testProject.extension2NoBuild.manifestPath
-        }
-      ]
-    })
-    .do(async ctx => {
-      utilsTest.insertTimestampInFile(
-        ctx.modifiedFiles[0].modifiedFilesPath,
-        now
-      )
-    })
-    .stub(inquirer, 'prompt', arg => {
-      const promptName = arg[0].name
-      if (promptName === 'versionName') {
-        return { versionName: `Version ${now}` }
-      } else if (promptName === 'selectedEntryPoint') {
-        return {
-          selectedEntryPoint: testProject.extension2NoBuild.entryPointPath
-        }
+  describe('General tests on deployment', () => {
+    const extensionsToTest = [
+      {
+        name: 'extension with build',
+        testProject,
+        extensionA: testProject.extension1WithBuild,
+        extensionB: testProject.extension2NoBuild
+      },
+      {
+        name: 'extension no build',
+        testProject,
+        extensionA: testProject.extension2NoBuild,
+        extensionB: testProject.extension1WithBuild
       }
+    ]
+    extensionsToTest.forEach(extension => {
+      // test 4
+      deploySetup
+        .noEntrypointOnPackage(extension)
+        .catch(err => {
+          expect(err).to.be.an.instanceof(EntryPointNotFoundInPackageError)
+        })
+        .it(
+          `qt deploy to extension not listed in package [${extension.name}]`,
+          async (_, done) => {
+            const extensionServiceSpy = ExtensionService.prototype
+            expect(extensionServiceSpy.build.notCalled)
+            expect(extensionServiceSpy.upload.notCalled)
+            expect(extensionServiceSpy.deployVersion.notCalled)
+            done()
+          }
+        )
+      // test 5
+      deploySetup
+        .noManifest(extension)
+        .catch(err => {
+          expect(err).to.be.an.instanceof(ManifestNotFoundError)
+        })
+        .it('qt deploy to extension no manifest', async (_, done) => {
+          const extensionServiceSpy = ExtensionService.prototype
+          expect(extensionServiceSpy.build.notCalled)
+          expect(extensionServiceSpy.upload.notCalled)
+          expect(extensionServiceSpy.deployVersion.notCalled)
+          done()
+        })
+
+      // // test 6
+      deploySetup
+        .remoteExtensionNotFound(extension)
+        .catch(err => {
+          expect(err).to.be.an.instanceof(ExtensionNotFoundError)
+        })
+        .it(
+          'qt deploy to extension without remote extension',
+          async (_, done) => {
+            const extensionServiceSpy = ExtensionService.prototype
+            expect(extensionServiceSpy.build.notCalled)
+            expect(extensionServiceSpy.upload.notCalled)
+            expect(extensionServiceSpy.deployVersion.notCalled)
+            done()
+          }
+        )
     })
-    .command(['deploy'])
+    // // test 7
+    deploySetup
+      .deployAllExtensions(testProject)
+      .it('qt deploy all extensions', async (ctx, done) => {
+        const extensionServiceSpy = ExtensionService.prototype
 
-  setupDeployTestWithoutArgs.it(
-    'qt deploy to extension no build without argument',
-    async (_, done) => {
-      const extensionServiceSpy = ExtensionService.prototype
-      expect(extensionServiceSpy.build.notCalled)
-      expect(extensionServiceSpy.upload.callCount).to.equal(1)
-      const uploadFirstArgs = extensionServiceSpy.upload.firstCall.args
-      const bufferPassedToUploadFunction = uploadFirstArgs[0]
-      expectTimestampInFile(bufferPassedToUploadFunction, now)
-      expect(extensionServiceSpy.deployVersion.callCount).to.equal(1)
+        expect(extensionServiceSpy.build.callCount).to.equal(1)
 
-      done()
-    }
-  )
-  // test 7
-  const setupDeployTestAllExtensions = commonDeployTestSetup
-    .add('modifiedFiles', ctx => {
-      return [
-        {
-          modifiedFilesPath: testProject.extension1WithBuild.entryPointPath,
-          manifestPath: testProject.extension1WithBuild.manifestPath
-        },
-        {
-          modifiedFilesPath: testProject.extension2NoBuild.entryPointPath,
-          manifestPath: testProject.extension2NoBuild.manifestPath
-        }
-      ]
-    })
-    .do(async ctx => {
-      utilsTest.insertTimestampInFile(
-        ctx.modifiedFiles[0].modifiedFilesPath,
-        now
-      )
-      utilsTest.insertTimestampInFile(
-        ctx.modifiedFiles[1].modifiedFilesPath,
-        now
-      )
-    })
-    .command(['deploy', '-a'])
-  setupDeployTestAllExtensions.it(
-    'qt deploy all extensions',
-    async (_, done) => {
-      const extensionServiceSpy = ExtensionService.prototype
+        expect(extensionServiceSpy.upload.callCount).to.equal(2)
 
-      expect(extensionServiceSpy.build.callCount).to.equal(1)
+        const uploadFirstArgs = extensionServiceSpy.upload.firstCall.args
+        let bufferPassedToUploadFunction = uploadFirstArgs[0]
+        expectTimestampInFile(bufferPassedToUploadFunction, ctx.now)
 
-      expect(extensionServiceSpy.upload.callCount).to.equal(2)
+        const uploadSecondArgs = extensionServiceSpy.upload.firstCall.args
+        bufferPassedToUploadFunction = uploadSecondArgs[0]
+        expectTimestampInFile(bufferPassedToUploadFunction, ctx.now)
 
-      const uploadFirstArgs = extensionServiceSpy.upload.firstCall.args
-      let bufferPassedToUploadFunction = uploadFirstArgs[0]
-      expectTimestampInFile(bufferPassedToUploadFunction, now)
+        expect(extensionServiceSpy.deployVersion.callCount).to.equal(2)
 
-      const uploadSecondArgs = extensionServiceSpy.upload.firstCall.args
-      bufferPassedToUploadFunction = uploadSecondArgs[0]
-      expectTimestampInFile(bufferPassedToUploadFunction, now)
-
-      expect(extensionServiceSpy.deployVersion.callCount).to.equal(2)
-
-      done()
-    }
-  )
+        done()
+      })
+  })
 })
