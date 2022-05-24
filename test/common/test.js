@@ -4,6 +4,7 @@ const SodaFriendlyErrorsWebpackPlugin = require('@soda/friendly-errors-webpack-p
 const CredentialsTest = require('../services/credentials')
 const utilsTest = require('../utils/index')
 
+const { randomUUID } = require('crypto')
 const credentials = new CredentialsTest()
 credentials.createBeyondCredential()
 /**
@@ -20,6 +21,7 @@ function suppressVueCliLogs (test) {
       console.log()
     )
 }
+
 let myTest = suppressVueCliLogs(test)
 myTest = test.register('modifyFiles', extensions => {
   return {
@@ -42,6 +44,25 @@ myTest = test.register('modifyFiles', extensions => {
     }
   }
 })
+myTest = test.register('setRandomSessionId', prefix => {
+  return {
+    run (ctx) {
+      const newCredentials = new CredentialsTest()
+      newCredentials.devSessionId = randomUUID()
+      newCredentials.save()
+      ctx.devSessionIdCreateDuringTest = newCredentials.devSessionId
+    }
+  }
+})
+myTest = myTest.register('deleteSessionId', () => {
+  return {
+    run (ctx) {
+      const newCredentials = new CredentialsTest()
+      newCredentials.deleteSessionId()
+    }
+  }
+})
+
 module.exports = {
   testStubLoggedIn: myTest,
   expect

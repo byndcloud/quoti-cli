@@ -20,6 +20,8 @@ const { flags } = require('@oclif/command')
 const { getFrontBaseURL } = require('../utils/index')
 const RemoteExtensionService = require('../services/remoteExtension')
 const DevSessionIdService = require('../services/devSessionId.js')
+const dotenv = require('dotenv')
+dotenv.config()
 
 class ServeCommand extends Command {
   constructor ({ projectRoot, extensionsPaths }) {
@@ -127,7 +129,8 @@ class ServeCommand extends Command {
     sessionId,
     remoteExtensionsByPaths,
     manifestsByPaths,
-    alias
+    alias,
+    watcher
   ) {
     return async changedFilePath => {
       const extensionsEntrypointsToCheck = Object.keys(remoteExtensionsByPaths)
@@ -143,6 +146,9 @@ class ServeCommand extends Command {
         manifestsByPaths
       })
       await this.sendCodeToQuotiBySocket(extensionsData, sessionId)
+      if (process.env.NODE_ENV === 'test') {
+        watcher.close()
+      }
     }
   }
 
@@ -221,18 +227,21 @@ class ServeCommand extends Command {
       forceCreateDevSessionId: this.flags['new-session']
     })
 
+    const watcher = chokidar.watch(filesToWatch, {
+      cwd: this.projectRoot,
+      ignored: ['node_modules']
+    })
     const debouncedBuild = debounce(
       this.chokidarOnChange(
         sessionId,
         remoteExtensionsByEntrypoints,
         manifestsByEntrypoints,
-        alias
+        alias,
+        watcher
       ),
       800
     )
-    chokidar
-      .watch(filesToWatch, { cwd: this.projectRoot, ignored: ['node_modules'] })
-      .on('change', debouncedBuild)
+    watcher.on('change', debouncedBuild)
 
     const watchingChangesMessage = this.args.entryPointPath
       ? `Observando alterações na extensão em ${this.args.entryPointPath}`
