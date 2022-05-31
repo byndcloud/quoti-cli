@@ -1,4 +1,8 @@
 const { default: axios } = require('axios')
+const qs = require('qs')
+axios.defaults.paramsSerializer = params => {
+  return qs.stringify(params)
+}
 const https = require('https')
 
 class Api {
