@@ -1,7 +1,5 @@
 const { default: axios } = require('axios')
 const https = require('https')
-const dotenv = require('dotenv')
-dotenv.config()
 
 class Api {
   constructor () {

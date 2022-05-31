@@ -1,7 +1,5 @@
 const { createLogger, format, transports, addColors } = require('winston')
 const { combine, timestamp, printf } = format
-const dotenv = require('dotenv')
-dotenv.config()
 
 const NODE_ENV = process.env.NODE_ENV
 const colorizer = format.colorize()
