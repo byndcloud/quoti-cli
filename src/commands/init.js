@@ -15,9 +15,8 @@ class InitCommand extends Command {
     const dynamicComponent = await initExtensionService.createDynamicComponent(
       extension
     )
-    marketplaceOrganizationService.copyTemplateToPath({
-      extensionType: extension.type,
-      to: './'
+    initExtensionService.copyTemplateToCWD({
+      extensionType: extension.type
     })
     await initExtensionService.initializeManifestAccordingWithType(
       dynamicComponent

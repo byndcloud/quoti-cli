@@ -9,10 +9,13 @@ const { firebase } = require('../config/firebase')
 const api = require('../config/axios')
 credentials.load()
 const ManifestService = require('../services/manifest')
+const MarketplaceOrganizationService = require('../services/marketplaceOrganization')
+const marketplaceOrganizationService = new MarketplaceOrganizationService()
 const { CreateDynamicComponentError } = require('../utils/errorClasses')
 
 class InitExtensionService {
-  constructor ({ spinnerOptions } = {}) {
+  constructor ({ spinnerOptions, cwd = './' } = {}) {
+    this.cwd = cwd
     this.spinner = ora(
       spinnerOptions || {
         spinner: 'arrow3',
@@ -43,6 +46,10 @@ class InitExtensionService {
     }
   }
 
+  getCWD () {
+    return this.cwd
+  }
+
   async createDynamicComponent (dynamicComponent) {
     try {
       this.spinner.start('Criando extensão...')
@@ -70,7 +77,7 @@ class InitExtensionService {
   }
 
   async initializeManifestAccordingWithType (dynamicComponent) {
-    const rootPath = path.resolve('./')
+    const rootPath = path.resolve(this.getCWD())
     const manifestPath =
       dynamicComponent.type === 'Com build'
         ? path.join(rootPath, 'src', 'pages', 'extension1', 'manifest.json')
@@ -203,6 +210,13 @@ class InitExtensionService {
 
       return true
     }
+  }
+
+  copyTemplateToCWD ({ extensionType }) {
+    marketplaceOrganizationService.copyTemplateToPath({
+      extensionType,
+      to: this.getCWD()
+    })
   }
 }
 
