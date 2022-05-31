@@ -19,7 +19,7 @@ class Organization {
   }
 
   async listExtensionsPaths ({ token } = {}) {
-    const dynamicComponents = await this.listDynamicComponents(token)
+    const dynamicComponents = await this.listDynamicComponents({ token })
     return dynamicComponents.map(d => d.path)
   }
 }
