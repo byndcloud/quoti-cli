@@ -2,7 +2,6 @@ const credentials = require('../config/credentials')
 const { downloadFile, unzip } = require('../utils/index')
 const path = require('path')
 const fs = require('fs')
-credentials.load()
 class MarketplaceOrganization {
   constructor () {
     this.templatePath = path.dirname(credentials.getPath())

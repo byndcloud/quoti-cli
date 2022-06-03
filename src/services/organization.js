@@ -2,7 +2,6 @@ const api = require('../config/axios')
 const { firebase } = require('../config/firebase')
 const credentials = require('../config/credentials')
 
-credentials.load()
 class Organization {
   constructor ({ orgSlug } = {}) {
     this.orgSlug = orgSlug || credentials.institution
