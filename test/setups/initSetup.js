@@ -16,7 +16,6 @@ function init ({ args = [], preRun: { type = true, cwd } = {} }) {
       return cwd
     })
     .stub(InitExtensionService.prototype, 'promptExtensionInfo', ctx => {
-      console.log('chamou stub', type)
       const extensionName = `test_${uuid}`
       return {
         title: extensionName,
