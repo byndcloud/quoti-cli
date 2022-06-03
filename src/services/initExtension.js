@@ -7,7 +7,7 @@ const path = require('path')
 const credentials = require('../config/credentials')
 const { firebase } = require('../config/firebase')
 const api = require('../config/axios')
-credentials.load()
+// credentials.load()
 const ManifestService = require('../services/manifest')
 const MarketplaceOrganizationService = require('../services/marketplaceOrganization')
 const marketplaceOrganizationService = new MarketplaceOrganizationService()
@@ -165,7 +165,7 @@ class InitExtensionService {
         message: 'Extensão com build? y',
         type: 'confirm',
         default: true,
-        validate: this.validatePath.bind
+        validate: this.validate.validatePath.bind
       }
     ])
     return type ? 'Com build' : 'Sem build'
@@ -178,7 +178,7 @@ class InitExtensionService {
         message: 'Extensão é pública? n',
         type: 'confirm',
         default: false,
-        validate: this.validatePath.bind
+        validate: this.validate.validatePath.bind
       }
     ])
     return isPublic
@@ -191,25 +191,10 @@ class InitExtensionService {
         message: 'Extensão deve exibir a barra de navegação? y',
         type: 'confirm',
         default: true,
-        validate: this.validatePath.bind
+        validate: this.validate.validatePath.bind
       }
     ])
     return hasToolbar
-  }
-
-  validatePath (currentPaths) {
-    return path => {
-      const isValidFormat = /^[a-z0-9-]+(\/[a-z0-9-]+)*$/i.test(path)
-      if (!isValidFormat) {
-        return 'Path inválido. Só aceitamos números, letras, e -'
-      }
-      const isPathExist = currentPaths.includes(path)
-      if (isPathExist) {
-        return `Já existe uma extensão com esse path na organização ${credentials.institution}.`
-      }
-
-      return true
-    }
   }
 
   copyTemplateToCWD ({ extensionType }) {
