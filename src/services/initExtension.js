@@ -76,22 +76,19 @@ class InitExtensionService {
     }
   }
 
-  async initializeManifestAccordingWithType (dynamicComponent) {
+  initializeManifestAccordingWithType (dynamicComponent) {
     const rootPath = path.resolve(this.getCWD())
     const manifestPath =
       dynamicComponent.type === 'Com build'
         ? path.join(rootPath, 'src', 'pages', 'extension1', 'manifest.json')
         : path.join(rootPath, 'manifest.json')
-    await this.initializeManifestFromDynamicComponent({
+    this.initializeManifestFromDynamicComponent({
       dynamicComponent,
       manifestPath
     })
   }
 
-  async initializeManifestFromDynamicComponent ({
-    dynamicComponent,
-    manifestPath
-  }) {
+  initializeManifestFromDynamicComponent ({ dynamicComponent, manifestPath }) {
     const manifest = new ManifestService(manifestPath)
     manifest.extensionId = dynamicComponent.id
     manifest.extensionStorageId = dynamicComponent.extensionStorageId

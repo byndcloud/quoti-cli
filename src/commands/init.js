@@ -16,9 +16,7 @@ class InitCommand extends Command {
     initExtensionService.copyTemplateToCWD({
       extensionType: extension.type
     })
-    await initExtensionService.initializeManifestAccordingWithType(
-      dynamicComponent
-    )
+    initExtensionService.initializeManifestAccordingWithType(dynamicComponent)
   }
 
   static description = 'Inicializa um projeto Quoti'
