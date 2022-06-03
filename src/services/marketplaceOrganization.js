@@ -15,7 +15,7 @@ class MarketplaceOrganization {
     unzip(templateZipPath, this.templatePath)
   }
 
-  copyTemplateToPath ({ extensionType = 'build', to } = {}) {
+  copyTemplateToPath ({ extensionType = 'Com build', to } = {}) {
     const pathAccordingWithBuild =
       extensionType === 'Com build'
         ? 'extension-with-build'
