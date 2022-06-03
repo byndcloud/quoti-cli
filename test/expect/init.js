@@ -30,7 +30,7 @@ function getEntryPointDirname ({ cwd, type }) {
  * @param {string} data.cwd
  * @param {'build'|'noBuild'} data.type
  */
-function expectEntryPointFile ({ cwd, type }) {
+function expectEntryPointFileToExist ({ cwd, type }) {
   const entryPointPath = getEntryPointPath({ cwd, type })
   expect(fs.existsSync(entryPointPath), 'Entry point not found').to.equal(true)
 }
@@ -54,6 +54,6 @@ async function expectManifestAccordingRemoteExtension ({ cwd, type }) {
 }
 
 module.exports = {
-  expectEntryPointFile,
+  expectEntryPointFileToExist,
   expectManifestAccordingRemoteExtension
 }
