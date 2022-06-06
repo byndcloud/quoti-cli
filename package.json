@@ -102,7 +102,7 @@
     "postpack": "rm -f oclif.manifest.json",
     "prepack": "oclif-dev manifest && oclif-dev readme",
     "test:unit": "NODE_ENV=test nyc mocha --forbid-only --exit \"test/unit/**/*.test.js\"",
-    "test:e2e": "NODE_ENV=test nyc mocha --forbid-only --exit \"test/end-to-end/**/*.test.js\"",
+    "test:e2e": "NODE_ENV=test bash test.sh",
     "generate:docs": "npm pack && git add README.md",
     "lint": "eslint --fix -c .eslintrc.json src/**/*.js test/**/*.js",
     "format": "prettier --write src/**/*.js test/**/*.js",
