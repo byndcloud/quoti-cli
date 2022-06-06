@@ -7,14 +7,14 @@ const path = require('path')
 const credentials = require('../config/credentials')
 const { firebase } = require('../config/firebase')
 const api = require('../config/axios')
-// credentials.load()
 const ManifestService = require('../services/manifest')
 const MarketplaceOrganizationService = require('../services/marketplaceOrganization')
 const marketplaceOrganizationService = new MarketplaceOrganizationService()
 const { CreateDynamicComponentError } = require('../utils/errorClasses')
 
 class InitExtensionService {
-  constructor ({ spinnerOptions, cwd = './' } = {}) {
+  constructor ({ spinnerOptions, cwd = './', logger } = {}) {
+    this.logger = logger
     this.cwd = cwd
     this.spinner = ora(
       spinnerOptions || {
@@ -72,6 +72,7 @@ class InitExtensionService {
       this.spinner.fail(
         `Houve um erro ao criar extensão na organização ${credentials.institution}`
       )
+      this.logger.debug(error)
       throw new CreateDynamicComponentError()
     }
   }
