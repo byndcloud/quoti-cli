@@ -2,15 +2,16 @@ const { createLogger, format, transports, addColors } = require('winston')
 const { combine, timestamp, printf } = format
 
 const NODE_ENV = process.env.NODE_ENV
+const isDebug = NODE_ENV === 'development' || process.env.DEBUG === true
 const colorizer = format.colorize()
 
 const myCustomLevels = {
   levels: {
     error: 0,
     warning: 1,
-    debug: 2,
-    info: 3,
-    success: 4
+    info: 2,
+    success: 3,
+    debug: 4
   },
   colors: {
     error: 'bold red',
@@ -26,7 +27,7 @@ const logger = createLogger({
   format: combine(
     timestamp(),
     printf(msg => {
-      if (msg.level === 'debug' && NODE_ENV === 'development') {
+      if (msg.level === 'debug' && isDebug) {
         if (msg.tag) {
           return colorizer.colorize(
             msg.level,
@@ -38,7 +39,7 @@ const logger = createLogger({
             `${msg.timestamp} - ${msg.level}: ${msg.message}`
           )
         }
-      } else if (msg.stack && NODE_ENV === 'development') {
+      } else if (msg.stack && isDebug) {
         return colorizer.colorize(msg.level, `${msg.stack}`)
       }
       return colorizer.colorize(msg.level, `${msg.message}`)
@@ -46,7 +47,7 @@ const logger = createLogger({
   ),
   transports: [
     new transports.Console({
-      level: 'success',
+      level: isDebug ? 'debug' : 'success',
       prettyPrint: true,
       colorize: true,
       timestamp: true
