@@ -1,8 +1,5 @@
 const { default: axios } = require('axios')
 const qs = require('qs')
-axios.defaults.paramsSerializer = params => {
-  return qs.stringify(params)
-}
 const https = require('https')
 
 class Api {
@@ -17,7 +14,12 @@ class Api {
         httpsAgent: new https.Agent({
           rejectUnauthorized: false
         }),
-        baseURL: process.env.API_BASE_URL
+        baseURL: process.env.API_BASE_URL,
+        // note: Essa linha permite realizar requisições para o quoti api usando apenas
+        // axios.get(url, params: {}), sem precisar passar o objeto para string
+        paramsSerializer: params => {
+          return qs.stringify(params)
+        }
       })
     } else {
       this.axios = axios.create({
