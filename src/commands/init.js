@@ -19,7 +19,7 @@ class InitCommand extends Command {
     initExtensionService.initializeManifestAccordingWithType(dynamicComponent)
   }
 
-  static description = 'Inicializa um projeto Quoti'
+  static description = 'Inicializa um projeto Vue para uma ou mais extensões do Quoti'
 }
 
 module.exports = InitCommand
