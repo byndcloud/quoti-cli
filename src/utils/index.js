@@ -8,6 +8,9 @@ const {
 const ManifestService = require('../services/manifest')
 const readPkgSync = require('read-pkg-up').sync
 const credentials = require('../config/credentials')
+const fs = require('fs')
+const { default: axios } = require('axios')
+const unzipper = require('unzipper')
 function isYes (text) {
   return ['s', 'sim', 'yes', 'y'].includes(text.toLowerCase())
 }
@@ -133,6 +136,53 @@ function getFrontBaseURL () {
   return 'https://quoti.cloud'
 }
 
+function slugify (str, separator = '-') {
+  if (!str) {
+    return str
+  }
+  str = str.replace(/^\s+|\s+$/g, '') // trim
+
+  // remove accents, swap ñ for n, etc
+  const from = 'àáäâèéëêìíïîòóöôùúüûñç·/_,:;'
+  const to = 'aaaaeeeeiiiioooouuuunc------'
+  for (let i = 0, l = from.length; i < l; i++) {
+    str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i))
+  }
+
+  str = str
+    .replace(/[^a-zA-Z0-9 -]/g, '') // remove invalid chars
+    .replace(/\s+/g, separator) // collapse whitespace and replace by -
+    .replace(/-+/g, separator) // collapse dashes
+
+  return str
+}
+
+async function downloadFile (url, filePath) {
+  return new Promise((resolve, reject) => {
+    axios
+      .get(url, {
+        responseType: 'stream'
+      })
+      .then(res => {
+        if (res.data?.pipe) {
+          const stream = fs.createWriteStream(filePath)
+          res.data.pipe(stream)
+
+          stream.on('finish', () => {
+            resolve(filePath)
+          })
+          stream.on('error', reject)
+        } else {
+          throw new Error('erro ao baixar o arquivo')
+        }
+      })
+  })
+}
+
+function unzip (pathIn, pathOut) {
+  fs.createReadStream(pathIn).pipe(unzipper.Extract({ path: pathOut }))
+}
+
 module.exports = {
   isYes,
   isNo,
@@ -142,5 +192,8 @@ module.exports = {
   listExtensionsPaths,
   validateEntryPointIncludedInPackage,
   getFrontBaseURL,
-  promptExtensionEntryPointsFromUser
+  promptExtensionEntryPointsFromUser,
+  slugify,
+  downloadFile,
+  unzip
 }

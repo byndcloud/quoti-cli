@@ -12,6 +12,10 @@ class JSONManager {
     }
   }
 
+  getPath () {
+    return this.#path
+  }
+
   delete () {
     if (!this.exists()) {
       return false

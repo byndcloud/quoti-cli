@@ -4,8 +4,12 @@ manifest.json
 extension
 marketplace
 .env
+.env.test
 .nyc_output
 extensionsToTest/dist
+extensionsToTest2/
 test/beyondCredentials.json
+test/template.zip
+test/quoti-app-template-main
 quoti-cli*tgz
 .eslintcache

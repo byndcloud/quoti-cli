@@ -20,8 +20,6 @@ const { flags } = require('@oclif/command')
 const { getFrontBaseURL } = require('../utils/index')
 const RemoteExtensionService = require('../services/remoteExtension')
 const DevSessionIdService = require('../services/devSessionId.js')
-const dotenv = require('dotenv')
-dotenv.config()
 
 class ServeCommand extends Command {
   constructor ({ projectRoot, extensionsPaths }) {

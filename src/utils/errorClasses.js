@@ -39,6 +39,15 @@ class EntryPointNotFoundInPackageError extends TypedError {
   }
 }
 
+class CreateDynamicComponentError extends TypedError {
+  constructor ({ message, entryPointPath } = {}) {
+    super(
+      message ||
+        'Houve um erro durante criação da extensão. Se possível, entre em contato com a equipe do Quoti.'
+    )
+  }
+}
+
 class ManifestFromAnotherOrgError extends TypedError {
   constructor ({
     message,
@@ -59,5 +68,6 @@ module.exports = {
   ExtensionsNotFoundError,
   ManifestNotFoundError,
   EntryPointNotFoundInPackageError,
-  ManifestFromAnotherOrgError
+  ManifestFromAnotherOrgError,
+  CreateDynamicComponentError
 }

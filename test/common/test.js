@@ -3,7 +3,6 @@ const utilsVueCliService = require('@vue/cli-shared-utils')
 const SodaFriendlyErrorsWebpackPlugin = require('@soda/friendly-errors-webpack-plugin')
 const CredentialsTest = require('../services/credentials')
 const utilsTest = require('../utils/index')
-
 const { randomUUID } = require('crypto')
 const credentials = new CredentialsTest()
 credentials.createBeyondCredential()
@@ -44,7 +43,7 @@ myTest = test.register('modifyFiles', extensions => {
     }
   }
 })
-myTest = test.register('setRandomSessionId', prefix => {
+myTest = myTest.register('setRandomSessionId', prefix => {
   return {
     run (ctx) {
       const newCredentials = new CredentialsTest()
