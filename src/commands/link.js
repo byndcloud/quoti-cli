@@ -1,11 +1,7 @@
 const path = require('path')
 const ora = require('ora')
-const { union } = require('lodash')
 const inquirer = require('inquirer')
-const readJSON = require('json-file-plus')
 const inquirerFileTreeSelection = require('inquirer-file-tree-selection-prompt')
-
-const { merge, set } = require('lodash')
 const { readdirSync, existsSync } = require('fs')
 const Command = require('../base.js')
 const { flags } = require('@oclif/command')
@@ -16,6 +12,8 @@ const credentials = require('../config/credentials')
 const api = require('../config/axios')
 const fuzzy = require('fuzzy')
 const ManifestService = require('../services/manifest.js')
+const PackageService = require('../services/package.js')
+const packageService = new PackageService()
 inquirer.registerPrompt('file-tree-selection', inquirerFileTreeSelection)
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'))
 
@@ -101,7 +99,10 @@ class LinkExtensionCommand extends Command {
       this.args.entryPointPath || selectedEntryPoint
     )
 
-    await this.addExtensionToPackageJson(absoluteExtensionPath)
+    await packageService.addExtensionToPackageJson(
+      absoluteExtensionPath,
+      this.projectRoot
+    )
 
     this.upsertManifest({
       manifestPath: path.resolve(
@@ -131,45 +132,6 @@ class LinkExtensionCommand extends Command {
     manifest.save()
 
     return manifest
-  }
-
-  convertPathToPOSIX (targetPath) {
-    if (targetPath.includes('/')) {
-      return targetPath
-    }
-    return targetPath.replace(/\\/g, '/')
-  }
-
-  async addExtensionToPackageJson (absoluteExtensionPath) {
-    const extensionPathRelativeToProjectRoot = path.relative(
-      this.projectRoot,
-      absoluteExtensionPath
-    )
-    const extensionPathRelativeToProjectRootPOSIX = this.convertPathToPOSIX(
-      extensionPathRelativeToProjectRoot
-    )
-    const packageJsonEditor = await readJSON(
-      path.resolve(this.projectRoot, 'package.json')
-    )
-
-    const currentQuotiInfo = merge(
-      { extensions: [] },
-      await packageJsonEditor.get('quoti')
-    )
-    currentQuotiInfo.extensions = currentQuotiInfo?.extensions?.map(item => {
-      return this.convertPathToPOSIX(item)
-    })
-    currentQuotiInfo.extensions = union(currentQuotiInfo.extensions, [
-      extensionPathRelativeToProjectRootPOSIX
-    ])
-    if (packageJsonEditor?.data) {
-      set(
-        packageJsonEditor.data,
-        'quoti.extensions',
-        currentQuotiInfo.extensions
-      )
-    }
-    await packageJsonEditor.save()
   }
 
   async listExtensions (institution, withBuild) {
