@@ -30,6 +30,23 @@ class MarketplaceOrganization {
     this.copyFolderSync(from, to)
   }
 
+  copyTemplateEntryPointToPath ({ extensionType = 'Com build', to } = {}) {
+    const pathAccordingWithBuild =
+      extensionType === 'Com build'
+        ? 'extension-with-build/src/pages/extension2/index.vue'
+        : 'extension-no-build/App.vue'
+
+    const from = path.join(
+      this.templatePath,
+      'quoti-app-template-main',
+      pathAccordingWithBuild
+    )
+
+    if (fs.lstatSync(from).isFile()) {
+      fs.copyFileSync(from, path.join(to))
+    }
+  }
+
   copyFolderSync (from, to) {
     if (!fs.existsSync(to)) {
       fs.mkdirSync(path.resolve(to))
