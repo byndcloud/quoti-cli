@@ -13,3 +13,5 @@ test/template.zip
 test/quoti-app-template-main
 quoti-cli*tgz
 .eslintcache
+CLI-deploy/node_modules
+CLI-deploy/src
