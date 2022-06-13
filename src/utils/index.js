@@ -11,20 +11,28 @@ const credentials = require('../config/credentials')
 const fs = require('fs')
 const { default: axios } = require('axios')
 const unzipper = require('unzipper')
-function isYes (text) {
-  return ['s', 'sim', 'yes', 'y'].includes(text.toLowerCase())
+function isYes (input) {
+  if (typeof input === 'boolean') {
+    return input
+  }
+
+  return ['s', 'sim', 'yes', 'y'].includes(input.toLowerCase())
 }
 
-function isNo (text) {
-  return ['n', 'não', 'nao', 'no'].includes(text.toLowerCase())
+function isNo (input) {
+  if (typeof input === 'boolean') {
+    return input
+  }
+  return ['n', 'não', 'nao', 'no'].includes(input.toLowerCase())
 }
 
-async function confirmQuestion (text) {
-  const { confirmVersion } = await inquirer.prompt([
+async function confirmQuestion (text, defaultValue) {
+  const { confirmQuestion } = await inquirer.prompt([
     {
-      name: 'confirmVersion',
+      name: 'confirmQuestion',
       message: text,
-      type: 'input',
+      type: 'confirm',
+      default: defaultValue,
       validate: input => {
         if (!isYes(input) && !isNo(input)) {
           return 'Só é permitido "Sim" ou "Não" como resposta'
@@ -33,7 +41,7 @@ async function confirmQuestion (text) {
       }
     }
   ])
-  return isYes(confirmVersion)
+  return isYes(confirmQuestion)
 }
 
 function getManifestFromEntryPoint (entrypointPath) {
