@@ -15,3 +15,4 @@ quoti-cli*tgz
 .eslintcache
 CLI-deploy/node_modules
 CLI-deploy/src
+CLI-deploy/qt.7z
