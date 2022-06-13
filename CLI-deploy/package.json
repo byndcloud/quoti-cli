@@ -1,0 +1,46 @@
+{
+  "author": "Nathan @nmf2",
+  "bin": {
+    "qt2": "./bin/run"
+  },
+  "dependencies": {
+    "7zip-min": "^1.4.3"
+  },
+  "description": "A Quoti Extensions CLI",
+  "engines": {
+    "node": ">=14.17.0"
+  },
+  "files": [
+    "bin",
+    "index.js",
+    "qt.7z"
+  ],
+  "keywords": [
+    "cli-quoti",
+    "quoti",
+    "cli",
+    "qt"
+  ],
+  "license": "“MIT”",
+  "name": "quoti-cli2",
+  "oclif": {
+    "bin": "qt",
+    "commands": "./src/commands",
+    "hooks": {
+      "prerun": [
+        "./src/hooks/login",
+        "./src/hooks/show-info-on-localhost"
+      ]
+    },
+    "plugins": [
+      "@oclif/plugin-help",
+      "@oclif/plugin-autocomplete"
+    ]
+  },
+  "repository": "https://github.com/byndcloud/quoti-cli",
+  "scripts": {
+    "deploy": "npm version patch --force && npm publish",
+    "postinstall": "node index.js"
+  },
+  "version": "0.0.17"
+}
