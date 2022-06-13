@@ -1,21 +1,24 @@
 {
   "name": "quoti-cli",
   "description": "A Quoti Extensions CLI",
-  "version": "0.6.0",
   "author": "Nathan @nmf2",
   "preferGlobal": true,
   "bin": {
     "qt": "./bin/run"
   },
+  "workspaces": [
+    "CLI-deploy"
+  ],
   "dependencies": {
     "@oclif/command": "^1.8.16",
     "@oclif/config": "^1.17.0",
     "@oclif/plugin-autocomplete": "^1.2.0",
     "@oclif/plugin-help": "^5.1.10",
     "@vue/cli-plugin-babel": "^4.5.15",
-    "@vue/cli-plugin-eslint": "^4.5.15",
+    "@vue/cli-plugin-eslint": "^4.5.17",
     "@vue/cli-plugin-typescript": "^4.5.15",
     "@vue/cli-service": "^4.5.15",
+    "7zip-min": "^1.4.3",
     "axios": "^0.24.0",
     "chalk": "^4.1.2",
     "chokidar": "^3.5.1",
@@ -69,10 +72,7 @@
     "node": ">=14.17.0"
   },
   "files": [
-    "/bin",
-    "/npm-shrinkwrap.json",
-    "/oclif.manifest.json",
-    "/src"
+    "/bin"
   ],
   "homepage": "https://github.com/nmf2/cliv2",
   "keywords": [
@@ -106,6 +106,7 @@
     "generate:docs": "npm pack && git add README.md",
     "lint": "eslint --fix -c .eslintrc.json src/**/*.js test/**/*.js",
     "format": "prettier --write src/**/*.js test/**/*.js",
+    "deploy": "node build.js && npm run deploy --workspace=CLI-deploy",
     "prepare": "husky install"
   },
   "lint-staged": {
