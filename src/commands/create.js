@@ -9,7 +9,7 @@ const utils = require('../utils/index')
 const PackageService = require('../services/package.js')
 const packageService = new PackageService()
 
-class InitCommand extends Command {
+class CreateCommand extends Command {
   constructor () {
     super(...arguments)
     const commandName = this.id
@@ -26,15 +26,27 @@ class InitCommand extends Command {
   }
 
   async run () {
+    if (!this.args?.extensionDirectory) {
+      return
+    }
+    let basePath = path.join(this.projectRoot, 'src/pages')
+    if (!fs.existsSync(basePath)) {
+      basePath = path.resolve(this.projectRoot)
+    }
+
     const [extension] = await Promise.all([
       this.initExtensionService.promptExtensionInfo(),
       marketplaceOrganizationService.downloadTemplate()
     ])
     const dynamicComponent =
       await this.initExtensionService.createDynamicComponent(extension)
+    const extensionDirectory = path.join(basePath, this.args.extensionDirectory)
+    if (!fs.existsSync(extensionDirectory)) {
+      fs.mkdirSync(extensionDirectory, { recursive: true })
+    }
     this.initExtensionService.initializeManifestFromDynamicComponent({
       dynamicComponent,
-      manifestPath: path.resolve('./manifest.json')
+      manifestPath: path.join(extensionDirectory, './manifest.json')
     })
     let entryPointName
     if (extension.type === 'Com build') {
@@ -42,7 +54,7 @@ class InitCommand extends Command {
     } else {
       entryPointName = 'App.vue'
     }
-    const entryPointPath = path.resolve(entryPointName)
+    const entryPointPath = path.join(extensionDirectory, entryPointName)
     await packageService.addExtensionToPackageJson(
       entryPointPath,
       this.projectRoot
@@ -58,14 +70,22 @@ class InitCommand extends Command {
       )
     }
     if (isReplaceFile) {
-      this.initExtensionService.copyTemplateEntryPointToCWD({
+      marketplaceOrganizationService.copyTemplateEntryPointToPath({
         extensionType: extension.type,
-        entryPointName
+        to: path.join(extensionDirectory, entryPointName)
       })
     }
   }
 
   static description = 'Cria uma extensão vue para seu projeto'
+  static args = [
+    {
+      name: 'extensionDirectory',
+      required: true,
+      description:
+        'Endereço relativo a pasta ./src/pages onde será salvo sua extensão. Caso não exista a pasta ./src/pages o endereço fica relativo a raiz do projeto'
+    }
+  ]
 }
 
-module.exports = InitCommand
+module.exports = CreateCommand
