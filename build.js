@@ -14,4 +14,7 @@ function compress7z (input, output) {
   })
 }
 
-compress7z(['./node_modules', path.resolve('bin'), 'src'], 'CLI-deploy/qt')
+compress7z(
+  ['./node_modules', path.resolve('bin'), 'src', 'README.md'],
+  'CLI-deploy/qt'
+)
