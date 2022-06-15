@@ -201,6 +201,13 @@ class InitExtensionService {
       to: this.getCWD()
     })
   }
+
+  copyTemplateEntryPointToCWD ({ extensionType, entryPointName }) {
+    marketplaceOrganizationService.copyTemplateEntryPointToPath({
+      extensionType,
+      to: path.join(this.getCWD(), entryPointName)
+    })
+  }
 }
 
 module.exports = InitExtensionService
