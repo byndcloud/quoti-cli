@@ -39,7 +39,6 @@
   },
   "repository": "https://github.com/byndcloud/quoti-cli",
   "scripts": {
-    "deploy": "npm version patch --force && npm publish",
     "postinstall": "node index.js"
   },
   "version": "0.0.17"
