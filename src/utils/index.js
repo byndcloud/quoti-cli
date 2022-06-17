@@ -119,6 +119,12 @@ async function promptExtensionEntryPointsFromUser ({
         name: 'selectedEntryPoint',
         message,
         type: multiSelect ? 'checkbox' : 'list',
+        validate: input => {
+          if (input?.length === 0) {
+            return 'Você não selecionou nenhuma extensão para fazer deploy. Utilize a tecla espaço para selecionar a extensão que deseja fazer deploy. '
+          }
+          return true
+        },
         choices: extensionsChoices
       }
     ])
