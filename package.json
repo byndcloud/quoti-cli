@@ -1,21 +1,25 @@
 {
   "name": "quoti-cli",
   "description": "A Quoti Extensions CLI",
-  "version": "0.7.0",
+  "version": "0.8.0-beta.6",
   "author": "Nathan @nmf2",
   "preferGlobal": true,
   "bin": {
     "qt": "./bin/run"
   },
+  "workspaces": [
+    "CLI-deploy"
+  ],
   "dependencies": {
     "@oclif/command": "^1.8.16",
     "@oclif/config": "^1.17.0",
     "@oclif/plugin-autocomplete": "^1.2.0",
     "@oclif/plugin-help": "^5.1.10",
     "@vue/cli-plugin-babel": "^4.5.15",
-    "@vue/cli-plugin-eslint": "^4.5.15",
+    "@vue/cli-plugin-eslint": "^4.5.17",
     "@vue/cli-plugin-typescript": "^4.5.15",
     "@vue/cli-service": "^4.5.15",
+    "7zip-min": "^1.4.3",
     "axios": "^0.24.0",
     "chalk": "^4.1.2",
     "chokidar": "^3.5.1",
@@ -65,15 +69,12 @@
     "proxyquire": "^2.1.3",
     "sinon": "^13.0.1"
   },
+  "files": [
+    "bin"
+  ],
   "engines": {
     "node": ">=14.17.0"
   },
-  "files": [
-    "/bin",
-    "/npm-shrinkwrap.json",
-    "/oclif.manifest.json",
-    "/src"
-  ],
   "homepage": "https://github.com/nmf2/cliv2",
   "keywords": [
     "cli-quoti",
@@ -99,13 +100,15 @@
   },
   "repository": "https://github.com/byndcloud/quoti-cli",
   "scripts": {
-    "postpack": "rm -f oclif.manifest.json",
-    "prepack": "oclif-dev manifest && oclif-dev readme",
     "test:unit": "NODE_ENV=test nyc mocha --forbid-only --exit \"test/unit/**/*.test.js\"",
     "test:e2e": "NODE_ENV=test bash test.sh",
-    "generate:docs": "npm pack && git add README.md",
+    "generate:docs": "oclif-dev manifest && oclif-dev readme",
     "lint": "eslint --fix -c .eslintrc.json src/**/*.js test/**/*.js",
     "format": "prettier --write src/**/*.js test/**/*.js",
+    "build": "node build.js",
+    "preversion": "if [ -z $SKIP_TESTS ]; then npm run test:e2e; fi;",
+    "version": "./publish.sh",
+    "prepublishOnly": "echo 'Use npm version to deploy the CLI, check out the documentation: ' && exit 1",
     "prepare": "husky install"
   },
   "lint-staged": {
