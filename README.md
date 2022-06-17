@@ -10,11 +10,11 @@ A Quoti Extensions LCI
 # Usage
 <!-- usage -->
 ```sh-session
-$ npm install -g quoti-cli
+$ npm install -g quoti-cli2
 $ qt COMMAND
 running command...
 $ qt (-v|--version|version)
-quoti-cli/0.7.0 linux-x64 node-v14.19.3
+quoti-cli2/0.7.0-beta.2 linux-x64 node-v14.19.3
 $ qt --help [COMMAND]
 USAGE
   $ qt COMMAND
@@ -24,6 +24,7 @@ USAGE
 # Commands
 <!-- commands -->
 * [`qt autocomplete [SHELL]`](#qt-autocomplete-shell)
+* [`qt create EXTENSIONDIRECTORY`](#qt-create-extensiondirectory)
 * [`qt deploy [ENTRYPOINTPATH]`](#qt-deploy-entrypointpath)
 * [`qt download-current-version [FILEPATH]`](#qt-download-current-version-filepath)
 * [`qt help [COMMAND]`](#qt-help-command)
@@ -55,7 +56,22 @@ EXAMPLES
   $ qt autocomplete --refresh-cache
 ```
 
-_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v1.2.0/src/commands/autocomplete/index.ts)_
+_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v1.3.0/src/commands/autocomplete/index.ts)_
+
+## `qt create EXTENSIONDIRECTORY`
+
+Cria uma extensão vue para seu projeto
+
+```
+USAGE
+  $ qt create EXTENSIONDIRECTORY
+
+ARGUMENTS
+  EXTENSIONDIRECTORY  Endereço relativo a pasta ./src/pages onde será salvo sua extensão. Caso não exista a pasta
+                      ./src/pages o endereço fica relativo a raiz do projeto
+```
+
+_See code: [src/commands/create.js](https://github.com/byndcloud/quoti-cli/blob/v0.7.0-beta.2/src/commands/create.js)_
 
 ## `qt deploy [ENTRYPOINTPATH]`
 
@@ -78,7 +94,7 @@ ALIASES
   $ qt d
 ```
 
-_See code: [src/commands/deploy.js](https://github.com/byndcloud/quoti-cli/blob/v0.7.0/src/commands/deploy.js)_
+_See code: [src/commands/deploy.js](https://github.com/byndcloud/quoti-cli/blob/v0.7.0-beta.2/src/commands/deploy.js)_
 
 ## `qt download-current-version [FILEPATH]`
 
@@ -95,24 +111,24 @@ DESCRIPTION
   ...
 ```
 
-_See code: [src/commands/download-current-version.js](https://github.com/byndcloud/quoti-cli/blob/v0.7.0/src/commands/download-current-version.js)_
+_See code: [src/commands/download-current-version.js](https://github.com/byndcloud/quoti-cli/blob/v0.7.0-beta.2/src/commands/download-current-version.js)_
 
 ## `qt help [COMMAND]`
 
-Display help for qt.
+display help for qt
 
 ```
 USAGE
   $ qt help [COMMAND]
 
 ARGUMENTS
-  COMMAND  Command to show help for.
+  COMMAND  command to show help for
 
 OPTIONS
-  -n, --nested-commands  Include all nested commands in the output.
+  --all  see all commands in CLI
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.1.12/src/commands/help.ts)_
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v3.2.18/src/commands/help.ts)_
 
 ## `qt init`
 
@@ -123,7 +139,7 @@ USAGE
   $ qt init
 ```
 
-_See code: [src/commands/init.js](https://github.com/byndcloud/quoti-cli/blob/v0.7.0/src/commands/init.js)_
+_See code: [src/commands/init.js](https://github.com/byndcloud/quoti-cli/blob/v0.7.0-beta.2/src/commands/init.js)_
 
 ## `qt link [ENTRYPOINTPATH]`
 
@@ -146,7 +162,7 @@ ALIASES
   $ qt select-extension
 ```
 
-_See code: [src/commands/link.js](https://github.com/byndcloud/quoti-cli/blob/v0.7.0/src/commands/link.js)_
+_See code: [src/commands/link.js](https://github.com/byndcloud/quoti-cli/blob/v0.7.0-beta.2/src/commands/link.js)_
 
 ## `qt login`
 
@@ -157,7 +173,7 @@ USAGE
   $ qt login
 ```
 
-_See code: [src/commands/login.js](https://github.com/byndcloud/quoti-cli/blob/v0.7.0/src/commands/login.js)_
+_See code: [src/commands/login.js](https://github.com/byndcloud/quoti-cli/blob/v0.7.0-beta.2/src/commands/login.js)_
 
 ## `qt logout`
 
@@ -168,7 +184,7 @@ USAGE
   $ qt logout
 ```
 
-_See code: [src/commands/logout.js](https://github.com/byndcloud/quoti-cli/blob/v0.7.0/src/commands/logout.js)_
+_See code: [src/commands/logout.js](https://github.com/byndcloud/quoti-cli/blob/v0.7.0-beta.2/src/commands/logout.js)_
 
 ## `qt publish [ENTRYPOINTPATH]`
 
@@ -191,7 +207,7 @@ ALIASES
   $ qt p
 ```
 
-_See code: [src/commands/publish.js](https://github.com/byndcloud/quoti-cli/blob/v0.7.0/src/commands/publish.js)_
+_See code: [src/commands/publish.js](https://github.com/byndcloud/quoti-cli/blob/v0.7.0-beta.2/src/commands/publish.js)_
 
 ## `qt serve [ENTRYPOINTPATH]`
 
@@ -213,5 +229,5 @@ ALIASES
   $ qt dev
 ```
 
-_See code: [src/commands/serve.js](https://github.com/byndcloud/quoti-cli/blob/v0.7.0/src/commands/serve.js)_
+_See code: [src/commands/serve.js](https://github.com/byndcloud/quoti-cli/blob/v0.7.0-beta.2/src/commands/serve.js)_
 <!-- commandsstop -->

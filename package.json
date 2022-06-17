@@ -1,5 +1,5 @@
 {
-  "name": "quoti-cli",
+  "name": "quoti-cli2",
   "description": "A Quoti Extensions CLI",
   "version": "0.7.0-beta.2",
   "author": "Nathan @nmf2",
@@ -69,12 +69,12 @@
     "proxyquire": "^2.1.3",
     "sinon": "^13.0.1"
   },
+  "files": [
+    "bin"
+  ],
   "engines": {
     "node": ">=14.17.0"
   },
-  "files": [
-    "/bin"
-  ],
   "homepage": "https://github.com/nmf2/cliv2",
   "keywords": [
     "cli-quoti",
@@ -100,15 +100,15 @@
   },
   "repository": "https://github.com/byndcloud/quoti-cli",
   "scripts": {
-    "postpack": "rm -f oclif.manifest.json",
-    "prepack": "oclif-dev manifest && oclif-dev readme",
-    "version": "npm run prepack && npm run build",
     "test:unit": "NODE_ENV=test nyc mocha --forbid-only --exit \"test/unit/**/*.test.js\"",
     "test:e2e": "NODE_ENV=test bash test.sh",
-    "generate:docs": "npm pack && git add README.md",
+    "generate:docs": "oclif-dev manifest && oclif-dev readme",
     "lint": "eslint --fix -c .eslintrc.json src/**/*.js test/**/*.js",
     "format": "prettier --write src/**/*.js test/**/*.js",
     "build": "node build.js",
+    "preversion": "npm run test:e2e",
+    "version": "./publish.sh",
+    "prepublishOnly": "echo 'Only run 'npm publish' in the CLI-deploy workspace!' && exit 1",
     "prepare": "husky install"
   },
   "lint-staged": {
