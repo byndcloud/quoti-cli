@@ -108,7 +108,7 @@
     "build": "node build.js",
     "preversion": "npm run test:e2e",
     "version": "./publish.sh",
-    "prepublishOnly": "echo 'Only run 'npm publish' in the CLI-deploy workspace!' && exit 1",
+    "prepublishOnly": "echo 'Use npm version to deploy the CLI, check out the documentation: ' && exit 1",
     "prepare": "husky install"
   },
   "lint-staged": {
