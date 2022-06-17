@@ -1,7 +1,7 @@
 {
   "name": "quoti-cli",
   "description": "A Quoti Extensions CLI",
-  "version": "0.8.0-beta.1",
+  "version": "0.8.0-beta.2",
   "author": "Nathan @nmf2",
   "preferGlobal": true,
   "bin": {
