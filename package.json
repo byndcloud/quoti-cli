@@ -1,7 +1,7 @@
 {
   "name": "quoti-cli",
   "description": "A Quoti Extensions CLI",
-  "version": "0.8.0-beta.3",
+  "version": "0.8.0-beta.4",
   "author": "Nathan @nmf2",
   "preferGlobal": true,
   "bin": {
@@ -106,7 +106,7 @@
     "lint": "eslint --fix -c .eslintrc.json src/**/*.js test/**/*.js",
     "format": "prettier --write src/**/*.js test/**/*.js",
     "build": "node build.js",
-    "preversion": "npm run test:e2e",
+    "preversion": "if [ -z $SKIP_TESTS ]; then npm run test:e2e; fi;",
     "version": "./publish.sh",
     "prepublishOnly": "echo 'Use npm version to deploy the CLI, check out the documentation: ' && exit 1",
     "prepare": "husky install"
