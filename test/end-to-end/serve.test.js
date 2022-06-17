@@ -60,6 +60,7 @@ describe('Serve command', function () {
           const extensionServiceSpy = ExtensionService.prototype
           expect(extensionServiceSpy.build.callCount).to.equal(1)
 
+          await delay(1000)
           const socketSpy = Socket.prototype
           const emitFirstArgs = socketSpy.emit.firstCall.firstArg
           expectTimestampInFile(emitFirstArgs.data.code, ctx.now)
