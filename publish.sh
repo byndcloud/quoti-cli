@@ -16,7 +16,7 @@ npm run build
 VERSION=$(cat package.json | jq -r .version) 
 
 # Get a possible publish tag from the package version
-$PUBLISH_TAG=$(echo $VERSION | grep -oP '(?<=-)(.+)(?=\.)')
+PUBLISH_TAG=$(echo $VERSION | grep -oP '(?<=-)(.+)(?=\.)')
 
 # Make sure version to be published is the same as the one in the main workspace
 npm version $VERSION --workspace=CLI-deploy
