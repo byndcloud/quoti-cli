@@ -23,10 +23,12 @@ npm version $VERSION --workspace=CLI-deploy
 
 if [ -z $PUBLISH_TAG  ]; then
   # Publish the code to NPM with the "latest" tag
-  npm publish --workspace=CLI-deploy --tag latest 
+  echo "Publish to latest tag $PUBLISH_TAG"
+  npm publish --dry-run --workspace=CLI-deploy --tag latest 
 else
   # Publish the code to NPM with the tag from the package version
-  npm publish --workspace=CLI-deploy --tag $PUBLISH_TAG
+  echo "Publish to specific tag: $PUBLISH_TAG"
+  npm publish --dry-run --workspace=CLI-deploy --tag $PUBLISH_TAG
 fi
 
 # Publish the code in the deploy workspace
