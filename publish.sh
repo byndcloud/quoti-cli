@@ -31,9 +31,6 @@ else
   npm publish --workspace=CLI-deploy --tag $PUBLISH_TAG
 fi
 
-# Publish the code in the deploy workspace
-npm publish --workspace=CLI-deploy
-
 # Remove the manifest from main and deploy workspaces
 rm -f oclif.manifest.json ./CLI-deploy/oclif.manifest.json
 
