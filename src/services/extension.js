@@ -114,7 +114,7 @@ class ExtensionService {
     try {
       this.vueCliService.init(mode)
       this.spinner.start(`Fazendo build da extensão ${this.manifest.name} ...`)
-      const dest = 'dist/'
+      const dest = `dist/${this.manifest.extensionUUID}`
       const name = `dc_${this.manifest.extensionUUID}`
       await this.vueCliService.run('build', {
         mode,

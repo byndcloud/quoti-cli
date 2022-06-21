@@ -246,6 +246,7 @@ class ServeCommand extends Command {
       : 'Observando alterações em qualquer extensão'
 
     this.logger.info(watchingChangesMessage)
+    fs.rmSync('./dist', { recursive: true, force: true })
   }
 
   async getAliasFromVueConfig () {
