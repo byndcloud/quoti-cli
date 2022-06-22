@@ -8,18 +8,6 @@ module.exports = {
   publicPath: process.env.VUE_APP_CORDOVA ? '' : '/',
   lintOnSave: true,
   transpileDependencies: ['vue-clamp', 'resize-detector'],
-  devServer: {
-    // public: 'https://localhost:8080/',
-    contentBase: './dist',
-    hot: true,
-    
-    // compress: process.env.VUE_APP_CORDOVA ? false : true,
-    // disableHostCheck: true,
-    overlay: {
-      warnings: true,
-      errors: true
-    }
-  },
   // css: {
   //   loaderOptions: {
   //     sass: {
@@ -31,7 +19,7 @@ module.exports = {
   //   }
   // },
   configureWebpack: {
-    devtool: process.env.NODE_ENV === 'production' ? false : 'source-map',
+    devtool: false,
     resolve: {
       alias: {
         '@': path.resolve(__dirname, 'src/')
@@ -42,14 +30,14 @@ module.exports = {
       'core-js/modules/es.promise',
       'core-js/modules/es.array.iterator',
       path.resolve(__dirname, 'src/main.js')
-    ],
-    
+    ]
+
     // plugins: [new VuetifyLoaderPlugin()]
   },
 
-  chainWebpack: (config) => {
+  chainWebpack: config => {
     config.plugins.delete('prefetch')
-    
+
     // const modules = ['vue-modules', 'vue', 'normal-modules', 'normal']
     // modules.forEach(match => {
     //   config.module
