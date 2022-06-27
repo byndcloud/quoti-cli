@@ -72,9 +72,12 @@ class ServeCommand extends Command {
         let distPath = path
         const manifest = manifestsByPaths[path]
         const extensionService = new ExtensionService(manifest)
+        const remoteExtensionUUID =
+          remoteExtensionsByPaths?.[path]?.extension_uuid
         if (manifestsByPaths[path].type === 'build') {
           distPath = await extensionService.build(path, {
-            mode: 'staging'
+            mode: 'staging',
+            remoteExtensionUUID
           })
         }
 

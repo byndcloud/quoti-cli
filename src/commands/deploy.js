@@ -95,7 +95,10 @@ class DeployCommand extends Command {
 
     let extensionPath = entryPointPath
     if (manifest.type === 'build') {
-      extensionPath = await this.extensionService.build(entryPointPath)
+      const remoteExtensionUUID = remoteExtension?.extension_uuid
+      extensionPath = await this.extensionService.build(entryPointPath, {
+        remoteExtensionUUID
+      })
     }
     await this.extensionService.upload(fs.readFileSync(extensionPath), filename)
     try {
