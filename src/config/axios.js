@@ -22,7 +22,7 @@ class Api {
       })
       config.baseURL = process.env.API_BASE_URL
     } else {
-      config.baseURL = 'https://api.minhafaculdade.app/api/v1/'
+      config.baseURL = 'https://api.quoti.cloud/api/v1/'
     }
     this.axios = axios.create(config)
   }
