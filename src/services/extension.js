@@ -101,11 +101,10 @@ class ExtensionService {
     return uuid
   }
 
-  async build (entry, { mode } = { mode: 'production' }) {
+  async build (entry, { mode, remoteExtensionUUID } = { mode: 'production' }) {
     if (!this.manifest.extensionUUID) {
-      const extension = await this.getExtension(this.manifest.extensionId)
-      if (this.extension?.extensionUUID) {
-        this.manifest.extensionUUID = extension.extensionUUID
+      if (remoteExtensionUUID) {
+        this.manifest.extensionUUID = remoteExtensionUUID
         this.manifest.save()
       } else {
         await this.createExtensionUUID()
