@@ -80,7 +80,7 @@ class DeployCommand extends Command {
 
     if (!manifest.exists()) {
       this.logger.warning(
-        'Execute qt link-extension antes de realizar o deploy da sua extensão'
+        'Execute "qt link" antes de realizar o deploy da sua extensão'
       )
       return
     }
