@@ -127,6 +127,7 @@ class LinkExtensionCommand extends Command {
     manifest.type = extensionData.type === 'Com build' ? 'build' : 'noBuild'
     manifest.name = extensionData.title
     manifest.extensionUUID = extensionData.extensionUUID
+    manifest.meta = extensionData.meta
     manifest.institution = institution
 
     manifest.save()
