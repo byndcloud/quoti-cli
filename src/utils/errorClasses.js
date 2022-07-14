@@ -25,7 +25,7 @@ class ManifestNotFoundError extends TypedError {
   constructor ({ message, manifestPath } = {}) {
     super(
       message ||
-        `"manifest.json" não encontrado para a extensão em "${manifestPath}", Execute "qt link-extension"`,
+        `"manifest.json" não encontrado para a extensão em "${manifestPath}", Execute "qt link"`,
       'manifest-not-found'
     )
   }
@@ -34,7 +34,7 @@ class EntryPointNotFoundInPackageError extends TypedError {
   constructor ({ message, entryPointPath } = {}) {
     super(
       message ||
-        `O entrypoint especificado (${entryPointPath}) não está entre as extensões que já foram selecionadas. Tem certeza que o caminho está correto ou que a extensão já foi selecionada com qt link-extension?`
+        `O entrypoint especificado (${entryPointPath}) não está entre as extensões que já foram selecionadas. Tem certeza que o caminho está correto ou que a extensão já foi selecionada com "qt link"?`
     )
   }
 }
@@ -58,7 +58,7 @@ class ManifestFromAnotherOrgError extends TypedError {
     const relativeManifestPath = path.relative('./', manifestPath)
     super(
       message ||
-        `O manifest localizado em (${relativeManifestPath}) está registrado com a organização ${manifestInstitution}, porém você está logado na organização ${credentialsInstitution}. Execute qt link-extension ou realize login na organização ${credentialsInstitution}`
+        `O manifest localizado em (${relativeManifestPath}) está registrado com a organização ${manifestInstitution}, porém você está logado na organização ${credentialsInstitution}. Execute "qt link" ou realize login na organização ${credentialsInstitution}`
     )
   }
 }
