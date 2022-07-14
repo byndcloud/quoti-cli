@@ -42,7 +42,8 @@ class ExtensionService {
         url,
         version,
         fileVuePrefix,
-        activated: true
+        activated: true,
+        meta: this.manifest.meta || {}
       },
       { headers: { Authorization: `Bearer ${token}` } }
     )
