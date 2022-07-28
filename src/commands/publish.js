@@ -44,9 +44,7 @@ class PublishCommand extends Command {
     }
 
     if (!manifest) {
-      this.logger.warning(
-        'Por favor selecione uma extensão. Execute qt select-extension'
-      )
+      this.logger.warning('Por favor selecione uma extensão. Execute qt link')
       process.exit(0)
     }
 

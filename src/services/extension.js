@@ -52,9 +52,7 @@ class ExtensionService {
 
   async upload (buffer, remotePath) {
     if (!this.manifest.exists()) {
-      this.logger.warning(
-        'Por favor selecione sua extensão. Execute qt select-extension'
-      )
+      this.logger.warning('Por favor selecione sua extensão. Execute qt link')
       process.exit(0)
     } else if (!buffer) {
       this.logger.error('Buffer é null!')

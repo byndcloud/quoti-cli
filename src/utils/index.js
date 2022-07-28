@@ -80,7 +80,7 @@ function listExtensionsPaths (projectRoot) {
   const pkgInfo = readPkgSync({ cwd: path.resolve(projectRoot) })
   if (!pkgInfo.packageJson?.quoti?.extensions?.length) {
     throw new Error(
-      'Você ainda não selecionou suas extensões. Execute qt select-extension.'
+      'Você ainda não selecionou suas extensões. Execute qt link.'
     )
   }
   return pkgInfo.packageJson.quoti.extensions.map(extPath =>
