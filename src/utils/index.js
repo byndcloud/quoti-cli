@@ -157,8 +157,8 @@ function slugify (str, separator = '-') {
   str = str.replace(/^\s+|\s+$/g, '') // trim
 
   // remove accents, swap ñ for n, etc
-  const from = 'àáäâèéëêìíïîòóöôùúüûñç·/_,:;'
-  const to = 'aaaaeeeeiiiioooouuuunc------'
+  const from = 'ãàáäâèéëêìíïîòóöôùúüûñç·/_,:;'
+  const to = 'aaaaaeeeeiiiioooouuuunc------'
   for (let i = 0, l = from.length; i < l; i++) {
     str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i))
   }
