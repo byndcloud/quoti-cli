@@ -63,9 +63,17 @@ class ManifestFromAnotherOrgError extends TypedError {
   }
 }
 
+class InvalidFieldTypeError extends TypedError {
+  constructor ({ message, fieldTypeName } = {}) {
+    super(message)
+    this.fieldTypeName = fieldTypeName
+  }
+}
+
 module.exports = {
   ExtensionNotFoundError,
   ExtensionsNotFoundError,
+  InvalidFieldTypeError,
   ManifestNotFoundError,
   EntryPointNotFoundInPackageError,
   ManifestFromAnotherOrgError,
