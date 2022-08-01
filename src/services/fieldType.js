@@ -34,7 +34,7 @@ class FieldTypeService {
 
   makeModelData () {
     const text = `class Model {
-        constructor(fieldTypes) {
+        constructor(fieldTypes, options) {
           this.columns = fieldTypes
           for (const key in options) {
             this[key] = options[key]
