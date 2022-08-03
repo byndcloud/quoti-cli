@@ -155,6 +155,7 @@ function slugify (str, separator = '-') {
     return str
   }
   str = str.replace(/^\s+|\s+$/g, '') // trim
+  str = str.toLowerCase()
 
   // remove accents, swap ñ for n, etc
   const from = 'ãàáäâèéëêìíïîòóöôùúüûñç·/_,:;'
