@@ -34,10 +34,18 @@ class FieldTypeService {
 
   makeModelData () {
     const text = `class Model {
-        constructor(fieldTypes, options) {
-          this.columns = fieldTypes
+        constructor(fields, options) {
+          this.fields = []
+          this.info = {}
+          for (const key in fields) {
+            this.fields.push({
+              name:key, 
+              fieldTypeId: fields[key]?.type.id,
+              ...fields[key]
+            })
+          }
           for (const key in options) {
-            this[key] = options[key]
+            this.info[key] = options[key]
           }
         }
       }
@@ -78,7 +86,7 @@ class FieldTypeService {
   async syncFieldTypes () {
     try {
       this.spinner.start(
-        `Sincronizando os fieldTypes da organização ${credentials.institution} ...`
+        `Sincronizando os fieldTypes da organização '${credentials.institution}' ...`
       )
       const fieldTypes = await this.getFieldTypes()
       const fieldTypesFilePath = path.resolve(
@@ -95,7 +103,7 @@ class FieldTypeService {
         this.makeModelData(fieldTypes)
       )
       this.spinner.succeed(
-        `Sincronização os fieldTypes da organização ${credentials.institution} realizado com sucesso`
+        `Sincronização dos fieldTypes na organização '${credentials.institution}' realizado com sucesso`
       )
     } catch (error) {
       this.spinner.fail('Erro durante a sincronização dos fieldTypes')
