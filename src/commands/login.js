@@ -1,9 +1,12 @@
 const credentials = require('../config/credentials')
 const Command = require('../base.js')
 const Auth = require('../services/auth')
+const { flags } = require('@oclif/command')
 class LoginCommand extends Command {
   async run () {
-    const { previouslyLogger } = await Auth.silentLogin()
+    const { previouslyLogger } = await Auth.silentLogin({
+      force: this.flags.force
+    })
     if (previouslyLogger) {
       this.logger.info('Você já realizou login anteriormente.\n')
 
@@ -23,6 +26,13 @@ class LoginCommand extends Command {
     } else {
       this.logger.success('Login realizado com sucesso')
     }
+  }
+
+  static flags = {
+    force: flags.boolean({
+      char: 'f',
+      description: 'Força o login em uma nova conta'
+    })
   }
 
   static description = 'Realiza login em uma organização do Quoti'

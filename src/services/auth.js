@@ -74,8 +74,8 @@ class Auth {
     return inputToken
   }
 
-  async silentLogin () {
-    if (!credentials.exists()) {
+  async silentLogin ({ force } = {}) {
+    if (!credentials.exists() || force) {
       await this.login()
       credentials.load()
       return { previouslyLogger: false }
