@@ -14,7 +14,7 @@ $ npm install -g quoti-cli
 $ qt COMMAND
 running command...
 $ qt (-v|--version|version)
-quoti-cli/0.11.0-beta linux-x64 node-v14.19.3
+quoti-cli/0.11.0 linux-x64 node-v14.19.3
 $ qt --help [COMMAND]
 USAGE
   $ qt COMMAND
@@ -71,7 +71,7 @@ ARGUMENTS
                       ./src/pages o endereço fica relativo a raiz do projeto
 ```
 
-_See code: [src/commands/create.js](https://github.com/byndcloud/quoti-cli/blob/v0.9.0/src/commands/create.js)_
+_See code: [src/commands/create.js](https://github.com/byndcloud/quoti-cli/blob/v0.11.0/src/commands/create.js)_
 
 ## `qt deploy [ENTRYPOINTPATH]`
 
@@ -94,7 +94,7 @@ ALIASES
   $ qt d
 ```
 
-_See code: [src/commands/deploy.js](https://github.com/byndcloud/quoti-cli/blob/v0.9.0/src/commands/deploy.js)_
+_See code: [src/commands/deploy.js](https://github.com/byndcloud/quoti-cli/blob/v0.11.0/src/commands/deploy.js)_
 
 ## `qt download-current-version [FILEPATH]`
 
@@ -111,7 +111,7 @@ DESCRIPTION
   ...
 ```
 
-_See code: [src/commands/download-current-version.js](https://github.com/byndcloud/quoti-cli/blob/v0.9.0/src/commands/download-current-version.js)_
+_See code: [src/commands/download-current-version.js](https://github.com/byndcloud/quoti-cli/blob/v0.11.0/src/commands/download-current-version.js)_
 
 ## `qt help [COMMAND]`
 
@@ -139,7 +139,7 @@ USAGE
   $ qt init
 ```
 
-_See code: [src/commands/init.js](https://github.com/byndcloud/quoti-cli/blob/v0.9.0/src/commands/init.js)_
+_See code: [src/commands/init.js](https://github.com/byndcloud/quoti-cli/blob/v0.11.0/src/commands/init.js)_
 
 ## `qt link [ENTRYPOINTPATH]`
 
@@ -159,10 +159,10 @@ OPTIONS
 ALIASES
   $ qt l
   $ qt link-extension
-  $ qt select-extension
+  $ qt link
 ```
 
-_See code: [src/commands/link.js](https://github.com/byndcloud/quoti-cli/blob/v0.9.0/src/commands/link.js)_
+_See code: [src/commands/link.js](https://github.com/byndcloud/quoti-cli/blob/v0.11.0/src/commands/link.js)_
 
 ## `qt login`
 
@@ -171,9 +171,12 @@ Realiza login em uma organização do Quoti
 ```
 USAGE
   $ qt login
+
+OPTIONS
+  -f, --force  Força o login em uma nova conta
 ```
 
-_See code: [src/commands/login.js](https://github.com/byndcloud/quoti-cli/blob/v0.9.0/src/commands/login.js)_
+_See code: [src/commands/login.js](https://github.com/byndcloud/quoti-cli/blob/v0.11.0/src/commands/login.js)_
 
 ## `qt logout`
 
@@ -184,7 +187,7 @@ USAGE
   $ qt logout
 ```
 
-_See code: [src/commands/logout.js](https://github.com/byndcloud/quoti-cli/blob/v0.9.0/src/commands/logout.js)_
+_See code: [src/commands/logout.js](https://github.com/byndcloud/quoti-cli/blob/v0.11.0/src/commands/logout.js)_
 
 ## `qt publish [ENTRYPOINTPATH]`
 
@@ -207,7 +210,7 @@ ALIASES
   $ qt p
 ```
 
-_See code: [src/commands/publish.js](https://github.com/byndcloud/quoti-cli/blob/v0.9.0/src/commands/publish.js)_
+_See code: [src/commands/publish.js](https://github.com/byndcloud/quoti-cli/blob/v0.11.0/src/commands/publish.js)_
 
 ## `qt serve [ENTRYPOINTPATH]`
 
@@ -229,5 +232,5 @@ ALIASES
   $ qt dev
 ```
 
-_See code: [src/commands/serve.js](https://github.com/byndcloud/quoti-cli/blob/v0.9.0/src/commands/serve.js)_
+_See code: [src/commands/serve.js](https://github.com/byndcloud/quoti-cli/blob/v0.11.0/src/commands/serve.js)_
 <!-- commandsstop -->
