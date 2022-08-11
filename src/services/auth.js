@@ -6,11 +6,21 @@ const chalk = require('chalk')
 const inquirer = require('inquirer')
 const api = require('../config/axios')
 const Logger = require('../config/logger')
+const { getFrontBaseURL } = require('../utils/index')
 
 class Auth {
+  getTokenAccessURL (orgSlug) {
+    const baseUrl = getFrontBaseURL()
+    return `${baseUrl}/${orgSlug}/extensions`
+  }
+
   async login () {
     console.log(chalk`${logo}`)
     const institution = await this.insertOrgSLug()
+    const tokenAccessURL = this.getTokenAccessURL(institution)
+    Logger.info(
+      `Clique no botão "Obter o token de acesso" em ${tokenAccessURL} para copiar o token e cole-o aqui:`
+    )
     const customToken = await this.insertToken()
     try {
       const authFirebase = await app.auth().signInWithCustomToken(customToken)
@@ -64,10 +74,11 @@ class Auth {
     return inputToken
   }
 
-  async silentLogin () {
-    if (!credentials.exists()) {
+  async silentLogin ({ force } = {}) {
+    if (!credentials.exists() || force) {
       await this.login()
       credentials.load()
+      return { alreadyLoggedIn: false }
     } else {
       credentials.load()
       try {
@@ -78,6 +89,7 @@ class Auth {
           userData
         )
         await firebase.auth().updateCurrentUser(user)
+        return { alreadyLoggedIn: true }
       } catch (error) {
         this.logger.error(error)
         this.logger.error('Erro ao carregar credenciais')

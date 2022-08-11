@@ -44,17 +44,17 @@ class PublishCommand extends Command {
     }
 
     if (!manifest) {
-      this.logger.warning(
-        'Por favor selecione uma extensão. Execute qt select-extension'
-      )
+      this.logger.warning('Por favor selecione uma extensão. Execute qt link')
       process.exit(0)
     }
 
     const token = await firebase.auth().currentUser.getIdToken()
 
+    const orgSlug = credentials.institution
+    const extensionId = manifest.extensionId
     const { data } = await api.axios.get(
       decodeURIComponent(
-        `/${credentials.institution}/dynamic-components?where[id]=${manifest.extensionId}`
+        `/${orgSlug}/dynamic-components?where[id]=${extensionId}`
       ),
       {
         headers: {
@@ -62,7 +62,7 @@ class PublishCommand extends Command {
         }
       }
     )
-    const dynamicComponentFile = data[0]
+    const dynamicComponentFile = data?.[0]
     if (!dynamicComponentFile) {
       this.logger.error(
         'Extensão não encontrada. Verifique se você ainda possui esta extensão'
@@ -78,9 +78,17 @@ class PublishCommand extends Command {
       process.exit(0)
     }
 
+    const extensionName = dynamicComponentFile.title
+
     this.logger.info(
-      `* Você está realizando publish de uma nova versão para a extensão ${dynamicComponentFile.title}`
+      `* Publicando a extensão ${extensionName} (id: ${extensionId}) da organização ${orgSlug}`
     )
+
+    if (extensionName !== manifest.name) {
+      this.logger.warning(
+        `O nome da extensão no manifesto (${manifest.name}) está diferente do nome da extensão na sua organização (${extensionName}). Execute 'qt link' para atualizar o nome da extensão no manifesto.`
+      )
+    }
 
     if (!dynamicComponentFile.marketplaceExtensionId) {
       await this.publishExtension(

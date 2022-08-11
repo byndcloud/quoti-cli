@@ -64,21 +64,23 @@ class DeployCommand extends Command {
       })
     }
 
-    const lastVersion = remoteExtension.DynamicComponentsFiles.find(
-      item => item.activated
-    ).version
+    const lastDynamicComponentFile =
+      remoteExtension.DynamicComponentsFiles.find(item => item.activated)
+    const lastVersion = lastDynamicComponentFile?.version
     this.logger.info(
-      `* Você está realizando deploy de uma nova versão para a extensão ${remoteExtension?.[0]?.title}`
+      `* Você está realizando deploy de uma nova versão para a extensão "${remoteExtension?.title}"`
     )
     if (lastVersion) {
       this.logger.info(`* Versão atual: ${lastVersion}`)
+    } else {
+      this.logger.info('* Extensão não possui uma versão ativa')
     }
 
     this.extensionService = new ExtensionService(manifest)
 
     if (!manifest.exists()) {
       this.logger.warning(
-        'Execute qt link-extension antes de realizar o deploy da sua extensão'
+        'Execute "qt link" antes de realizar o deploy da sua extensão'
       )
       return
     }

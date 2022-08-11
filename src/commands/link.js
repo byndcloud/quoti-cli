@@ -127,6 +127,7 @@ class LinkExtensionCommand extends Command {
     manifest.type = extensionData.type === 'Com build' ? 'build' : 'noBuild'
     manifest.name = extensionData.title
     manifest.extensionUUID = extensionData.extensionUUID
+    manifest.meta = extensionData.meta
     manifest.institution = institution
 
     manifest.save()
@@ -170,7 +171,7 @@ class LinkExtensionCommand extends Command {
     return filesNames.map(fileName => ({ name: fileName, value: fileName }))
   }
 
-  static aliases = ['l', 'link-extension', 'select-extension']
+  static aliases = ['l', 'link-extension', 'link']
 
   static description = 'Faça um link de uma extensão no Quoti com o seu código'
 
