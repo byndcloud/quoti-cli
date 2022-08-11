@@ -4,25 +4,30 @@ const Auth = require('../services/auth')
 const { flags } = require('@oclif/command')
 class LoginCommand extends Command {
   async run () {
-    const { previouslyLogger } = await Auth.silentLogin({
+    const { alreadyLoggedIn } = await Auth.silentLogin({
       force: this.flags.force
     })
-    if (previouslyLogger) {
-      this.logger.info('Você já realizou login anteriormente.\n')
+    if (alreadyLoggedIn) {
+      this.logger.info('Você já está logado! Veja os detalhes:\n')
 
       this.logger.info(`Organização: ${credentials.institution}`)
       this.logger.info(`Usuário: ${credentials.user?.displayName}`)
       this.logger.info(`Email: ${credentials.user?.email}`)
       if (credentials.devSessionId) {
-        this.logger.info(`sessionId: ${credentials.devSessionId}`)
+        this.logger.info(
+          `ID da sua sessão de desenvolvimento: ${credentials.devSessionId}`
+        )
       }
 
+      this.logger.info('\nAlgumas opções de o que fazer agora:\n')
       this.logger.info(
-        '\n"qt login -f" : Para que seja ignorada sessão atual e seja forçado o login em uma nova conta'
+        '1. Execute "qt login -f" para que seja ignorada sessão atual e seja forçado o login com um novo usuário'
       )
       this.logger.info(
-        '"qt logout" : Torna possível sair da conta atual e ficar desconectado'
+        '2. Executar "qt logout" para sair da conta atual e ficar desconectado'
       )
+
+      this.logger.info('3. Só continuar com o login atual')
     } else {
       this.logger.success('Login realizado com sucesso')
     }

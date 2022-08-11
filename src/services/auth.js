@@ -78,7 +78,7 @@ class Auth {
     if (!credentials.exists() || force) {
       await this.login()
       credentials.load()
-      return { previouslyLogger: false }
+      return { alreadyLoggedIn: false }
     } else {
       credentials.load()
       try {
@@ -89,7 +89,7 @@ class Auth {
           userData
         )
         await firebase.auth().updateCurrentUser(user)
-        return { previouslyLogger: true }
+        return { alreadyLoggedIn: true }
       } catch (error) {
         this.logger.error(error)
         this.logger.error('Erro ao carregar credenciais')
