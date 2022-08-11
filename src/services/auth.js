@@ -11,7 +11,7 @@ const { getFrontBaseURL } = require('../utils/index')
 class Auth {
   getTokenAccessURL (orgSlug) {
     const baseUrl = getFrontBaseURL()
-    return `${baseUrl}/${orgSlug}/dynamicComponents`
+    return `${baseUrl}/${orgSlug}/extensions`
   }
 
   async login () {
@@ -19,7 +19,7 @@ class Auth {
     const institution = await this.insertOrgSLug()
     const tokenAccessURL = this.getTokenAccessURL(institution)
     Logger.info(
-      `Clique no botão "Obter o token de acesso" em ${tokenAccessURL}`
+      `Clique no botão "Obter o token de acesso" em ${tokenAccessURL} para copiar o token e cole-o aqui:`
     )
     const customToken = await this.insertToken()
     try {
