@@ -34,7 +34,7 @@ class DatabaseService {
     const tablesForUpdate = []
     for (const table of tables) {
       const remoteTable = remoteTables.find(
-        rt => rt.name === slugify(table?.info?.name)
+        rt => rt.name === slugify(table?.info?.name, '_')
       )
       if (remoteTable) {
         tablesForUpdate.push({ tableId: remoteTable.id, ...table })
@@ -66,9 +66,12 @@ class DatabaseService {
   }
 
   async getRemoteTables (token) {
-    const { data } = await api.axios.get(`/${credentials.institution}/tables`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
+    const { data } = await api.axios.get(
+      `/${credentials.institution}/tables?limit=9999999999`,
+      {
+        headers: { Authorization: `Bearer ${token}` }
+      }
+    )
     return data
   }
 
@@ -98,7 +101,7 @@ class DatabaseService {
       set(
         model,
         'info.name',
-        slugify(model?.info?.name || model.constructor.name)
+        slugify(model?.info?.name || model.constructor.name, '_')
       )
       tables.push(model)
     }
