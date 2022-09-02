@@ -67,7 +67,7 @@ class DatabaseService {
 
   async getRemoteTables (token) {
     const { data } = await api.axios.get(
-      `/${credentials.institution}/tables?limit=9999999999`,
+      `/${credentials.institution}/tables?limit=99999`,
       {
         headers: { Authorization: `Bearer ${token}` }
       }
