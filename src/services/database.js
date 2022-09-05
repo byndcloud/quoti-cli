@@ -32,10 +32,12 @@ class DatabaseService {
     const remoteTables = await this.getRemoteTables(token)
     const tablesForCreation = []
     const tablesForUpdate = []
+    const tablesNames = []
     for (const table of tables) {
       const remoteTable = remoteTables.find(
         rt => rt.name === slugify(table?.info?.name, '_')
       )
+      tablesNames.push(table?.info?.name)
       if (remoteTable) {
         tablesForUpdate.push({ tableId: remoteTable.id, ...table })
       } else {
@@ -45,23 +47,51 @@ class DatabaseService {
     const hasTableForUpdate = tablesForUpdate.length > 0
     const hasTableForCreation = tablesForCreation.length > 0
 
-    if (hasTableForUpdate) {
-      await api.axios.put(
-        `/${credentials.institution}/apps/tables/bulk`,
-        tablesForUpdate,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      )
-    }
     if (hasTableForCreation) {
-      await api.axios.post(
-        `/${credentials.institution}/apps/tables/bulk`,
-        tablesForCreation,
-        {
-          headers: { Authorization: `Bearer ${token}` }
-        }
-      )
+      try {
+        await api.axios.post(
+          `/${credentials.institution}/apps/tables/bulk`,
+          tablesForCreation,
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        )
+      } catch (error) {
+        this.logger.error('Erro durante a criação dos databases')
+        throw error
+      }
+    }
+    this.printTables(tablesForCreation)
+
+    if (hasTableForUpdate) {
+      try {
+        await api.axios.put(
+          `/${credentials.institution}/apps/tables/bulk`,
+          tablesForUpdate,
+          {
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        )
+      } catch (error) {
+        this.logger.error('Erro durante a atualização dos databases')
+        throw error
+      }
+    }
+    this.printTables(tablesForUpdate, 'updated')
+  }
+
+  printTables (tables, operation) {
+    operation = operation === 'updated' ? 'atualizado' : 'criado'
+    const names = tables.map(t => t.info.name)
+    names.sort()
+    if (names.length === 0) {
+      this.logger.success(`Nenhum database foi ${operation}`)
+    } else if (names.length === 1) {
+      this.logger.success(`Foi ${operation} o seguinte database:`)
+      this.logger.success(`- ${names.join('\n-')}`)
+    } else {
+      this.logger.success(`Foram ${operation}s os seguintes databases:`)
+      this.logger.success(`- ${names.join('\n- ')}`)
     }
   }
 
@@ -106,9 +136,6 @@ class DatabaseService {
       tables.push(model)
     }
     await this.upsertTable(tables, token)
-    this.logger.success(
-      `Configurou databases presente no diretório ${cwdRelative}`
-    )
   }
 }
 
