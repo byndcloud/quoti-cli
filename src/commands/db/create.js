@@ -29,7 +29,7 @@ class CreateDatabaseCommand extends Command {
     {
       name: 'modelsDirectory',
       description:
-        'Endereço relativo a pasta ./src/pages onde será salvo sua extensão. Caso não exista a pasta ./src/pages o endereço fica relativo a raiz do projeto',
+        'Endereço onde será salvo sua extensão. (Endereço relativo a pasta ./src/pages. Caso ./src/pages não exista o endereço fica relativo a raiz do projeto)',
       default: './src/models'
     }
   ]

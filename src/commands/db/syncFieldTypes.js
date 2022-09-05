@@ -7,7 +7,8 @@ class SyncFieldTypeCommand extends Command {
     await fieldTypeService.syncFieldTypes()
   }
 
-  static description = 'Sincroniza os fieldTypes presentes na organização'
+  static description =
+    'Sincroniza os tipos de campos disponíveis para databases presentes na organização'
 }
 
 module.exports = SyncFieldTypeCommand
