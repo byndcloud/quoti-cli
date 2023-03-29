@@ -220,6 +220,8 @@ class PublishCommand extends Command {
             ', '
           )}`
         )
+      } else {
+        this.logger.success(`Nenhuma org teve essa extensão atualizada`)
       }
       if (data.orgsWithoutAutomaticUpdate.length > 0) {
         this.logger.success(
