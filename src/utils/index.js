@@ -179,7 +179,7 @@ async function prompt (message, choices, { multiSelect = true } = {}) {
         type: multiSelect ? 'checkbox' : 'list',
         validate: input => {
           if (input?.length === 0) {
-            return 'Você não selecionou nenhuma extensão para fazer deploy. Utilize a tecla espaço para selecionar a extensão que deseja fazer deploy. '
+            return 'Você não selecionou nenhuma opção. Utilize a tecla espaço para selecionar a opção desejada. '
           }
           return true
         },
