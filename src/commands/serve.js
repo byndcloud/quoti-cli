@@ -118,6 +118,7 @@ class ServeCommand extends Command {
         await this.spinner.succeed('Disponível em ' + urlExtension)
         return
       }
+
       await this.spinner.fail('Quoti não recebeu o código da extensão!')
       this.logger.error(`Erro ao enviar extensão para o Quoti ${err}`)
       if (process.env.DEBUG) {

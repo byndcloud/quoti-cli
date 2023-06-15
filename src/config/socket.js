@@ -63,8 +63,13 @@ module.exports = class Socket {
    * }} param0
    */
   emit ({ event = 'reload-extension', data = {} } = {}) {
-    return new Promise(resolve =>
-      this.socket.send(JSON.stringify({ event, data }), r => resolve(r))
-    )
+    return new Promise(resolve => {
+      if (typeof this.socket?.send === 'function') {
+        this.socket.send(JSON.stringify({ event, data }), r => resolve(r))
+      } else {
+        this.logger.error('Socket não conectado')
+        resolve(false)
+      }
+    })
   }
 }
