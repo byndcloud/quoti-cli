@@ -1,7 +1,7 @@
 {
   "author": "Nathan @nmf2",
   "name": "quoti-cli",
-  "version": "0.11.0",
+  "version": "0.12.6",
   "bin": {
     "qt": "./bin/run"
   },
