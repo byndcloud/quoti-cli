@@ -1,7 +1,7 @@
 {
   "name": "quoti-cli",
   "description": "A Quoti Extensions CLI",
-  "version": "0.11.0",
+  "version": "0.12.5",
   "author": "Nathan @nmf2",
   "preferGlobal": true,
   "bin": {
@@ -108,7 +108,6 @@
     "build": "node build.js",
     "preversion": "if [ -z $SKIP_TESTS ]; then npm run test:e2e; fi;",
     "version": "./publish.sh",
-    "prepublishOnly": "echo 'Use npm version to deploy the CLI, check out the documentation: ' && exit 1",
     "prepare": "husky install"
   },
   "lint-staged": {

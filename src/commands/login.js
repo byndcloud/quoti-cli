@@ -37,6 +37,12 @@ class LoginCommand extends Command {
     force: flags.boolean({
       char: 'f',
       description: 'Força o login em uma nova conta'
+    }),
+    org: flags.string({
+      description: 'Slug da organização (multipla autenticação)'
+    }),
+    local: flags.boolean({
+      description: 'Utiliza credenciais locais (relativas ao diretório atual)'
     })
   }
 
