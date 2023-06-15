@@ -190,7 +190,8 @@ class LinkExtensionCommand extends Command {
       description:
         'Use (--build|-b) se você está selecionando uma extensão com build ou use --no-build se você está selecionando uma extensão sem build',
       exclusive: []
-    })
+    }),
+    org: flags.string({ description: 'Slug da organização' })
   }
 }
 

@@ -187,7 +187,8 @@ class DeployCommand extends Command {
       description:
         'Permite selecionar uma versão para o deploy quando a flag --all for passada também. Por padrão, um timestamp será usado para identificar a versão.',
       exclusive: ['extra-flag']
-    })
+    }),
+    org: flags.string({ description: 'Slug da organização' })
   }
 
   static args = [

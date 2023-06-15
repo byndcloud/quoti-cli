@@ -337,7 +337,8 @@ class ServeCommand extends Command {
     }),
     'new-session': flags.boolean({
       description: 'Força a criação de um novo devSessionId'
-    })
+    }),
+    org: flags.string({ description: 'Slug da organização' })
   }
 
   static args = [

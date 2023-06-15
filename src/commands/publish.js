@@ -221,7 +221,7 @@ class PublishCommand extends Command {
           )}`
         )
       } else {
-        this.logger.success(`Nenhuma org teve essa extensão atualizada`)
+        this.logger.success('Nenhuma org teve essa extensão atualizada')
       }
       if (data.orgsWithoutAutomaticUpdate.length > 0) {
         this.logger.success(
@@ -321,6 +321,7 @@ class PublishCommand extends Command {
     'Publica uma nova extensão ou atualiza uma extensão já publicada no Marketplace'
 
   static flags = {
+    org: flags.string({ description: 'Slug da organização' }),
     version: flags.string({
       char: 'v',
       description: 'Versão da extensão'
