@@ -33,6 +33,10 @@ const existsLocalCredential = fs.existsSync('.qt/credentials.json')
 if (org && org !== 'undefined') {
   credentialsPath = path.join(baseConfigDirectory, `${org}.json`)
 } else if (existsLocalCredential || wantsLocalCredential) {
+  if (wantsLocalCredential && !existsLocalCredential) {
+    fs.mkdirSync('.qt', { recursive: true })
+  }
+
   this.logger.debug(
     'Arquivo de credenciais local encontrado. Utilizando arquivo de credenciais local'
   )
