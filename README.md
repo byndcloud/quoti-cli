@@ -89,6 +89,10 @@ OPTIONS
 
   -a, --ask-version  Permite selecionar uma versão para o deploy quando a flag --all for passada também. Por padrão, um
                      timestamp será usado para identificar a versão.
+  
+  --local (Utilizará autenticação relativa ao diretório atual - Este é o padrão se já existir)
+
+  --org=MINHA_ORG (Utilizará autenticação relativa a org especificada)
 
 ALIASES
   $ qt d
@@ -159,7 +163,10 @@ OPTIONS
 ALIASES
   $ qt l
   $ qt link-extension
-  $ qt link
+  $ qt select-extension
+  
+  --local (Utilizará autenticação relativa ao diretório atual - Este é o padrão se já existir)
+  --org=MINHA_ORG (Utilizará autenticação relativa a org especificada)
 ```
 
 _See code: [src/commands/link.js](https://github.com/byndcloud/quoti-cli/blob/v0.11.0/src/commands/link.js)_
@@ -173,7 +180,12 @@ USAGE
   $ qt login
 
 OPTIONS
-  -f, --force  Força o login em uma nova conta
+
+  -f Login forçado (caso já existe uma credencial vai sobrescrever)
+  
+  --local (Login relativo ao diretório atual)
+  
+  --org=MINHA_ORG (Login global ficará relativo a org especificada)
 ```
 
 _See code: [src/commands/login.js](https://github.com/byndcloud/quoti-cli/blob/v0.11.0/src/commands/login.js)_
@@ -205,6 +217,8 @@ OPTIONS
   -m, --minor            x.x.x -> x.x+1.x
   -p, --patch            x.x.x -> x.x.x+1
   -v, --version=version  Versão da extensão
+  --local (Utilizará autenticação relativa ao diretório atual - Este é o padrão se já existir)
+  --org=MINHA_ORG (Utilizará autenticação relativa a org especificada)
 
 ALIASES
   $ qt p
@@ -226,6 +240,8 @@ ARGUMENTS
 OPTIONS
   --deploy-develop  Indica se devemos salvar o build da extensão de develop no banco de dados da Beyond Company
   --new-session     Força a criação de um novo devSessionId
+  --local (Utilizará autenticação relativa ao diretório atual - Este é o padrão se já existir)
+  --org=MINHA_ORG (Utilizará autenticação relativa a org especificada)
 
 ALIASES
   $ qt s
