@@ -14,7 +14,7 @@ $ npm install -g quoti-cli
 $ qt COMMAND
 running command...
 $ qt (-v|--version|version)
-quoti-cli/0.11.0 linux-x64 node-v14.19.3
+quoti-cli/0.12.6 darwin-x64 node-v14.20.0
 $ qt --help [COMMAND]
 USAGE
   $ qt COMMAND
@@ -25,6 +25,8 @@ USAGE
 <!-- commands -->
 * [`qt autocomplete [SHELL]`](#qt-autocomplete-shell)
 * [`qt create EXTENSIONDIRECTORY`](#qt-create-extensiondirectory)
+* [`qt db:create [MODELSDIRECTORY]`](#qt-dbcreate-modelsdirectory)
+* [`qt db:syncFieldTypes`](#qt-dbsyncfieldtypes)
 * [`qt deploy [ENTRYPOINTPATH]`](#qt-deploy-entrypointpath)
 * [`qt download-current-version [FILEPATH]`](#qt-download-current-version-filepath)
 * [`qt help [COMMAND]`](#qt-help-command)
@@ -71,7 +73,33 @@ ARGUMENTS
                       ./src/pages o endereço fica relativo a raiz do projeto
 ```
 
-_See code: [src/commands/create.js](https://github.com/byndcloud/quoti-cli/blob/v0.11.0/src/commands/create.js)_
+_See code: [src/commands/create.js](https://github.com/byndcloud/quoti-cli/blob/v0.12.6/src/commands/create.js)_
+
+## `qt db:create [MODELSDIRECTORY]`
+
+Cria todos os modelos presentes na pasta especificada pelo arg modelDirectory
+
+```
+USAGE
+  $ qt db:create [MODELSDIRECTORY]
+
+ARGUMENTS
+  MODELSDIRECTORY  [default: ./src/models] Endereço onde será salvo sua extensão. (Endereço relativo a pasta
+                   ./src/pages. Caso ./src/pages não exista o endereço fica relativo a raiz do projeto)
+```
+
+_See code: [src/commands/db/create.js](https://github.com/byndcloud/quoti-cli/blob/v0.12.6/src/commands/db/create.js)_
+
+## `qt db:syncFieldTypes`
+
+Sincroniza os tipos de campos disponíveis para databases presentes na organização
+
+```
+USAGE
+  $ qt db:syncFieldTypes
+```
+
+_See code: [src/commands/db/syncFieldTypes.js](https://github.com/byndcloud/quoti-cli/blob/v0.12.6/src/commands/db/syncFieldTypes.js)_
 
 ## `qt deploy [ENTRYPOINTPATH]`
 
@@ -89,16 +117,14 @@ OPTIONS
 
   -a, --ask-version  Permite selecionar uma versão para o deploy quando a flag --all for passada também. Por padrão, um
                      timestamp será usado para identificar a versão.
-  
-  --local (Utilizará autenticação relativa ao diretório atual - Este é o padrão se já existir)
 
-  --org=MINHA_ORG (Utilizará autenticação relativa a org especificada)
+  --org=org          Slug da organização
 
 ALIASES
   $ qt d
 ```
 
-_See code: [src/commands/deploy.js](https://github.com/byndcloud/quoti-cli/blob/v0.11.0/src/commands/deploy.js)_
+_See code: [src/commands/deploy.js](https://github.com/byndcloud/quoti-cli/blob/v0.12.6/src/commands/deploy.js)_
 
 ## `qt download-current-version [FILEPATH]`
 
@@ -115,7 +141,7 @@ DESCRIPTION
   ...
 ```
 
-_See code: [src/commands/download-current-version.js](https://github.com/byndcloud/quoti-cli/blob/v0.11.0/src/commands/download-current-version.js)_
+_See code: [src/commands/download-current-version.js](https://github.com/byndcloud/quoti-cli/blob/v0.12.6/src/commands/download-current-version.js)_
 
 ## `qt help [COMMAND]`
 
@@ -143,7 +169,7 @@ USAGE
   $ qt init
 ```
 
-_See code: [src/commands/init.js](https://github.com/byndcloud/quoti-cli/blob/v0.11.0/src/commands/init.js)_
+_See code: [src/commands/init.js](https://github.com/byndcloud/quoti-cli/blob/v0.12.6/src/commands/init.js)_
 
 ## `qt link [ENTRYPOINTPATH]`
 
@@ -160,16 +186,15 @@ OPTIONS
   -b, --[no-]build  Use (--build|-b) se você está selecionando uma extensão com build ou use --no-build se você está
                     selecionando uma extensão sem build
 
+  --org=org         Slug da organização
+
 ALIASES
   $ qt l
   $ qt link-extension
-  $ qt select-extension
-  
-  --local (Utilizará autenticação relativa ao diretório atual - Este é o padrão se já existir)
-  --org=MINHA_ORG (Utilizará autenticação relativa a org especificada)
+  $ qt link
 ```
 
-_See code: [src/commands/link.js](https://github.com/byndcloud/quoti-cli/blob/v0.11.0/src/commands/link.js)_
+_See code: [src/commands/link.js](https://github.com/byndcloud/quoti-cli/blob/v0.12.6/src/commands/link.js)_
 
 ## `qt login`
 
@@ -180,15 +205,12 @@ USAGE
   $ qt login
 
 OPTIONS
-
-  -f Login forçado (caso já existe uma credencial vai sobrescrever)
-  
-  --local (Login relativo ao diretório atual)
-  
-  --org=MINHA_ORG (Login global ficará relativo a org especificada)
+  -f, --force  Força o login em uma nova conta
+  --local      Utiliza credenciais locais (relativas ao diretório atual)
+  --org=org    Slug da organização (multipla autenticação)
 ```
 
-_See code: [src/commands/login.js](https://github.com/byndcloud/quoti-cli/blob/v0.11.0/src/commands/login.js)_
+_See code: [src/commands/login.js](https://github.com/byndcloud/quoti-cli/blob/v0.12.6/src/commands/login.js)_
 
 ## `qt logout`
 
@@ -199,7 +221,7 @@ USAGE
   $ qt logout
 ```
 
-_See code: [src/commands/logout.js](https://github.com/byndcloud/quoti-cli/blob/v0.11.0/src/commands/logout.js)_
+_See code: [src/commands/logout.js](https://github.com/byndcloud/quoti-cli/blob/v0.12.6/src/commands/logout.js)_
 
 ## `qt publish [ENTRYPOINTPATH]`
 
@@ -217,14 +239,13 @@ OPTIONS
   -m, --minor            x.x.x -> x.x+1.x
   -p, --patch            x.x.x -> x.x.x+1
   -v, --version=version  Versão da extensão
-  --local (Utilizará autenticação relativa ao diretório atual - Este é o padrão se já existir)
-  --org=MINHA_ORG (Utilizará autenticação relativa a org especificada)
+  --org=org              Slug da organização
 
 ALIASES
   $ qt p
 ```
 
-_See code: [src/commands/publish.js](https://github.com/byndcloud/quoti-cli/blob/v0.11.0/src/commands/publish.js)_
+_See code: [src/commands/publish.js](https://github.com/byndcloud/quoti-cli/blob/v0.12.6/src/commands/publish.js)_
 
 ## `qt serve [ENTRYPOINTPATH]`
 
@@ -240,13 +261,12 @@ ARGUMENTS
 OPTIONS
   --deploy-develop  Indica se devemos salvar o build da extensão de develop no banco de dados da Beyond Company
   --new-session     Força a criação de um novo devSessionId
-  --local (Utilizará autenticação relativa ao diretório atual - Este é o padrão se já existir)
-  --org=MINHA_ORG (Utilizará autenticação relativa a org especificada)
+  --org=org         Slug da organização
 
 ALIASES
   $ qt s
   $ qt dev
 ```
 
-_See code: [src/commands/serve.js](https://github.com/byndcloud/quoti-cli/blob/v0.11.0/src/commands/serve.js)_
+_See code: [src/commands/serve.js](https://github.com/byndcloud/quoti-cli/blob/v0.12.6/src/commands/serve.js)_
 <!-- commandsstop -->
