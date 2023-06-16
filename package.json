@@ -1,7 +1,7 @@
 {
   "name": "quoti-cli",
   "description": "A Quoti Extensions CLI",
-  "version": "0.12.6",
+  "version": "0.13.1-alpha.1",
   "author": "Nathan @nmf2",
   "preferGlobal": true,
   "bin": {
@@ -15,10 +15,10 @@
     "@oclif/config": "^1.17.0",
     "@oclif/plugin-autocomplete": "^1.2.0",
     "@oclif/plugin-help": "^5.1.10",
-    "@vue/cli-plugin-babel": "^4.5.15",
-    "@vue/cli-plugin-eslint": "^4.5.17",
-    "@vue/cli-plugin-typescript": "^4.5.15",
-    "@vue/cli-service": "^4.5.15",
+    "@vue/cli-plugin-babel": "~5.0.0",
+    "@vue/cli-plugin-eslint": "~5.0.0",
+    "@vue/cli-plugin-typescript": "~5.0.0",
+    "@vue/cli-service": "~5.0.0",
     "7zip-min": "^1.4.3",
     "axios": "^0.24.0",
     "chalk": "^4.1.2",
