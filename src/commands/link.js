@@ -58,7 +58,11 @@ class LinkExtensionCommand extends Command {
       credentials.institution,
       this.flags.build
     ).catch(err => {
-      spinner.fail('Falha ao carregar extensões')
+      let errorMessage = 'Falha ao carregar extensões'
+      if (err.response.status === 403) {
+        errorMessage = 'Usuário com permissões insuficientes'
+      }
+      spinner.fail(errorMessage)
       throw err
     })
 
