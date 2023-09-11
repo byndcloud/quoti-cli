@@ -208,14 +208,14 @@ class ServeCommand extends Command {
         this.args?.entryPointPath,
         this.extensionsPaths
       )
-
+    this.spinner.start('Verificando extensões...')
     const remoteExtensionsByEntrypoints =
       await this.getRemoteExtensionsByEntrypoints(
         entrypointsOfExtensionsToWatch
       )
     this.checkWhichRemoteExtensionsExist(remoteExtensionsByEntrypoints)
 
-    const manifestsByEntrypoints = await this.getManifestsFromEntrypoints(
+    const manifestsByEntrypoints = this.getManifestsFromEntrypoints(
       entrypointsOfExtensionsToWatch
     )
     await this.createUUIDsIfTheyDontExist(
@@ -230,7 +230,7 @@ class ServeCommand extends Command {
     )
     const alias = await this.getAliasFromVueConfig()
 
-    this.logger.info('Conectado ao Quoti!')
+    this.spinner.succeed('Conectado ao Quoti!')
     const devSessionIdService = new DevSessionIdService()
     const sessionId = await devSessionIdService.getSessionId({
       forceCreateDevSessionId: this.flags['new-session']

@@ -39,11 +39,14 @@ module.exports = class BaseCommand extends Command {
         this.extensionsPaths = utils.listExtensionsPaths(this.projectRoot)
       }
     } catch (error) {
-      this.logger.error(error)
+      this.catch(error)
     }
   }
 
   async catch (err) {
+    if (this.spinner?.isSpinning) {
+      this.spinner.fail()
+    }
     if (err.isAxiosError) {
       err.data = err?.response?.data
     }
