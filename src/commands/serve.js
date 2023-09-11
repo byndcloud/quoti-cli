@@ -22,11 +22,6 @@ const RemoteExtensionService = require('../services/remoteExtension')
 const DevSessionIdService = require('../services/devSessionId.js')
 
 class ServeCommand extends Command {
-  constructor ({ projectRoot, extensionsPaths }) {
-    super(...arguments)
-    this._argConstructor = { projectRoot, extensionsPaths }
-  }
-
   init () {
     super.init({ injectProjectRoot: true, injectExtensionsPaths: true })
     this.socket = new Socket()
@@ -158,16 +153,16 @@ class ServeCommand extends Command {
 
   /**
    *
-   * @param {string[]} entryponits
+   * @param {string[]} entrypoints
    * @returns
    */
-  async getRemoteExtensionsByEntrypoints (entryponits) {
+  async getRemoteExtensionsByEntrypoints (entrypoints) {
     const token = await firebase.auth().currentUser.getIdToken()
     const orgSlug = credentials.institution
     const remoteExtensionService = new RemoteExtensionService()
     const remoteExtensionsByEntrypoints =
       await remoteExtensionService.listRemoteExtensionsByEntrypoints({
-        entryponits,
+        entrypoints,
         orgSlug,
         token
       })
