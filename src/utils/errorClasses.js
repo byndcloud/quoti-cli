@@ -62,7 +62,7 @@ class ManifestFromAnotherOrgError extends GenericError {
     super(
       message ||
         deindent`O manifest localizado em (${relativeManifestPath}) está registrado com a organização ${manifestInstitution}, porém você está logado na organização ${credentialsInstitution}.
-        Execute "qt link" ou realize login na organização ${credentialsInstitution}`
+        Execute "qt link" ou realize login na organização ${manifestInstitution}`
     )
   }
 }
