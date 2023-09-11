@@ -1,0 +1,11 @@
+{
+  "type": "build",
+  "name": "extensao teste",
+  "extensionUUID": "7a0ce76d-6fee-4487-9721-b357b3de5bc1",
+  "institution": "beyond",
+  "meta": {
+    "public": false,
+    "hasToolbar": true
+  },
+  "extensionId": 98
+}

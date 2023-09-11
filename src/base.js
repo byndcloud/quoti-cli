@@ -45,7 +45,7 @@ module.exports = class BaseCommand extends Command {
 
   async catch (err) {
     if (err.isAxiosError) {
-      err.message = err?.response.data
+      err.data = err?.response?.data
     }
     this.logger.error(err)
     if (process.env.NODE_ENV === 'test') {

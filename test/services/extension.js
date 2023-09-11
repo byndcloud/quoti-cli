@@ -25,13 +25,13 @@ class Extension {
    *
    * @param {number} extensionId
    */
-  setExtensionIdOnManifest (extensionId) {
+  setExtensionUUIDOnManifest (uuid) {
     const manifestBuffer = this.getManifestBufferSync()
     if (!this.#manifestBufferBackup) {
       this.#manifestBufferBackup = manifestBuffer
     }
     const manifestObject = JSON.parse(manifestBuffer.toString())
-    manifestObject.extensionId = extensionId
+    manifestObject.extensionUUID = uuid
     fs.writeFileSync(this.manifestPath, JSON.stringify(manifestObject, null, 2))
   }
 

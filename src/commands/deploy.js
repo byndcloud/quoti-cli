@@ -51,11 +51,11 @@ class DeployCommand extends Command {
     const token = await firebase.auth().currentUser.getIdToken()
     const remoteExtensionService = new RemoteExtensionService()
     const [remoteExtension] =
-      await remoteExtensionService.getRemoteExtensionsByIds({
-        ids: [manifest.extensionId],
-        orgSlug: credentials.institution,
+      await remoteExtensionService.listRemoteExtensionsByUUIDs(
+        [manifest.extensionUUID],
+        credentials.institution,
         token
-      })
+      )
 
     if (!remoteExtension) {
       throw new ExtensionNotFoundError(null, {

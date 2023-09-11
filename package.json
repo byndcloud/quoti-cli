@@ -11,6 +11,7 @@
     "CLI-deploy"
   ],
   "dependencies": {
+    "7zip-min": "^1.4.3",
     "@oclif/command": "^1.8.16",
     "@oclif/config": "^1.17.0",
     "@oclif/plugin-autocomplete": "^1.2.0",
@@ -19,10 +20,10 @@
     "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-plugin-typescript": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
-    "7zip-min": "^1.4.3",
     "axios": "^0.24.0",
     "chalk": "^4.1.2",
     "chokidar": "^3.5.1",
+    "deindent": "^0.1.0",
     "dotenv": "^8.2.0",
     "firebase": "^8.10.1",
     "fuzzy": "^0.1.3",
@@ -108,12 +109,18 @@
     "build": "node build.js",
     "preversion": "if [ -z $SKIP_TESTS ]; then npm run test:e2e; fi;",
     "version": "./publish.sh",
+    "postversion": "git push && git push --tags",
     "prepare": "husky install"
   },
   "lint-staged": {
     "*.js": [
       "prettier --write",
       "eslint --cache --fix"
+    ]
+  },
+  "quoti": {
+    "extensions": [
+      "extensionsToTest/src/extension1/App.vue"
     ]
   }
 }

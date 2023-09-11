@@ -2,7 +2,7 @@ const { createLogger, format, transports, addColors } = require('winston')
 const { combine, timestamp, printf } = format
 
 const NODE_ENV = process.env.NODE_ENV
-const isDebug = NODE_ENV === 'development' || process.env.DEBUG === true
+const isDebug = NODE_ENV === 'development' || process.env.DEBUG === 'true'
 const colorizer = format.colorize()
 
 const myCustomLevels = {
@@ -40,9 +40,9 @@ const logger = createLogger({
           )
         }
       } else if (msg.stack && isDebug) {
-        return colorizer.colorize(msg.level, `${msg.stack}`)
+        return colorizer.colorize(msg.level, `${msg.message}\n${msg.stack}`)
       }
-      return colorizer.colorize(msg.level, `${msg.message}`)
+      return colorizer.colorize(msg.level, msg.message)
     })
   ),
   transports: [

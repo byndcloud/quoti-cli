@@ -1,0 +1,11 @@
+{
+  "extensionId": 90,
+  "type": "noBuild",
+  "name": "Extensao para teste sem build",
+  "extensionUUID": "78428604-019e-44f1-a193-2a053303741a",
+  "institution": "beyond",
+  "meta": {
+    "public": true,
+    "hasToolbar": null
+  }
+}

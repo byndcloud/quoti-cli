@@ -13,6 +13,7 @@ const api = require('../config/axios')
 const fuzzy = require('fuzzy')
 const ManifestService = require('../services/manifest.js')
 const PackageService = require('../services/package.js')
+const { GenericError } = require('../utils/errorClasses.js')
 const packageService = new PackageService()
 inquirer.registerPrompt('file-tree-selection', inquirerFileTreeSelection)
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'))
@@ -58,11 +59,7 @@ class LinkExtensionCommand extends Command {
       credentials.institution,
       this.flags.build
     ).catch(err => {
-      let errorMessage = 'Falha ao carregar extensões'
-      if (err.response.status === 403) {
-        errorMessage = 'Usuário com permissões insuficientes'
-      }
-      spinner.fail(errorMessage)
+      spinner.fail('Falha ao listar extensões:')
       throw err
     })
 
@@ -141,22 +138,48 @@ class LinkExtensionCommand extends Command {
 
   async listExtensions (institution, withBuild) {
     const token = await app.auth().currentUser.getIdToken()
-    const result = await api.axios.get(`/${institution}/dynamic-components/`, {
-      headers: {
-        Authorization: `Bearer ${token}`
+    let remoteExtensions
+    try {
+      remoteExtensions = await api.axios.get(
+        `/${institution}/dynamic-components/`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        }
+      )
+    } catch (err) {
+      if (err.response?.status === 403) {
+        throw new GenericError(
+          'Você não tem permissão para listar extensões',
+          err,
+          'user-forbidden-to-list-extensions'
+        )
+      } else if (err.response?.status === 401) {
+        throw new GenericError(
+          'Seu token expirou, tente rodar o comando novamente',
+          err,
+          'user-token-expired'
+        )
+      } else {
+        throw new GenericError(
+          'Houve um erro ao listar extensões, tente novamente com a variável de ambiente DEBUG=true para mais detalhes',
+          err,
+          'list-extensions-error'
+        )
       }
-    })
+    }
 
     let extensions
 
     if (typeof withBuild !== 'undefined') {
-      extensions = result.data.filter(
+      extensions = remoteExtensions.data.filter(
         extension =>
           (withBuild && extension.type === 'Com build') ||
           (!withBuild && extension.type === 'Sem build')
       )
     } else {
-      extensions = result.data
+      extensions = remoteExtensions.data
     }
 
     return extensions

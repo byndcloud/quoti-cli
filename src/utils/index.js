@@ -44,11 +44,19 @@ async function confirmQuestion (text, defaultValue) {
   return isYes(confirmQuestion)
 }
 
+/**
+ * Returns a the manifest of the extension in the given path
+ * @param {string} entrypointPath
+ * @returns {ManifestServiceType}
+ */
 function getManifestFromEntryPoint (entrypointPath) {
   const manifestPath = path.resolve(
     path.dirname(entrypointPath),
     'manifest.json'
   )
+  /**
+   * @type {ManifestServiceType}
+   */
   const manifest = new ManifestService(manifestPath)
   if (!manifest?.exists()) {
     throw new ManifestNotFoundError({ manifestPath: manifestPath })
@@ -198,6 +206,10 @@ function unzip (pathIn, pathOut) {
   fs.createReadStream(pathIn).pipe(unzipper.Extract({ path: pathOut }))
 }
 
+function required (param) {
+  throw new Error(`O parâmetro ${param} é obrigatório`)
+}
+
 module.exports = {
   isYes,
   isNo,
@@ -210,5 +222,6 @@ module.exports = {
   promptExtensionEntryPointsFromUser,
   slugify,
   downloadFile,
-  unzip
+  unzip,
+  required
 }

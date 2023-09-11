@@ -84,7 +84,7 @@ function noManifest ({ extensionA }) {
 function remoteExtensionNotFound ({ extensionA }) {
   return commonServeTestSetup
     .do(async _ => {
-      extensionA.setExtensionIdOnManifest(99999999)
+      extensionA.setExtensionUUIDOnManifest('invalid-uuid')
     })
     .command(['serve', extensionA.entryPointPath])
 }
