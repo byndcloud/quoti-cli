@@ -1,11 +1,9 @@
 const path = require('path')
 
-console.log('Modo de build: ', process.env.NODE_ENV)
-
 module.exports = {
   runtimeCompiler: true,
   parallel: true,
-  publicPath: process.env.VUE_APP_CORDOVA ? '' : '/',
+  publicPath: '/',
   lintOnSave: true,
   transpileDependencies: ['vue-clamp', 'resize-detector'],
   // css: {
