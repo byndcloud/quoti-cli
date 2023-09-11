@@ -11,7 +11,7 @@
     "CLI-deploy"
   ],
   "dependencies": {
-    "@oclif/command": "^1.8.16",
+    "@oclif/command": "^1.8.36",
     "@oclif/config": "^1.17.0",
     "@oclif/plugin-autocomplete": "^1.2.0",
     "@oclif/plugin-help": "^5.1.10",
@@ -109,7 +109,6 @@
     "build": "node build.js",
     "preversion": "if [ -z $SKIP_TESTS ]; then npm run test:e2e; fi;",
     "version": "./publish.sh",
-    "postversion": "git push && git push --tags",
     "prepare": "husky install"
   },
   "lint-staged": {
