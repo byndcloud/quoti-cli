@@ -3,10 +3,22 @@ const api = require('../config/axios')
 const { firebase } = require('../config/firebase')
 const utils = require('../utils/index')
 const { keyBy } = require('lodash')
+const credentials = require('../config/credentials')
 
 class RemoteExtensionService {
   #extensionVersionsOnMarketplace = []
   #isLoadExtensionVersionsOnMarketplace = false
+
+  async getSubscribedOrgs (extensionsId) {
+    await credentials.load()
+    const token = await firebase.auth().currentUser.getIdToken()
+    const { data: subscribedOrgs } = await api.axios.get(
+      `/${credentials.institution}/marketplace/extensions/${extensionsId}/subscribed/orgs`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    )
+    return subscribedOrgs.data
+  }
+
   #checkLoadExtensionVersions = () => {
     if (this.#isLoadExtensionVersionsOnMarketplace) {
       return this.#extensionVersionsOnMarketplace
