@@ -74,7 +74,7 @@
     "bin"
   ],
   "engines": {
-    "node": ">=14.17.0"
+    "node": ">=14.21.3"
   },
   "homepage": "https://github.com/nmf2/cliv2",
   "keywords": [

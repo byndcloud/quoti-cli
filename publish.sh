@@ -2,12 +2,12 @@
 
 # Generate the manifest and readme
 npm run generate:docs
-
-# Install the exact packages from package-lock
-npm ci
-
 # Copy readme and manifest to deploy workspace
 cp README.md oclif.manifest.json ./CLI-deploy 
+
+npm prune --omit=dev
+
+node-prune
 
 # Build / compact the code and save it in the deploy workspace
 npm run build 
@@ -35,4 +35,10 @@ fi
 rm -f oclif.manifest.json ./CLI-deploy/oclif.manifest.json
 
 # Add the README.md package.json from the CLI to the publish commit
-git add README.md ./CLI-deploy
+git add .
+
+# Commit the changes
+git commit -m "Publish $VERSION"
+
+# Tag
+git tag v$VERSION
