@@ -41,6 +41,7 @@ class ServeCommand extends Command {
     const tsConfigPath = path.join(this.projectRoot, 'tsconfig.json')
     if (fs.existsSync(tsConfigPath)) {
       this.tsConfig = require(tsConfigPath)
+      return
     }
 
     this.tsConfig = {
