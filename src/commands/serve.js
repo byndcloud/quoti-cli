@@ -1,7 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const chokidar = require('chokidar')
-const getDependencyTree = require('get-dependency-tree')
+const dependencyTree = require('dependency-tree')
 
 const { debounce, pickBy } = require('lodash')
 const Command = require('../base.js')
@@ -26,9 +26,33 @@ class ServeCommand extends Command {
     super.init({ injectProjectRoot: true, injectExtensionsPaths: true })
     this.socket = new Socket()
     credentials.load()
+    this.ensureTsConfigExists()
+    this.setWebpackConfigPath()
   }
 
-  getDependentExtensionPath ({
+  setWebpackConfigPath () {
+    const webpackPath = path.join(this.projectRoot, 'webpack.config.js')
+    if (fs.existsSync(webpackPath)) {
+      this.webpackConfigPath = webpackPath
+    }
+  }
+
+  ensureTsConfigExists () {
+    const tsConfigPath = path.join(this.projectRoot, 'tsconfig.json')
+    if (fs.existsSync(tsConfigPath)) {
+      this.tsConfig = require(tsConfigPath)
+    }
+
+    this.tsConfig = {
+      compilerOptions: {
+        paths: {
+          '@/*': ['src/*']
+        }
+      }
+    }
+  }
+
+  getDependentExtensionPaths ({
     changedFilePath,
     extensionsEntrypointsToCheck,
     alias
@@ -37,14 +61,27 @@ class ServeCommand extends Command {
     const changedFileAbsolutePath = path.join(this.projectRoot, changedFilePath)
     const extensionsToUpdate = extensionsEntrypointsToCheck.filter(
       entryPoint => {
-        const { arr: dependencies } = getDependencyTree({
-          entry: entryPoint,
-          alias
+        if (entryPoint === changedFileAbsolutePath) {
+          return true
+        }
+        console.time(`getDependencyTree ${entryPoint}`)
+        const dependencies = dependencyTree.toList({
+          filename: entryPoint,
+          directory: this.projectRoot,
+          filter: absolutePath => {
+            return !absolutePath.includes('node_modules')
+          },
+          webpackConfig: this.webpackConfigPath,
+          tsConfig: this.tsConfig
         })
-        dependencies.push(entryPoint)
-        return dependencies.includes(changedFileAbsolutePath)
+        console.timeEnd(`getDependencyTree ${entryPoint}`)
+        const isChangedFileDependent = dependencies.includes(
+          changedFileAbsolutePath
+        )
+        return isChangedFileDependent
       }
     )
+    console.log('extensionsToUpdate', extensionsToUpdate)
     return extensionsToUpdate
   }
 
@@ -133,7 +170,7 @@ class ServeCommand extends Command {
       const extensionsEntrypointsToCheck = Object.keys(
         remoteExtensionsByEntrypoints
       )
-      const extensionsPathsToUpdate = this.getDependentExtensionPath({
+      const extensionsPathsToUpdate = this.getDependentExtensionPaths({
         changedFilePath,
         extensionsEntrypointsToCheck,
         alias
