@@ -64,7 +64,6 @@ class ServeCommand extends Command {
         if (entryPoint === changedFileAbsolutePath) {
           return true
         }
-        console.time(`getDependencyTree ${entryPoint}`)
         const dependencies = dependencyTree.toList({
           filename: entryPoint,
           directory: this.projectRoot,
@@ -74,14 +73,12 @@ class ServeCommand extends Command {
           webpackConfig: this.webpackConfigPath,
           tsConfig: this.tsConfig
         })
-        console.timeEnd(`getDependencyTree ${entryPoint}`)
         const isChangedFileDependent = dependencies.includes(
           changedFileAbsolutePath
         )
         return isChangedFileDependent
       }
     )
-    console.log('extensionsToUpdate', extensionsToUpdate)
     return extensionsToUpdate
   }
 

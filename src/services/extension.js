@@ -129,7 +129,7 @@ class ExtensionService {
       return path.join(utils.getProjectRootPath(), dest, `${name}.umd.min.js`)
     } catch (error) {
       this.spinner.fail('Erro durante o build')
-      throw new Error(error)
+      throw error
     }
   }
 }
