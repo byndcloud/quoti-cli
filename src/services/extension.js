@@ -116,7 +116,6 @@ class ExtensionService {
       const name = `dc_${this.manifest.extensionUUID}`
       await this.vueCliService.run('build', {
         mode,
-        modern: true,
         target: 'lib',
         formats: 'umd-min',
         dest,
