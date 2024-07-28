@@ -51,17 +51,18 @@ class ExtensionService {
     return true
   }
 
-  async upload (buffer, remotePath) {
+  async upload (extensionCode, remotePath) {
     if (!this.manifest.exists()) {
-      this.logger.warning('Por favor selecione sua extensão. Execute qt link')
+      this.logger.warn('Por favor selecione sua extensão. Execute qt link')
       process.exit(0)
-    } else if (!buffer) {
-      this.logger.error('Buffer é null!')
+    } else if (!extensionCode) {
+      this.logger.warn('O código da extensão não foi gerado')
       process.exit(0)
     }
 
     this.spinner.start(`Fazendo upload da extensão ${this.manifest.name}...`)
     try {
+      const buffer = Buffer.from(extensionCode)
       await storage
         .ref()
         .child(remotePath)

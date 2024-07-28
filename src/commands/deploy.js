@@ -4,7 +4,6 @@ const credentials = require('../config/credentials')
 const Command = require('../base.js')
 const ExtensionService = require('../services/extension')
 const RemoteExtensionService = require('../services/remoteExtension')
-const fs = require('fs')
 const inquirer = require('inquirer')
 const utils = require('../utils/index')
 const { flags } = require('@oclif/command')
@@ -95,14 +94,11 @@ class DeployCommand extends Command {
     )
     const url = `https://storage.cloud.google.com/dynamic-components/${filename}`
 
-    let extensionPath = entryPointPath
-    if (manifest.type === 'build') {
-      const remoteExtensionUUID = remoteExtension?.extension_uuid
-      extensionPath = await this.extensionService.build(entryPointPath, {
-        remoteExtensionUUID
-      })
-    }
-    await this.extensionService.upload(fs.readFileSync(extensionPath), filename)
+    const remoteExtensionUUID = remoteExtension?.extension_uuid
+    const extensionCode = await this.extensionService.build(entryPointPath, {
+      remoteExtensionUUID
+    })
+    await this.extensionService.upload(extensionCode, filename)
     try {
       this.spinner.start('Fazendo deploy...')
       await this.extensionService.deployVersion(
