@@ -31,4 +31,5 @@ exports.appExtension = firebase.initializeApp(
   firebaseExtensionConfig,
   'Extensions'
 )
+/** @type {firebase.default.storage.Storage} */
 exports.storage = this.app.storage('gs://dynamic-components')

@@ -1,9 +1,9 @@
 const fs = require('fs')
 const path = require('path')
 const chokidar = require('chokidar')
-const getDependencyTree = require('get-dependency-tree')
+const dependencyTree = require('dependency-tree')
 
-const { debounce, pickBy } = require('lodash')
+const { pickBy } = require('lodash')
 const Command = require('../base.js')
 
 const credentials = require('../config/credentials')
@@ -26,9 +26,34 @@ class ServeCommand extends Command {
     super.init({ injectProjectRoot: true, injectExtensionsPaths: true })
     this.socket = new Socket()
     credentials.load()
+    this.ensureTsConfigExists()
+    this.setWebpackConfigPath()
   }
 
-  getDependentExtensionPath ({
+  setWebpackConfigPath () {
+    const webpackPath = path.join(this.projectRoot, 'webpack.config.js')
+    if (fs.existsSync(webpackPath)) {
+      this.webpackConfigPath = webpackPath
+    }
+  }
+
+  ensureTsConfigExists () {
+    const tsConfigPath = path.join(this.projectRoot, 'tsconfig.json')
+    if (fs.existsSync(tsConfigPath)) {
+      this.tsConfig = require(tsConfigPath)
+      return
+    }
+
+    this.tsConfig = {
+      compilerOptions: {
+        paths: {
+          '@/*': ['src/*']
+        }
+      }
+    }
+  }
+
+  getDependentExtensionPaths ({
     changedFilePath,
     extensionsEntrypointsToCheck,
     alias
@@ -37,12 +62,22 @@ class ServeCommand extends Command {
     const changedFileAbsolutePath = path.join(this.projectRoot, changedFilePath)
     const extensionsToUpdate = extensionsEntrypointsToCheck.filter(
       entryPoint => {
-        const { arr: dependencies } = getDependencyTree({
-          entry: entryPoint,
-          alias
+        if (entryPoint === changedFileAbsolutePath) {
+          return true
+        }
+        const dependencies = dependencyTree.toList({
+          filename: entryPoint,
+          directory: this.projectRoot,
+          filter: absolutePath => {
+            return !absolutePath.includes('node_modules')
+          },
+          webpackConfig: this.webpackConfigPath,
+          tsConfig: this.tsConfig
         })
-        dependencies.push(entryPoint)
-        return dependencies.includes(changedFileAbsolutePath)
+        const isChangedFileDependent = dependencies.includes(
+          changedFileAbsolutePath
+        )
+        return isChangedFileDependent
       }
     )
     return extensionsToUpdate
@@ -57,29 +92,30 @@ class ServeCommand extends Command {
   }
 
   async buildAndUploadExtension ({
-    changedFilePath,
     extensionsPathsToUpdate,
     remoteExtensionsByEntrypoints,
     manifestsByPaths
   }) {
     const extensionsData = await Promise.all(
       extensionsPathsToUpdate.map(async path => {
-        let distPath = path
+        // const distPath = path
         const manifest = manifestsByPaths[path]
         const extensionService = new ExtensionService(manifest)
         const remoteExtensionUUID =
           remoteExtensionsByEntrypoints?.[path]?.extension_uuid
-        if (manifestsByPaths[path].type === 'build') {
-          distPath = await extensionService.build(path, {
-            mode: 'staging',
-            remoteExtensionUUID
-          })
-        }
+        const extensionCode = await extensionService.build(path, {
+          mode: 'development',
+          remoteExtensionUUID
+        })
 
-        const fileBuffer = fs.readFileSync(distPath || changedFilePath)
-        const extensionCode = fileBuffer.toString()
+        // const fileBuffer = fs.readFileSync(distPath || changedFilePath)
+        // const extensionCode = fileBuffer.toString()
         if (this.flags['deploy-develop']) {
-          extensionService.upload(fileBuffer, this.getUploadFileName(manifest))
+          // extensionService.upload(fileBuffer, this.getUploadFileName(manifest))
+          extensionService.upload(
+            extensionCode,
+            this.getUploadFileName(manifest)
+          )
         }
         return {
           extensionInfo: manifestsByPaths[path],
@@ -93,31 +129,36 @@ class ServeCommand extends Command {
 
   async sendCodeToQuotiBySocket (extensionsData, sessionId) {
     extensionsData.forEach(async extensionData => {
-      this.spinner.start('Enviando código para o Quoti...')
-      const err = await this.socket.emit({
-        event: 'reload-extension',
-        data: {
-          ...extensionData,
-          sessionId,
-          user: {
-            uid: credentials.user.uid,
-            orgSlug: credentials.institution
+      try {
+        this.spinner.start('Enviando código para o Quoti...')
+        const err = await this.socket.emit({
+          event: 'reload-extension',
+          data: {
+            ...extensionData,
+            sessionId,
+            user: {
+              uid: credentials.user.uid,
+              orgSlug: credentials.institution
+            }
           }
+        })
+
+        if (!err) {
+          const urlExtension = `${getFrontBaseURL()}/${
+            credentials.institution
+          }/develop/${extensionData.extensionPath}?devSessionId=${sessionId}`
+          await this.spinner.succeed('Disponível em ' + urlExtension)
+          return
         }
-      })
 
-      if (!err) {
-        const urlExtension = `${getFrontBaseURL()}/${
-          credentials.institution
-        }/develop/${extensionData.extensionPath}?devSessionId=${sessionId}`
-        await this.spinner.succeed('Disponível em ' + urlExtension)
-        return
-      }
-
-      await this.spinner.fail('Quoti não recebeu o código da extensão!')
-      this.logger.error(`Erro ao enviar extensão para o Quoti ${err}`)
-      if (process.env.DEBUG) {
-        console.error(err)
+        await this.spinner.fail('Quoti não recebeu o código da extensão!')
+        this.logger.error(`Erro ao enviar extensão para o Quoti ${err}`)
+        if (process.env.DEBUG) {
+          console.error(err)
+        }
+      } catch (error) {
+        this.spinner.fail('Erro ao enviar extensão para o Quoti')
+        this.logger.error(error)
       }
     })
   }
@@ -130,23 +171,37 @@ class ServeCommand extends Command {
     watcher
   ) {
     return async changedFilePath => {
-      const extensionsEntrypointsToCheck = Object.keys(
-        remoteExtensionsByEntrypoints
-      )
-      const extensionsPathsToUpdate = this.getDependentExtensionPath({
-        changedFilePath,
-        extensionsEntrypointsToCheck,
-        alias
-      })
-      const extensionsData = await this.buildAndUploadExtension({
-        changedFilePath,
-        extensionsPathsToUpdate,
-        remoteExtensionsByEntrypoints,
-        manifestsByPaths
-      })
-      await this.sendCodeToQuotiBySocket(extensionsData, sessionId)
-      if (process.env.NODE_ENV === 'test') {
-        watcher.close()
+      try {
+        const extensionsEntrypointsToCheck = Object.keys(
+          remoteExtensionsByEntrypoints
+        )
+        const extensionsPathsToUpdate = this.getDependentExtensionPaths({
+          changedFilePath,
+          extensionsEntrypointsToCheck,
+          alias
+        })
+        if (!extensionsPathsToUpdate.length) {
+          return
+        }
+
+        const extensionsData = await this.buildAndUploadExtension({
+          changedFilePath,
+          extensionsPathsToUpdate,
+          remoteExtensionsByEntrypoints,
+          manifestsByPaths
+        })
+        if (!extensionsData) {
+          this.logger.warning(
+            'Provavelmente aconteceu algum erro no build da extensão pois não foi retornado nenhum dado'
+          )
+          return
+        }
+        await this.sendCodeToQuotiBySocket(extensionsData, sessionId)
+        if (process.env.NODE_ENV === 'test') {
+          watcher.close()
+        }
+      } catch (error) {
+        this.logger.error(error)
       }
     }
   }
@@ -235,17 +290,16 @@ class ServeCommand extends Command {
       cwd: this.projectRoot,
       ignored: ['node_modules']
     })
-    const debouncedBuild = debounce(
+    watcher.on(
+      'change',
       this.chokidarOnChange(
         sessionId,
         remoteExtensionsByEntrypoints,
         manifestsByEntrypoints,
         alias,
         watcher
-      ),
-      800
+      )
     )
-    watcher.on('change', debouncedBuild)
 
     const watchingChangesMessage = this.args.entryPointPath
       ? `Observando alterações na extensão em ${this.args.entryPointPath}`

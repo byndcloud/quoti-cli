@@ -4,7 +4,6 @@ const credentials = require('../config/credentials')
 const Command = require('../base.js')
 const ExtensionService = require('../services/extension')
 const RemoteExtensionService = require('../services/remoteExtension')
-const fs = require('fs')
 const inquirer = require('inquirer')
 const utils = require('../utils/index')
 const { flags } = require('@oclif/command')
@@ -45,65 +44,62 @@ class DeployCommand extends Command {
    * @param {boolean} isVersionTimestamp
    */
   async deployExtension (entryPointPath, promptVersion) {
-    this.logger.info('\n----------------------------------------------')
-    const manifest = utils.getManifestFromEntryPoint(entryPointPath)
+    try {
+      this.logger.info('\n----------------------------------------------')
+      const manifest = utils.getManifestFromEntryPoint(entryPointPath)
 
-    const token = await firebase.auth().currentUser.getIdToken()
-    const remoteExtensionService = new RemoteExtensionService()
-    const [remoteExtension] =
-      await remoteExtensionService.listRemoteExtensionsByUUIDs(
-        [manifest.extensionUUID],
-        credentials.institution,
-        token
+      const token = await firebase.auth().currentUser.getIdToken()
+      const remoteExtensionService = new RemoteExtensionService()
+      const [remoteExtension] =
+        await remoteExtensionService.listRemoteExtensionsByUUIDs(
+          [manifest.extensionUUID],
+          credentials.institution,
+          token
+        )
+
+      if (!remoteExtension) {
+        throw new ExtensionNotFoundError(null, {
+          name: manifest.name,
+          orgSlug: credentials.institution
+        })
+      }
+
+      const lastDynamicComponentFile =
+        remoteExtension.DynamicComponentsFiles.find(item => item.activated)
+      const lastVersion = lastDynamicComponentFile?.version
+      this.logger.info(
+        `* Você está realizando deploy de uma nova versão para a extensão "${remoteExtension?.title}"`
       )
+      if (lastVersion) {
+        this.logger.info(`* Versão atual: ${lastVersion}`)
+      } else {
+        this.logger.info('* Extensão não possui uma versão ativa')
+      }
 
-    if (!remoteExtension) {
-      throw new ExtensionNotFoundError(null, {
-        name: manifest.name,
-        orgSlug: credentials.institution
-      })
-    }
+      this.extensionService = new ExtensionService(manifest)
 
-    const lastDynamicComponentFile =
-      remoteExtension.DynamicComponentsFiles.find(item => item.activated)
-    const lastVersion = lastDynamicComponentFile?.version
-    this.logger.info(
-      `* Você está realizando deploy de uma nova versão para a extensão "${remoteExtension?.title}"`
-    )
-    if (lastVersion) {
-      this.logger.info(`* Versão atual: ${lastVersion}`)
-    } else {
-      this.logger.info('* Extensão não possui uma versão ativa')
-    }
+      if (!manifest.exists()) {
+        this.logger.warning(
+          'Execute "qt link" antes de realizar o deploy da sua extensão'
+        )
+        return
+      }
 
-    this.extensionService = new ExtensionService(manifest)
-
-    if (!manifest.exists()) {
-      this.logger.warning(
-        'Execute "qt link" antes de realizar o deploy da sua extensão'
+      let versionName = Date.now()
+      if (promptVersion) {
+        versionName = await this.promptVersionName(lastVersion)
+      }
+      const filename = this.getUploadFileNameDeploy(
+        new Date().getTime().toString(),
+        manifest.type === 'build'
       )
-      return
-    }
+      const url = `https://storage.cloud.google.com/dynamic-components/${filename}`
 
-    let versionName = Date.now()
-    if (promptVersion) {
-      versionName = await this.promptVersionName(lastVersion)
-    }
-    const filename = this.getUploadFileNameDeploy(
-      new Date().getTime().toString(),
-      manifest.type === 'build'
-    )
-    const url = `https://storage.cloud.google.com/dynamic-components/${filename}`
-
-    let extensionPath = entryPointPath
-    if (manifest.type === 'build') {
       const remoteExtensionUUID = remoteExtension?.extension_uuid
-      extensionPath = await this.extensionService.build(entryPointPath, {
+      const extensionCode = await this.extensionService.build(entryPointPath, {
         remoteExtensionUUID
       })
-    }
-    await this.extensionService.upload(fs.readFileSync(extensionPath), filename)
-    try {
+      await this.extensionService.upload(extensionCode, filename)
       this.spinner.start('Fazendo deploy...')
       await this.extensionService.deployVersion(
         {
@@ -116,6 +112,7 @@ class DeployCommand extends Command {
       )
       this.spinner.succeed('Deploy feito com sucesso!')
     } catch (error) {
+      this.logger.error(error)
       let errorMessage = 'Erro durante o deploy. '
       if (error?.response?.data?.message) {
         errorMessage += error?.response?.data?.message

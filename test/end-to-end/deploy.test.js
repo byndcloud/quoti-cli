@@ -28,41 +28,6 @@ describe('Deploy command', function () {
     sandbox.restore()
   })
 
-  describe('Deploy no build', () => {
-    // test 1
-    deploySetup
-      .noBuild(testProject)
-      .it('qt deploy to extension without build', async (ctx, done) => {
-        const extensionServiceSpy = ExtensionService.prototype
-        expect(extensionServiceSpy.build.notCalled)
-        expect(extensionServiceSpy.upload.callCount).to.equal(1)
-
-        const uploadFirstArgs = extensionServiceSpy.upload.firstCall.args
-        const bufferPassedToUploadFunction = uploadFirstArgs[0]
-        expectTimestampInFile(bufferPassedToUploadFunction, ctx.now)
-
-        expect(extensionServiceSpy.deployVersion.callCount).to.equal(1)
-
-        done()
-      })
-    // test 2
-    deploySetup
-      .deployExtensionNoBuildWithoutArgs(testProject)
-      .it(
-        'qt deploy to extension no build without argument',
-        async (ctx, done) => {
-          const extensionServiceSpy = ExtensionService.prototype
-          expect(extensionServiceSpy.build.notCalled)
-          expect(extensionServiceSpy.upload.callCount).to.equal(1)
-          const uploadFirstArgs = extensionServiceSpy.upload.firstCall.args
-          const bufferPassedToUploadFunction = uploadFirstArgs[0]
-          expectTimestampInFile(bufferPassedToUploadFunction, ctx.now)
-          expect(extensionServiceSpy.deployVersion.callCount).to.equal(1)
-
-          done()
-        }
-      )
-  })
   describe('Deploy with build', () => {
     // test 3
     deploySetup
