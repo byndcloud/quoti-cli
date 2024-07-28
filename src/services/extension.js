@@ -156,7 +156,7 @@ class ExtensionService {
       })
       this.logger.info(`⇨ Extensão: ${this.manifest.name}\n`)
       this.spinner.succeed('Build finalizado')
-      return result?.[0]?.output?.[0].code
+      return result?.[0]?.output?.[0]?.code
       // return path.join(utils.getProjectRootPath(), dest, `${name}.umd.min.js`)
     } catch (error) {
       this.spinner.fail('Erro durante o build', error.message)
