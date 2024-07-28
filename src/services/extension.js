@@ -159,7 +159,8 @@ class ExtensionService {
       return result?.[0]?.output?.[0]?.code
       // return path.join(utils.getProjectRootPath(), dest, `${name}.umd.min.js`)
     } catch (error) {
-      this.spinner.fail('Erro durante o build', error.message)
+      this.logger.error(error?.message)
+      this.spinner.fail('Erro durante o build: ' + error?.message)
     }
   }
 }
