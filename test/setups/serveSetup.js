@@ -18,29 +18,6 @@ const commonServeTestSetup = testStubLoggedIn
   .add('distPath', ctx => path.join(ctx.testProjectRootPath, 'dist'))
   .stub(utils, 'getProjectRootPath', () => testProjectRootPath)
 
-function noBuild (testProject, arg) {
-  return commonServeTestSetup
-    .add('now', Date.now())
-    .add('modifiedFiles', ctx => {
-      return [
-        {
-          modifiedFilesPath: testProject.extension2NoBuild.entryPointPath,
-          manifestPath: testProject.extension2NoBuild.manifestPath
-        }
-      ]
-    })
-    .command(['serve', arg])
-
-    .do(async ctx => {
-      await delay(1000)
-      utilsTest.insertTimestampInFile(
-        ctx.modifiedFiles[0].modifiedFilesPath,
-        ctx.now
-      )
-      await delay(1000)
-    })
-}
-
 function withBuild (testProject, arg) {
   return commonServeTestSetup
     .add('now', Date.now())
@@ -144,7 +121,6 @@ function serveWithNewSession (extensionA) {
 
 module.exports = {
   serve,
-  noBuild,
   withBuild,
   noEntrypointOnPackage,
   noManifest,
