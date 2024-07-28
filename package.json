@@ -74,7 +74,7 @@
     "bin"
   ],
   "engines": {
-    "node": ">=14.21.3"
+    "node": ">=20.12.2"
   },
   "homepage": "https://github.com/nmf2/cliv2",
   "keywords": [
@@ -109,7 +109,8 @@
     "build": "node build.js",
     "preversion": "if [ -z $SKIP_TESTS ]; then npm run test:e2e; fi;",
     "version": "./publish.sh",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "install-npm": "npm i -g npm@10"
   },
   "lint-staged": {
     "*.js": [
