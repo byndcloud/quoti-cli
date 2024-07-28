@@ -129,31 +129,36 @@ class ServeCommand extends Command {
 
   async sendCodeToQuotiBySocket (extensionsData, sessionId) {
     extensionsData.forEach(async extensionData => {
-      this.spinner.start('Enviando código para o Quoti...')
-      const err = await this.socket.emit({
-        event: 'reload-extension',
-        data: {
-          ...extensionData,
-          sessionId,
-          user: {
-            uid: credentials.user.uid,
-            orgSlug: credentials.institution
+      try {
+        this.spinner.start('Enviando código para o Quoti...')
+        const err = await this.socket.emit({
+          event: 'reload-extension',
+          data: {
+            ...extensionData,
+            sessionId,
+            user: {
+              uid: credentials.user.uid,
+              orgSlug: credentials.institution
+            }
           }
+        })
+
+        if (!err) {
+          const urlExtension = `${getFrontBaseURL()}/${
+            credentials.institution
+          }/develop/${extensionData.extensionPath}?devSessionId=${sessionId}`
+          await this.spinner.succeed('Disponível em ' + urlExtension)
+          return
         }
-      })
 
-      if (!err) {
-        const urlExtension = `${getFrontBaseURL()}/${
-          credentials.institution
-        }/develop/${extensionData.extensionPath}?devSessionId=${sessionId}`
-        await this.spinner.succeed('Disponível em ' + urlExtension)
-        return
-      }
-
-      await this.spinner.fail('Quoti não recebeu o código da extensão!')
-      this.logger.error(`Erro ao enviar extensão para o Quoti ${err}`)
-      if (process.env.DEBUG) {
-        console.error(err)
+        await this.spinner.fail('Quoti não recebeu o código da extensão!')
+        this.logger.error(`Erro ao enviar extensão para o Quoti ${err}`)
+        if (process.env.DEBUG) {
+          console.error(err)
+        }
+      } catch (error) {
+        this.spinner.fail('Erro ao enviar extensão para o Quoti')
+        this.logger.error(error)
       }
     })
   }
@@ -166,23 +171,37 @@ class ServeCommand extends Command {
     watcher
   ) {
     return async changedFilePath => {
-      const extensionsEntrypointsToCheck = Object.keys(
-        remoteExtensionsByEntrypoints
-      )
-      const extensionsPathsToUpdate = this.getDependentExtensionPaths({
-        changedFilePath,
-        extensionsEntrypointsToCheck,
-        alias
-      })
-      const extensionsData = await this.buildAndUploadExtension({
-        changedFilePath,
-        extensionsPathsToUpdate,
-        remoteExtensionsByEntrypoints,
-        manifestsByPaths
-      })
-      await this.sendCodeToQuotiBySocket(extensionsData, sessionId)
-      if (process.env.NODE_ENV === 'test') {
-        watcher.close()
+      try {
+        const extensionsEntrypointsToCheck = Object.keys(
+          remoteExtensionsByEntrypoints
+        )
+        const extensionsPathsToUpdate = this.getDependentExtensionPaths({
+          changedFilePath,
+          extensionsEntrypointsToCheck,
+          alias
+        })
+        if (!extensionsPathsToUpdate.length) {
+          return
+        }
+
+        const extensionsData = await this.buildAndUploadExtension({
+          changedFilePath,
+          extensionsPathsToUpdate,
+          remoteExtensionsByEntrypoints,
+          manifestsByPaths
+        })
+        if (!extensionsData) {
+          this.logger.warn(
+            'Provavelmente aconteceu algum erro no build da extensão pois não foi retornado nenhum dado'
+          )
+          return
+        }
+        await this.sendCodeToQuotiBySocket(extensionsData, sessionId)
+        if (process.env.NODE_ENV === 'test') {
+          watcher.close()
+        }
+      } catch (error) {
+        this.logger.error(error)
       }
     }
   }
