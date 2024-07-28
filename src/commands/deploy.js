@@ -44,62 +44,62 @@ class DeployCommand extends Command {
    * @param {boolean} isVersionTimestamp
    */
   async deployExtension (entryPointPath, promptVersion) {
-    this.logger.info('\n----------------------------------------------')
-    const manifest = utils.getManifestFromEntryPoint(entryPointPath)
-
-    const token = await firebase.auth().currentUser.getIdToken()
-    const remoteExtensionService = new RemoteExtensionService()
-    const [remoteExtension] =
-      await remoteExtensionService.listRemoteExtensionsByUUIDs(
-        [manifest.extensionUUID],
-        credentials.institution,
-        token
-      )
-
-    if (!remoteExtension) {
-      throw new ExtensionNotFoundError(null, {
-        name: manifest.name,
-        orgSlug: credentials.institution
-      })
-    }
-
-    const lastDynamicComponentFile =
-      remoteExtension.DynamicComponentsFiles.find(item => item.activated)
-    const lastVersion = lastDynamicComponentFile?.version
-    this.logger.info(
-      `* Você está realizando deploy de uma nova versão para a extensão "${remoteExtension?.title}"`
-    )
-    if (lastVersion) {
-      this.logger.info(`* Versão atual: ${lastVersion}`)
-    } else {
-      this.logger.info('* Extensão não possui uma versão ativa')
-    }
-
-    this.extensionService = new ExtensionService(manifest)
-
-    if (!manifest.exists()) {
-      this.logger.warning(
-        'Execute "qt link" antes de realizar o deploy da sua extensão'
-      )
-      return
-    }
-
-    let versionName = Date.now()
-    if (promptVersion) {
-      versionName = await this.promptVersionName(lastVersion)
-    }
-    const filename = this.getUploadFileNameDeploy(
-      new Date().getTime().toString(),
-      manifest.type === 'build'
-    )
-    const url = `https://storage.cloud.google.com/dynamic-components/${filename}`
-
-    const remoteExtensionUUID = remoteExtension?.extension_uuid
-    const extensionCode = await this.extensionService.build(entryPointPath, {
-      remoteExtensionUUID
-    })
-    await this.extensionService.upload(extensionCode, filename)
     try {
+      this.logger.info('\n----------------------------------------------')
+      const manifest = utils.getManifestFromEntryPoint(entryPointPath)
+
+      const token = await firebase.auth().currentUser.getIdToken()
+      const remoteExtensionService = new RemoteExtensionService()
+      const [remoteExtension] =
+        await remoteExtensionService.listRemoteExtensionsByUUIDs(
+          [manifest.extensionUUID],
+          credentials.institution,
+          token
+        )
+
+      if (!remoteExtension) {
+        throw new ExtensionNotFoundError(null, {
+          name: manifest.name,
+          orgSlug: credentials.institution
+        })
+      }
+
+      const lastDynamicComponentFile =
+        remoteExtension.DynamicComponentsFiles.find(item => item.activated)
+      const lastVersion = lastDynamicComponentFile?.version
+      this.logger.info(
+        `* Você está realizando deploy de uma nova versão para a extensão "${remoteExtension?.title}"`
+      )
+      if (lastVersion) {
+        this.logger.info(`* Versão atual: ${lastVersion}`)
+      } else {
+        this.logger.info('* Extensão não possui uma versão ativa')
+      }
+
+      this.extensionService = new ExtensionService(manifest)
+
+      if (!manifest.exists()) {
+        this.logger.warning(
+          'Execute "qt link" antes de realizar o deploy da sua extensão'
+        )
+        return
+      }
+
+      let versionName = Date.now()
+      if (promptVersion) {
+        versionName = await this.promptVersionName(lastVersion)
+      }
+      const filename = this.getUploadFileNameDeploy(
+        new Date().getTime().toString(),
+        manifest.type === 'build'
+      )
+      const url = `https://storage.cloud.google.com/dynamic-components/${filename}`
+
+      const remoteExtensionUUID = remoteExtension?.extension_uuid
+      const extensionCode = await this.extensionService.build(entryPointPath, {
+        remoteExtensionUUID
+      })
+      await this.extensionService.upload(extensionCode, filename)
       this.spinner.start('Fazendo deploy...')
       await this.extensionService.deployVersion(
         {
