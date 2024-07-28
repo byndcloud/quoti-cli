@@ -138,10 +138,6 @@ class ExtensionService {
             formats: ['umd']
           },
           minify: isProduction,
-          terserOptions: {
-            compress: isProduction,
-            mangle: isProduction
-          },
           rollupOptions: {
             external: ['vue', 'winston', 'axios', 'vuex'],
             output: {
