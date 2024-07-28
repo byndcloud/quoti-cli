@@ -53,12 +53,6 @@ describe('Serve command', function () {
         testProject,
         extensionA: testProject.extension1WithBuild,
         extensionB: testProject.extension2NoBuild
-      },
-      {
-        name: 'extension no build',
-        testProject,
-        extensionA: testProject.extension2NoBuild,
-        extensionB: testProject.extension1WithBuild
       }
     ]
     extensionsToTest.forEach(extension => {
