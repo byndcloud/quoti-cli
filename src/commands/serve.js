@@ -3,7 +3,7 @@ const path = require('path')
 const chokidar = require('chokidar')
 const dependencyTree = require('dependency-tree')
 
-const { debounce, pickBy } = require('lodash')
+const { pickBy } = require('lodash')
 const Command = require('../base.js')
 
 const credentials = require('../config/credentials')
@@ -92,29 +92,30 @@ class ServeCommand extends Command {
   }
 
   async buildAndUploadExtension ({
-    changedFilePath,
     extensionsPathsToUpdate,
     remoteExtensionsByEntrypoints,
     manifestsByPaths
   }) {
     const extensionsData = await Promise.all(
       extensionsPathsToUpdate.map(async path => {
-        let distPath = path
+        // const distPath = path
         const manifest = manifestsByPaths[path]
         const extensionService = new ExtensionService(manifest)
         const remoteExtensionUUID =
           remoteExtensionsByEntrypoints?.[path]?.extension_uuid
-        if (manifestsByPaths[path].type === 'build') {
-          distPath = await extensionService.build(path, {
-            mode: 'staging',
-            remoteExtensionUUID
-          })
-        }
+        const extensionCode = await extensionService.build(path, {
+          mode: 'development',
+          remoteExtensionUUID
+        })
 
-        const fileBuffer = fs.readFileSync(distPath || changedFilePath)
-        const extensionCode = fileBuffer.toString()
+        // const fileBuffer = fs.readFileSync(distPath || changedFilePath)
+        // const extensionCode = fileBuffer.toString()
         if (this.flags['deploy-develop']) {
-          extensionService.upload(fileBuffer, this.getUploadFileName(manifest))
+          // extensionService.upload(fileBuffer, this.getUploadFileName(manifest))
+          extensionService.upload(
+            extensionCode,
+            this.getUploadFileName(manifest)
+          )
         }
         return {
           extensionInfo: manifestsByPaths[path],
@@ -270,17 +271,16 @@ class ServeCommand extends Command {
       cwd: this.projectRoot,
       ignored: ['node_modules']
     })
-    const debouncedBuild = debounce(
+    watcher.on(
+      'change',
       this.chokidarOnChange(
         sessionId,
         remoteExtensionsByEntrypoints,
         manifestsByEntrypoints,
         alias,
         watcher
-      ),
-      800
+      )
     )
-    watcher.on('change', debouncedBuild)
 
     const watchingChangesMessage = this.args.entryPointPath
       ? `Observando alterações na extensão em ${this.args.entryPointPath}`

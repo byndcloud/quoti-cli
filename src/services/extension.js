@@ -1,7 +1,9 @@
+const { build } = require('vite')
+const vuePlugin = require('@vitejs/plugin-vue2')
+const pugPlugin = require('vite-plugin-pug').default
+const cssPlugin = require('vite-plugin-css-injected-by-js').default
 const { firebase, storage } = require('../config/firebase')
-const path = require('path')
 const ora = require('ora')
-const VueCliService = require('@vue/cli-service')
 const { randomUUID } = require('crypto')
 const api = require('../config/axios')
 const credentials = require('../config/credentials')
@@ -24,7 +26,6 @@ class ExtensionService {
         color: 'yellow'
       }
     )
-    this.vueCliService = new VueCliService(utils.getProjectRootPath())
   }
 
   /**
@@ -100,35 +101,70 @@ class ExtensionService {
     return uuid
   }
 
-  async build (entry, { mode, remoteExtensionUUID } = { mode: 'production' }) {
-    if (!this.manifest.extensionUUID) {
-      if (remoteExtensionUUID) {
-        this.manifest.extensionUUID = remoteExtensionUUID
-        this.manifest.save()
-      } else {
-        await this.createExtensionUUID()
-      }
+  async ensureExtensionUUIDExists (remoteExtensionUUID) {
+    if (this.manifest.extensionUUID) {
+      return
     }
+
+    if (remoteExtensionUUID) {
+      this.manifest.extensionUUID = remoteExtensionUUID
+      this.manifest.save()
+    } else {
+      await this.createExtensionUUID()
+    }
+  }
+
+  async build (entry, { mode = 'production', remoteExtensionUUID } = {}) {
     try {
-      this.vueCliService.init(mode)
-      this.spinner.start(`Fazendo build da extensão ${this.manifest.name} ...`)
-      const dest = `dist/${this.manifest.extensionUUID}`
+      await this.ensureExtensionUUIDExists(remoteExtensionUUID)
+      this.spinner.start(
+        `Fazendo fast build da extensão ${this.manifest.name} ...`
+      )
+      // const dest = `dist/${this.manifest.extensionUUID}`
       const name = `dc_${this.manifest.extensionUUID}`
-      await this.vueCliService.run('build', {
+      const isProduction = mode === 'production'
+      const result = await build({
+        plugins: [vuePlugin(), pugPlugin(), cssPlugin()],
         mode,
-        target: 'lib',
-        formats: 'umd-min',
-        dest,
-        name,
-        entry,
-        'inline-vue': true
+        root: utils.getProjectRootPath(),
+        define: {
+          'process.env': {},
+          'process.argv': {}
+        },
+        build: {
+          outDir: 'dist',
+          lib: {
+            entry,
+            name,
+            formats: ['umd']
+          },
+          minify: isProduction,
+          terserOptions: {
+            compress: isProduction,
+            mangle: isProduction
+          },
+          rollupOptions: {
+            external: ['vue', 'winston', 'axios', 'vuex'],
+            output: {
+              globals: {
+                vue: 'Vue',
+                winston: 'winston',
+                axios: 'axios',
+                vuex: 'Vuex'
+              }
+            }
+          },
+          commonjsOptions: {
+            transformMixedEsModules: true
+          }
+        }
       })
       this.logger.info(`⇨ Extensão: ${this.manifest.name}\n`)
-      this.spinner.succeed('Build finalizado')
-      return path.join(utils.getProjectRootPath(), dest, `${name}.umd.min.js`)
+      this.spinner.succeed('Fast Build finalizado')
+      return result?.[0]?.output?.[0].code
+      // return path.join(utils.getProjectRootPath(), dest, `${name}.umd.min.js`)
     } catch (error) {
-      this.spinner.fail('Erro durante o build')
-      throw error
+      this.spinner.fail('Erro durante o build', error.message)
     }
   }
 }
