@@ -11,7 +11,7 @@
 NODE_ENV=test
 API_BASE_URL=http://localhost:8081/api/v1/
 TEST_BEYOND_CREDENTIALS_PATH=./test/beyondCredentials.json
-TEST_BEYOND_CREDENTIALS={...the credentials JSON goes here (explained bellow)...}
+TEST_BEYOND_CREDENTIALS={...the credentials JSON goes here (explained below)...}
 ```
 
 - Run Quoti API locally
