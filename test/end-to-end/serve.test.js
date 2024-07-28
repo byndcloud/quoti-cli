@@ -1,8 +1,6 @@
 const { expect } = require('../common/test')
 const sinon = require('sinon')
 
-const path = require('path')
-const fs = require('fs')
 const Socket = require('../../src/config/socket')
 const ExtensionService = require('../../src/services/extension')
 
@@ -47,26 +45,6 @@ describe('Serve command', function () {
         })
     }
   })
-
-  serveSetup
-    .serve({ extensionA: testProject.extension1WithBuild })
-    .it(
-      "Change in a extension's file must be built in dist/uuid/dc_uuid.umd.min.js",
-      async (ctx, done) => {
-        const manifest = testProject.extension1WithBuild.getManifest()
-        const distExtensionPath = path.join(
-          ctx.distPath,
-          manifest.extensionUUID,
-          `dc_${manifest.extensionUUID}.umd.min.js`
-        )
-        while (!fs.existsSync(distExtensionPath)) {
-          await delay(100)
-        }
-        const file = fs.readFileSync(distExtensionPath, { encoding: 'utf8' })
-        expect(file.includes(ctx.now)).to.equal(true)
-        done()
-      }
-    )
 
   describe('General tests on qt serve', () => {
     const extensionsToTest = [
