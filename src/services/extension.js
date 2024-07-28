@@ -117,9 +117,7 @@ class ExtensionService {
   async build (entry, { mode = 'production', remoteExtensionUUID } = {}) {
     try {
       await this.ensureExtensionUUIDExists(remoteExtensionUUID)
-      this.spinner.start(
-        `Fazendo fast build da extensão ${this.manifest.name} ...`
-      )
+      this.spinner.start(`Fazendo build da extensão ${this.manifest.name} ...`)
       // const dest = `dist/${this.manifest.extensionUUID}`
       const name = `dc_${this.manifest.extensionUUID}`
       const isProduction = mode === 'production'
@@ -160,7 +158,7 @@ class ExtensionService {
         }
       })
       this.logger.info(`⇨ Extensão: ${this.manifest.name}\n`)
-      this.spinner.succeed('Fast Build finalizado')
+      this.spinner.succeed('Build finalizado')
       return result?.[0]?.output?.[0].code
       // return path.join(utils.getProjectRootPath(), dest, `${name}.umd.min.js`)
     } catch (error) {
