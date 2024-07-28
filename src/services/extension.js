@@ -53,11 +53,11 @@ class ExtensionService {
 
   async upload (extensionCode, remotePath) {
     if (!this.manifest.exists()) {
-      this.logger.warn('Por favor selecione sua extensão. Execute qt link')
+      this.logger.warning('Por favor selecione sua extensão. Execute qt link')
       process.exit(0)
     } else if (!extensionCode) {
-      this.logger.warn('O código da extensão não foi gerado')
-      process.exit(0)
+      this.logger.warning('O código da extensão não foi gerado')
+      throw new Error('O código da extensão não foi gerado')
     }
 
     this.spinner.start(`Fazendo upload da extensão ${this.manifest.name}...`)

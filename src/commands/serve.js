@@ -191,7 +191,7 @@ class ServeCommand extends Command {
           manifestsByPaths
         })
         if (!extensionsData) {
-          this.logger.warn(
+          this.logger.warning(
             'Provavelmente aconteceu algum erro no build da extensão pois não foi retornado nenhum dado'
           )
           return
