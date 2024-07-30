@@ -139,13 +139,24 @@ class ExtensionService {
           },
           minify: isProduction,
           rollupOptions: {
-            external: ['vue', 'winston', 'axios', 'vuex'],
+            external: [
+              'vue',
+              'winston',
+              'axios',
+              'vuex',
+              'firebase/app',
+              'moment',
+              'bluebird'
+            ],
             output: {
               globals: {
                 vue: 'Vue',
                 winston: 'winston',
                 axios: 'axios',
-                vuex: 'Vuex'
+                vuex: 'Vuex',
+                'firebase/app': 'firebaseApp',
+                moment: 'moment',
+                bluebird: 'bluebird'
               }
             }
           },
