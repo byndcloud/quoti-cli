@@ -1,8 +1,8 @@
 {
   "name": "quoti-cli",
   "description": "A Quoti Extensions CLI",
-  "version": "1.1.0-beta",
-  "author": "Nathan @nmf2",
+  "version": "1.1.0",
+  "author": "Beyond Co @byndcloud",
   "preferGlobal": true,
   "bin": {
     "qt": "./bin/run"
@@ -75,7 +75,7 @@
   "engines": {
     "node": ">=20.12.2"
   },
-  "homepage": "https://github.com/nmf2/cliv2",
+  "homepage": "https://docs.quoti.cloud",
   "keywords": [
     "cli-quoti",
     "quoti",
