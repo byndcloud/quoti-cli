@@ -29,7 +29,7 @@ if [ -z $PUBLISH_TAG  ]; then
 else
   # Publish the code to NPM with the tag from the package version
   echo "Publish to specific tag: $PUBLISH_TAG"
-  echo "npm publish --workspace=CLI-deploy --tag $PUBLISH_TAG"
+  npm publish --workspace=CLI-deploy --tag $PUBLISH_TAG
 fi
 
 # Remove the manifest from main and deploy workspaces
