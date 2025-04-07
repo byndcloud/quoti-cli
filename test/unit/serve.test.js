@@ -52,13 +52,13 @@ describe('[getDependentExtensionPath]', function () {
       extensionsPaths
     })
     for (let index = 1; index <= extensionsPaths.length; index++) {
-      const result = serveCommand.getDependentExtensionPath({
+      const result = serveCommand.getDependentExtensionPaths({
         changedFilePath: `extension${index}/App.vue`
       })
       expect(result).to.deep.equal([`/extension${index}/App.vue`])
     }
     for (let index = 1; index <= extensionsPaths.length; index++) {
-      const result = serveCommand.getDependentExtensionPath({
+      const result = serveCommand.getDependentExtensionPaths({
         changedFilePath: `extension${index}/File1.vue`
       })
       expect(result).to.deep.equal([`/extension${index}/App.vue`])

@@ -1,7 +1,7 @@
 <template lang="pug">
-  div 
-    h1 Uma extensão já criada.{{value}} 
-    h1 Uma extensão feita pela org Marketplace1. Date.now() : 1647450202148
+div 
+  h1 Uma extensão já criada.{{value}} 
+  h1 Uma extensão feita pela org Marketplace1. Date.now() : 1647450202148
 </template>
 
 <script>

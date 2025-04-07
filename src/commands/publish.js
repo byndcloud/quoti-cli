@@ -8,7 +8,8 @@ const {
   getManifestFromEntryPoint,
   confirmQuestion,
   validateEntryPointIncludedInPackage,
-  promptExtensionEntryPointsFromUser
+  promptExtensionEntryPointsFromUser,
+  prompt
 } = require('../utils/index')
 const inquirer = require('inquirer')
 const RemoteExtensionService = require('../services/remoteExtension')
@@ -122,7 +123,8 @@ class PublishCommand extends Command {
         dynamicComponentFileActivated.id,
         token,
         manifest,
-        targetVersion
+        targetVersion,
+        dynamicComponentFile.marketplaceExtensionId
       )
     }
   }
@@ -181,8 +183,18 @@ class PublishCommand extends Command {
     dynamicComponentFileId,
     token,
     manifest,
-    targetVersion
+    targetVersion,
+    extensionId
   ) {
+    let orgsToUpdate
+    if (flags.orgs) {
+      const remoteExtensionService = new RemoteExtensionService()
+      const orgs = await remoteExtensionService.getSubscribedOrgs(extensionId)
+      orgsToUpdate = await prompt(
+        'Selecione as organizações que receberão essa atualização',
+        orgs
+      )
+    }
     const confirmed = await confirmQuestion(
       `Deseja publicar uma nova versão "${targetVersion}" para a extensão "${manifest.name}" já publicada no Marketplace? Sim/Não\n`
     )
@@ -194,17 +206,16 @@ class PublishCommand extends Command {
     }
     let versionIncrement
     if (!flags.version) {
-      if (Object.keys(flags).length === 0) {
-        versionIncrement = 'PATCH'
-      } else {
-        versionIncrement = Object.keys(flags)[0].toUpperCase()
-      }
+      const versionIncrementTemp =
+        flags?.patch || flags?.minor || flags?.major || 'PATCH'
+      versionIncrement = versionIncrementTemp.toUpperCase()
     }
     const bodyPublishExtensionVersion = {
       dynamicComponentFileId,
       version: flags.version,
       versionIncrement,
-      manifest: manifest.getManifestToPublish()
+      manifest: manifest.getManifestToPublish(),
+      orgsToUpdate
     }
     try {
       const data = await this.callEndpointPublishExtensionVersion(
@@ -341,6 +352,12 @@ class PublishCommand extends Command {
     major: flags.boolean({
       char: 'M',
       description: 'x.x.x -> x+1.x.x'
+    }),
+
+    orgs: flags.boolean({
+      char: 'o',
+      description:
+        'Publique e instale a extensão apenas em organizações específicas. Ideal para versões em homologação'
     })
   }
 }

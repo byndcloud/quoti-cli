@@ -1,5 +1,6 @@
 const _7z = require('7zip-min')
 const path = require('path')
+const fs = require('fs')
 
 /**
  *
@@ -13,5 +14,7 @@ function compress7z (input, output) {
     }
   })
 }
+
+fs.unlinkSync('./node_modules/quoti-cli')
 
 compress7z(['./node_modules', path.resolve('bin'), 'src'], 'CLI-deploy/qt')

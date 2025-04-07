@@ -6,6 +6,7 @@ console.log('Installing qt command...')
 _7z.unpack(file7zPath, __dirname, err => {
   if (err) {
     console.log(err)
+    return
   }
   console.log('Finished installing qt command.')
 })

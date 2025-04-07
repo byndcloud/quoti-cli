@@ -1,8 +1,8 @@
 <template lang="pug">
-    div
-      MyComponent
-      p {{value}}
-      p atividade desenvolvida Date.now 1647461617555
+div
+  MyComponent
+  p {{value}}
+  p atividade desenvolvida Date.now 1694464558549
 </template>
 
 <script>

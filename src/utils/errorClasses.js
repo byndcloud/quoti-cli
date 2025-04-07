@@ -1,12 +1,15 @@
 const path = require('path')
-class TypedError extends Error {
-  constructor (message, type) {
+const deindent = require('deindent')
+
+class GenericError extends Error {
+  constructor (message, originalError, type) {
     super(message)
+    this.originalError = originalError
     this.type = type
   }
 }
 
-class ExtensionNotFoundError extends TypedError {
+class ExtensionNotFoundError extends GenericError {
   constructor (message, { name, orgSlug } = {}) {
     super(
       message ||
@@ -15,13 +18,13 @@ class ExtensionNotFoundError extends TypedError {
   }
 }
 
-class ExtensionsNotFoundError extends TypedError {
+class ExtensionsNotFoundError extends GenericError {
   constructor (message) {
     super(message || 'Extensões não encontradas', 'extensions-not-found')
   }
 }
 
-class ManifestNotFoundError extends TypedError {
+class ManifestNotFoundError extends GenericError {
   constructor ({ message, manifestPath } = {}) {
     super(
       message ||
@@ -30,7 +33,7 @@ class ManifestNotFoundError extends TypedError {
     )
   }
 }
-class EntryPointNotFoundInPackageError extends TypedError {
+class EntryPointNotFoundInPackageError extends GenericError {
   constructor ({ message, entryPointPath } = {}) {
     super(
       message ||
@@ -39,7 +42,7 @@ class EntryPointNotFoundInPackageError extends TypedError {
   }
 }
 
-class CreateDynamicComponentError extends TypedError {
+class CreateDynamicComponentError extends GenericError {
   constructor ({ message, entryPointPath } = {}) {
     super(
       message ||
@@ -48,7 +51,7 @@ class CreateDynamicComponentError extends TypedError {
   }
 }
 
-class ManifestFromAnotherOrgError extends TypedError {
+class ManifestFromAnotherOrgError extends GenericError {
   constructor ({
     message,
     manifestPath,
@@ -58,7 +61,8 @@ class ManifestFromAnotherOrgError extends TypedError {
     const relativeManifestPath = path.relative('./', manifestPath)
     super(
       message ||
-        `O manifest localizado em (${relativeManifestPath}) está registrado com a organização ${manifestInstitution}, porém você está logado na organização ${credentialsInstitution}. Execute "qt link" ou realize login na organização ${credentialsInstitution}`
+        deindent`O manifest localizado em (${relativeManifestPath}) está registrado com a organização ${manifestInstitution}, porém você está logado na organização ${credentialsInstitution}.
+        Execute "qt link" ou realize login na organização ${manifestInstitution}`
     )
   }
 }
@@ -69,5 +73,6 @@ module.exports = {
   ManifestNotFoundError,
   EntryPointNotFoundInPackageError,
   ManifestFromAnotherOrgError,
-  CreateDynamicComponentError
+  CreateDynamicComponentError,
+  GenericError
 }

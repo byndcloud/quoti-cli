@@ -1,7 +1,5 @@
 const firebase = require('firebase/app')
 require('firebase/auth')
-require('firebase/firestore')
-require('firebase/storage')
 
 const firebaseQuotiConfig = {
   apiKey: 'AIzaSyDiicN8xT3lImJY0hfcobQfRLit90zMw8U',
@@ -31,4 +29,3 @@ exports.appExtension = firebase.initializeApp(
   firebaseExtensionConfig,
   'Extensions'
 )
-exports.storage = this.app.storage('gs://dynamic-components')

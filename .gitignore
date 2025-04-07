@@ -1,6 +1,5 @@
 node_modules
 credentials.json
-manifest.json
 extension
 marketplace
 .env

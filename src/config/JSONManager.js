@@ -42,17 +42,17 @@ class JSONManager {
       throw new Error(`Error reading file ${this.#path}`)
     }
 
-    let manifest
+    let data
     try {
-      manifest = JSON.parse(raw)
+      data = JSON.parse(raw)
     } catch (e) {
       console.error(e)
       throw new Error(`Error parsing file: ${this.#path}`)
     }
 
-    Object.assign(this, manifest)
+    Object.assign(this, data)
 
-    return manifest
+    return data
   }
 
   save (data = {}) {

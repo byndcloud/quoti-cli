@@ -1,12 +1,16 @@
-const { firebase, storage } = require('../config/firebase')
-const path = require('path')
+const { build } = require('vite')
+const vuePlugin = require('@vitejs/plugin-vue2')
+const pugPlugin = require('vite-plugin-pug').default
+const cssPlugin = require('vite-plugin-css-injected-by-js').default
+const { firebase } = require('../config/firebase')
 const ora = require('ora')
-const VueCliService = require('@vue/cli-service')
 const { randomUUID } = require('crypto')
 const api = require('../config/axios')
 const credentials = require('../config/credentials')
 const Logger = require('../config/logger')
 const utils = require('../utils/index')
+const { uploadFile } = require('../utils/files')
+
 class ExtensionService {
   constructor (manifest, { spinnerOptions } = {}) {
     if (!manifest) {
@@ -24,7 +28,6 @@ class ExtensionService {
         color: 'yellow'
       }
     )
-    this.vueCliService = new VueCliService(utils.getProjectRootPath())
   }
 
   /**
@@ -50,32 +53,40 @@ class ExtensionService {
     return true
   }
 
-  async upload (buffer, remotePath) {
+  /**
+   *
+   * @description Uploads a file content to Firebase Storage.
+   * @param {String} extensionCode code of the extension
+   * @param {String} filePath path to file be saved on firebase storage
+   */
+  async upload (extensionCode, filePath) {
     if (!this.manifest.exists()) {
       this.logger.warning('Por favor selecione sua extensão. Execute qt link')
       process.exit(0)
-    } else if (!buffer) {
-      this.logger.error('Buffer é null!')
-      process.exit(0)
+    } else if (!extensionCode) {
+      this.logger.warning('O código da extensão não foi gerado')
+      throw new Error('O código da extensão não foi gerado')
     }
 
     this.spinner.start(`Fazendo upload da extensão ${this.manifest.name}...`)
     try {
-      await storage
-        .ref()
-        .child(remotePath)
-        .put(buffer, {
-          destination: remotePath,
-          gzip: true,
-          metadata: {
-            cacheControl: 'public, max-age=0'
-          }
-        })
+      this.spinner.start(
+        `Fazendo upload da extensão ${this.manifest.name}... ${filePath}`
+      )
+      const { status, data } = await uploadFile({
+        fileContent: extensionCode,
+        filePath
+      })
+
+      if (status !== 200) {
+        this.logger.error('Erro ao fazer upload da extensão', { data })
+        throw new Error('Erro ao fazer upload da extensão')
+      }
       this.spinner.succeed(
         `Upload da extensão ${this.manifest.name} finalizado!`
       )
     } catch (error) {
-      this.spinner.fail('Erro durante o upload')
+      this.spinner.fail('Erro durante o upload', { error })
       throw new Error(error)
     }
   }
@@ -100,36 +111,76 @@ class ExtensionService {
     return uuid
   }
 
-  async build (entry, { mode, remoteExtensionUUID } = { mode: 'production' }) {
-    if (!this.manifest.extensionUUID) {
-      if (remoteExtensionUUID) {
-        this.manifest.extensionUUID = remoteExtensionUUID
-        this.manifest.save()
-      } else {
-        await this.createExtensionUUID()
-      }
+  async ensureExtensionUUIDExists (remoteExtensionUUID) {
+    if (this.manifest.extensionUUID) {
+      return
     }
+
+    if (remoteExtensionUUID) {
+      this.manifest.extensionUUID = remoteExtensionUUID
+      this.manifest.save()
+    } else {
+      await this.createExtensionUUID()
+    }
+  }
+
+  async build (entry, { mode = 'production', remoteExtensionUUID } = {}) {
     try {
-      this.vueCliService.init(mode)
+      await this.ensureExtensionUUIDExists(remoteExtensionUUID)
       this.spinner.start(`Fazendo build da extensão ${this.manifest.name} ...`)
-      const dest = `dist/${this.manifest.extensionUUID}`
+      // const dest = `dist/${this.manifest.extensionUUID}`
       const name = `dc_${this.manifest.extensionUUID}`
-      await this.vueCliService.run('build', {
+      const isProduction = mode === 'production'
+      const result = await build({
+        plugins: [vuePlugin(), pugPlugin(), cssPlugin()],
         mode,
-        modern: true,
-        target: 'lib',
-        formats: 'umd-min',
-        dest,
-        name,
-        entry,
-        'inline-vue': true
+        root: utils.getProjectRootPath(),
+        define: {
+          'process.env': {},
+          'process.argv': {}
+        },
+        build: {
+          outDir: 'dist',
+          lib: {
+            entry,
+            name,
+            formats: ['umd']
+          },
+          minify: isProduction,
+          rollupOptions: {
+            external: [
+              'vue',
+              'winston',
+              'axios',
+              'vuex',
+              'firebase/app',
+              'moment',
+              'bluebird'
+            ],
+            output: {
+              globals: {
+                vue: 'Vue',
+                winston: 'winston',
+                axios: 'axios',
+                vuex: 'Vuex',
+                'firebase/app': 'firebaseApp',
+                moment: 'moment',
+                bluebird: 'bluebird'
+              }
+            }
+          },
+          commonjsOptions: {
+            transformMixedEsModules: true
+          }
+        }
       })
       this.logger.info(`⇨ Extensão: ${this.manifest.name}\n`)
       this.spinner.succeed('Build finalizado')
-      return path.join(utils.getProjectRootPath(), dest, `${name}.umd.min.js`)
+      return result?.[0]?.output?.[0]?.code
+      // return path.join(utils.getProjectRootPath(), dest, `${name}.umd.min.js`)
     } catch (error) {
-      this.spinner.fail('Erro durante o build')
-      throw new Error(error)
+      this.logger.error(error?.message)
+      this.spinner.fail('Erro durante o build: ' + error?.message)
     }
   }
 }

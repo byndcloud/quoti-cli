@@ -44,11 +44,19 @@ async function confirmQuestion (text, defaultValue) {
   return isYes(confirmQuestion)
 }
 
+/**
+ * Returns a the manifest of the extension in the given path
+ * @param {string} entrypointPath
+ * @returns {ManifestServiceType}
+ */
 function getManifestFromEntryPoint (entrypointPath) {
   const manifestPath = path.resolve(
     path.dirname(entrypointPath),
     'manifest.json'
   )
+  /**
+   * @type {ManifestServiceType}
+   */
   const manifest = new ManifestService(manifestPath)
   if (!manifest?.exists()) {
     throw new ManifestNotFoundError({ manifestPath: manifestPath })
@@ -138,6 +146,56 @@ async function promptExtensionEntryPointsFromUser ({
   return entryPointPath || []
 }
 
+/**
+ *
+ * @param {Object} message
+ * @param {Object} data
+ * @param {boolean} [data.multiSelect]
+ * @returns {Promise<string[]>} entryPointsSelected
+ */
+async function prompt (message, choices, { multiSelect = true } = {}) {
+  if (!message) {
+    throw Error('message is required')
+  }
+  if (!choices?.[0]) {
+    throw Error('choices is required and must have more than one item')
+  }
+  let answers
+  const formattedChoices =
+    typeof choices[0] === 'string'
+      ? choices.map(c => {
+        return {
+          name: c,
+          value: c
+        }
+      })
+      : choices
+
+  if (formattedChoices.length > 1) {
+    const { selectedChoice } = await inquirer.prompt([
+      {
+        name: 'selectedChoice',
+        message,
+        type: multiSelect ? 'checkbox' : 'list',
+        validate: input => {
+          if (input?.length === 0) {
+            return 'Você não selecionou nenhuma opção. Utilize a tecla espaço para selecionar a opção desejada. '
+          }
+          return true
+        },
+        choices
+      }
+    ])
+    answers = selectedChoice
+  } else {
+    answers = formattedChoices[0]?.value
+  }
+  if (!Array.isArray(answers) && answers) {
+    return [answers]
+  }
+  return answers || []
+}
+
 function getFrontBaseURL () {
   if (process.env.QUOTI_FRONT_BASE_URL) {
     return process.env.QUOTI_FRONT_BASE_URL
@@ -198,6 +256,10 @@ function unzip (pathIn, pathOut) {
   fs.createReadStream(pathIn).pipe(unzipper.Extract({ path: pathOut }))
 }
 
+function required (param) {
+  throw new Error(`O parâmetro ${param} é obrigatório`)
+}
+
 module.exports = {
   isYes,
   isNo,
@@ -210,5 +272,7 @@ module.exports = {
   promptExtensionEntryPointsFromUser,
   slugify,
   downloadFile,
-  unzip
+  unzip,
+  required,
+  prompt
 }
