@@ -2,13 +2,15 @@ const { build } = require('vite')
 const vuePlugin = require('@vitejs/plugin-vue2')
 const pugPlugin = require('vite-plugin-pug').default
 const cssPlugin = require('vite-plugin-css-injected-by-js').default
-const { firebase, storage } = require('../config/firebase')
+const { firebase } = require('../config/firebase')
 const ora = require('ora')
 const { randomUUID } = require('crypto')
 const api = require('../config/axios')
 const credentials = require('../config/credentials')
 const Logger = require('../config/logger')
 const utils = require('../utils/index')
+const { uploadFile } = require('../utils/files')
+
 class ExtensionService {
   constructor (manifest, { spinnerOptions } = {}) {
     if (!manifest) {
@@ -51,7 +53,13 @@ class ExtensionService {
     return true
   }
 
-  async upload (extensionCode, remotePath) {
+  /**
+   *
+   * @description Uploads a file content to Firebase Storage.
+   * @param {String} extensionCode code of the extension
+   * @param {String} filePath path to file be saved on firebase storage
+   */
+  async upload (extensionCode, filePath) {
     if (!this.manifest.exists()) {
       this.logger.warning('Por favor selecione sua extensão. Execute qt link')
       process.exit(0)
@@ -62,22 +70,23 @@ class ExtensionService {
 
     this.spinner.start(`Fazendo upload da extensão ${this.manifest.name}...`)
     try {
-      const buffer = Buffer.from(extensionCode)
-      await storage
-        .ref()
-        .child(remotePath)
-        .put(buffer, {
-          destination: remotePath,
-          gzip: true,
-          metadata: {
-            cacheControl: 'public, max-age=0'
-          }
-        })
+      this.spinner.start(
+        `Fazendo upload da extensão ${this.manifest.name}... ${filePath}`
+      )
+      const { status, data } = await uploadFile({
+        fileContent: extensionCode,
+        filePath
+      })
+
+      if (status !== 200) {
+        this.logger.error('Erro ao fazer upload da extensão', { data })
+        throw new Error('Erro ao fazer upload da extensão')
+      }
       this.spinner.succeed(
         `Upload da extensão ${this.manifest.name} finalizado!`
       )
     } catch (error) {
-      this.spinner.fail('Erro durante o upload')
+      this.spinner.fail('Erro durante o upload', { error })
       throw new Error(error)
     }
   }
@@ -139,13 +148,24 @@ class ExtensionService {
           },
           minify: isProduction,
           rollupOptions: {
-            external: ['vue', 'winston', 'axios', 'vuex'],
+            external: [
+              'vue',
+              'winston',
+              'axios',
+              'vuex',
+              'firebase/app',
+              'moment',
+              'bluebird'
+            ],
             output: {
               globals: {
                 vue: 'Vue',
                 winston: 'winston',
                 axios: 'axios',
-                vuex: 'Vuex'
+                vuex: 'Vuex',
+                'firebase/app': 'firebaseApp',
+                moment: 'moment',
+                bluebird: 'bluebird'
               }
             }
           },
