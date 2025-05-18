@@ -179,6 +179,8 @@ class ExtensionService {
                 vue: 'Vue',
                 react: 'React',
                 'react-dom': 'ReactDOM',
+                'react/jsx-runtime': 'jsxRuntime',
+                'react/jsx-dev-runtime': 'jsxDevRuntime',
                 winston: 'winston',
                 axios: 'axios',
                 vuex: 'Vuex',
