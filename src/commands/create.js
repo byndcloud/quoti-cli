@@ -49,10 +49,19 @@ class CreateCommand extends Command {
       manifestPath: path.join(extensionDirectory, './manifest.json')
     })
     let entryPointName
-    if (extension.type === 'Com build') {
-      entryPointName = 'index.vue'
-    } else {
-      entryPointName = 'App.vue'
+    const framework = extension.meta?.framework || 'vue' // Default to vue if somehow not set
+    if (framework === 'react') {
+      if (extension.type === 'Com build') {
+        entryPointName = 'index.jsx'
+      } else {
+        entryPointName = 'App.jsx'
+      }
+    } else { // vue or default
+      if (extension.type === 'Com build') {
+        entryPointName = 'index.vue'
+      } else {
+        entryPointName = 'App.vue'
+      }
     }
     const entryPointPath = path.join(extensionDirectory, entryPointName)
     await packageService.addExtensionToPackageJson(
@@ -72,6 +81,8 @@ class CreateCommand extends Command {
     if (isReplaceFile) {
       marketplaceOrganizationService.copyTemplateEntryPointToPath({
         extensionType: extension.type,
+        extensionFramework: framework,
+        entryPointName: entryPointName,
         to: path.join(extensionDirectory, entryPointName)
       })
     }

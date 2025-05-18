@@ -30,11 +30,27 @@ class MarketplaceOrganization {
     this.copyFolderSync(from, to)
   }
 
-  copyTemplateEntryPointToPath ({ extensionType = 'Com build', to } = {}) {
-    const pathAccordingWithBuild =
-      extensionType === 'Com build'
-        ? 'extension-with-build/src/pages/extension2/index.vue'
-        : 'extension-no-build/App.vue'
+  copyTemplateEntryPointToPath ({ extensionType = 'Com build', extensionFramework = 'vue', entryPointName, to } = {}) {
+    let templateSubPath = ''
+    // Determine template path based on framework and type
+    if (extensionFramework === 'react') {
+      if (extensionType === 'Com build') {
+        templateSubPath = 'extension-react-with-build/index.jsx' // Placeholder, adjust to actual template name
+      } else { // Sem build
+        templateSubPath = 'extension-react-no-build/App.jsx' // Placeholder, adjust to actual template name
+      }
+    } else { // vue (default)
+      if (extensionType === 'Com build') {
+        templateSubPath = 'extension-vue-with-build/index.vue' // Placeholder, adjust to actual template name
+      } else { // Sem build
+        templateSubPath = 'extension-vue-no-build/App.vue' // Placeholder, adjust to actual template name
+      }
+    }
+
+    // If entryPointName is provided and matches expected names, it could also be used to infer/confirm the template
+    // For now, templateSubPath directly defines the template file relative to quoti-app-template-main
+
+    const pathAccordingWithBuild = templateSubPath
 
     const from = path.join(
       this.templatePath,
@@ -43,7 +59,11 @@ class MarketplaceOrganization {
     )
 
     if (fs.lstatSync(from).isFile()) {
-      fs.copyFileSync(from, path.join(to))
+      // The 'to' parameter already includes the entryPointName from CreateCommand
+      fs.copyFileSync(from, to)
+    } else {
+      // It might be useful to log an error or throw if the template file is not found
+      console.warn(`Template file not found at: ${from}`)
     }
   }
 
