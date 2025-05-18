@@ -97,6 +97,7 @@ class InitExtensionService {
     manifest.name = dynamicComponent.title
     manifest.extensionUUID = dynamicComponent.extensionUUID
     manifest.institution = credentials.institution
+    manifest.meta = dynamicComponent.meta
     manifest.save()
   }
 
@@ -128,6 +129,7 @@ class InitExtensionService {
     extension.type = await this.promptExtensionType()
     extension.meta.public = await this.promptExtensionIsPublic()
     extension.meta.hasToolbar = await this.promptExtensionIsShowToolbar()
+    extension.meta.framework = await this.promptFramework()
     return extension
   }
 
@@ -193,6 +195,19 @@ class InitExtensionService {
       }
     ])
     return hasToolbar
+  }
+
+  async promptFramework () {
+    const { framework } = await inquirer.prompt([
+      {
+        name: 'framework',
+        message: 'Qual framework você gostaria de usar para esta extensão?',
+        type: 'list',
+        choices: ['vue', 'react'],
+        default: 'vue'
+      }
+    ])
+    return framework
   }
 
   copyTemplateToCWD ({ extensionType }) {
