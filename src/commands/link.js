@@ -23,6 +23,19 @@ class LinkExtensionCommand extends Command {
     super.init({ injectProjectRoot: true })
   }
 
+  returnFramework (filePath) {
+    if (!filePath) {
+      return null
+    }
+    const ext = path.extname(filePath)
+    if (ext === '.vue') {
+      return 'vue'
+    } else if (ext === '.jsx' || ext === '.tsx') {
+      return 'react'
+    }
+    return null
+  }
+
   async run () {
     if (this.args.entryPointPath && !existsSync(this.args.entryPointPath)) {
       throw new Error(
@@ -30,12 +43,13 @@ class LinkExtensionCommand extends Command {
       )
     }
 
+    const framework = this.returnFramework(this.args.entryPointPath)
     if (
-      this.args.entryPointPath &&
-      !this.args.entryPointPath.endsWith('.vue')
+      framework !== 'vue' &&
+      framework !== 'react'
     ) {
       throw new Error(
-        'O arquivo de ponto de entrada de extensão deve ser um arquivo .vue'
+        'O arquivo de ponto de entrada de extensão deve ser um arquivo .vue, .jsx ou .tsx'
       )
     }
 
@@ -110,6 +124,7 @@ class LinkExtensionCommand extends Command {
         path.dirname(absoluteExtensionPath),
         'manifest.json'
       ),
+      meta: { framework },
       extensionData: selectedExtension,
       institution: credentials.institution
     })
@@ -120,7 +135,7 @@ class LinkExtensionCommand extends Command {
     )
   }
 
-  upsertManifest ({ manifestPath, extensionData, institution }) {
+  upsertManifest ({ manifestPath, meta, extensionData, institution }) {
     const manifest = new ManifestService(manifestPath)
 
     manifest.extensionId = extensionData.id
@@ -128,7 +143,7 @@ class LinkExtensionCommand extends Command {
     manifest.type = extensionData.type === 'Com build' ? 'build' : 'noBuild'
     manifest.name = extensionData.title
     manifest.extensionUUID = extensionData.extensionUUID
-    manifest.meta = extensionData.meta
+    manifest.meta = { ...extensionData.meta, ...meta }
     manifest.institution = institution
 
     manifest.save()

@@ -2,6 +2,7 @@ const { build } = require('vite')
 const vuePlugin = require('@vitejs/plugin-vue2')
 const pugPlugin = require('vite-plugin-pug').default
 const cssPlugin = require('vite-plugin-css-injected-by-js').default
+const react = require('@vitejs/plugin-react')
 const { firebase } = require('../config/firebase')
 const ora = require('ora')
 const { randomUUID } = require('crypto')
@@ -126,13 +127,25 @@ class ExtensionService {
 
   async build (entry, { mode = 'production', remoteExtensionUUID } = {}) {
     try {
+      const frameworkType = this.manifest.meta?.framework || 'vue'
+
       await this.ensureExtensionUUIDExists(remoteExtensionUUID)
       this.spinner.start(`Fazendo build da extensão ${this.manifest.name} ...`)
       // const dest = `dist/${this.manifest.extensionUUID}`
       const name = `dc_${this.manifest.extensionUUID}`
       const isProduction = mode === 'production'
+      const vitePlugins = []
+      vitePlugins.push(cssPlugin())
+
+      if (frameworkType === 'react') {
+        vitePlugins.push(react())
+      } else {
+        vitePlugins.push(vuePlugin())
+        vitePlugins.push(pugPlugin())
+      }
+
       const result = await build({
-        plugins: [vuePlugin(), pugPlugin(), cssPlugin()],
+        plugins: vitePlugins,
         mode,
         root: utils.getProjectRootPath(),
         define: {
@@ -150,6 +163,10 @@ class ExtensionService {
           rollupOptions: {
             external: [
               'vue',
+              'react',
+              'react-dom',
+              'react/jsx-runtime',
+              'react/jsx-dev-runtime',
               'winston',
               'axios',
               'vuex',
@@ -160,6 +177,8 @@ class ExtensionService {
             output: {
               globals: {
                 vue: 'Vue',
+                react: 'React',
+                'react-dom': 'ReactDOM',
                 winston: 'winston',
                 axios: 'axios',
                 vuex: 'Vuex',
@@ -177,7 +196,6 @@ class ExtensionService {
       this.logger.info(`⇨ Extensão: ${this.manifest.name}\n`)
       this.spinner.succeed('Build finalizado')
       return result?.[0]?.output?.[0]?.code
-      // return path.join(utils.getProjectRootPath(), dest, `${name}.umd.min.js`)
     } catch (error) {
       this.logger.error(error?.message)
       this.spinner.fail('Erro durante o build: ' + error?.message)

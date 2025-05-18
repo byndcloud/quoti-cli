@@ -244,7 +244,7 @@ class ServeCommand extends Command {
   }
 
   async run () {
-    const filesToWatch = ['*.js', './**/*.vue', './**/*.js']
+    const filesToWatch = ['*.js', './**/*.vue', './**/*.jsx', './**/*.tsx', './**/*.js']
 
     if (this.args.entryPointPath) {
       utils.validateEntryPointIncludedInPackage(
