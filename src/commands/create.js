@@ -26,8 +26,6 @@ class CreateCommand extends Command {
   }
 
   async run () {
-    this.logger.debug('run create command')
-
     // Obter informações da extensão primeiro, pois podemos precisar do nome dela para o diretório
     const [extension] = await Promise.all([
       this.initExtensionService.promptExtensionInfo(),
@@ -62,7 +60,6 @@ class CreateCommand extends Command {
 
     const dynamicComponent =
       await this.initExtensionService.createDynamicComponent(extension)
-    this.logger.debug(`Dynamic component created: ${dynamicComponent}`)
     const manifestPath = path.join(extensionDirectory, './manifest.json')
     this.initExtensionService.initializeManifestFromDynamicComponent({
       dynamicComponent,
