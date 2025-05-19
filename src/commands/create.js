@@ -26,35 +26,55 @@ class CreateCommand extends Command {
   }
 
   async run () {
-    if (!this.args?.extensionDirectory) {
-      return
-    }
-    let basePath = path.join(this.projectRoot, 'src/pages')
-    if (!fs.existsSync(basePath)) {
-      basePath = path.resolve(this.projectRoot)
-    }
+    this.logger.debug('run create command')
 
+    // Obter informações da extensão primeiro, pois podemos precisar do nome dela para o diretório
     const [extension] = await Promise.all([
       this.initExtensionService.promptExtensionInfo(),
-      marketplaceOrganizationService.downloadTemplate()
+      marketplaceOrganizationService.downloadTemplate() // Continua baixando o template geral se necessário
     ])
-    const dynamicComponent =
-      await this.initExtensionService.createDynamicComponent(extension)
-    const extensionDirectory = path.join(basePath, this.args.extensionDirectory)
+
+    let extensionFolderName = this.args.extensionDirectory
+    if (!extensionFolderName) {
+      // Normalizar o nome da extensão para usar como nome da pasta
+      // Ex: "Minha Extensão Top" -> "minha-extensao-top"
+      extensionFolderName = extension.title
+        .toLowerCase()
+        .replace(/\s+/g, '-') // Substitui espaços por hífens
+        .replace(/[^a-z0-9-]/g, '') // Remove caracteres não alfanuméricos exceto hífens
+        .replace(/-+/g, '-') // Substitui múltiplos hífens por um único
+        .trim()
+      if (!extensionFolderName) {
+        this.logger.error('Nome da extensão inválido ou vazio após normalização.')
+        return
+      }
+    }
+
+    const basePath = path.join(this.projectRoot, 'src/pages')
+    const extensionDirectory = path.join(basePath, extensionFolderName)
+
     if (!fs.existsSync(extensionDirectory)) {
       fs.mkdirSync(extensionDirectory, { recursive: true })
+      this.logger.info(`Diretório da extensão criado: ${extensionDirectory}`)
+    } else {
+      this.logger.info(`Diretório da extensão já existe: ${extensionDirectory}`)
     }
+
+    const dynamicComponent =
+      await this.initExtensionService.createDynamicComponent(extension)
+    this.logger.debug(`Dynamic component created: ${dynamicComponent}`)
+    const manifestPath = path.join(extensionDirectory, './manifest.json')
     this.initExtensionService.initializeManifestFromDynamicComponent({
       dynamicComponent,
-      manifestPath: path.join(extensionDirectory, './manifest.json')
+      manifestPath
     })
     let entryPointName
     const framework = extension.meta?.framework || 'vue' // Default to vue if somehow not set
     if (framework === 'react') {
       if (extension.type === 'Com build') {
-        entryPointName = 'index.jsx'
+        entryPointName = 'index.tsx'
       } else {
-        entryPointName = 'App.jsx'
+        entryPointName = 'App.tsx'
       }
     } else { // vue or default
       if (extension.type === 'Com build') {
@@ -79,12 +99,13 @@ class CreateCommand extends Command {
       )
     }
     if (isReplaceFile) {
-      marketplaceOrganizationService.copyTemplateEntryPointToPath({
+      const copyParams = {
         extensionType: extension.type,
         extensionFramework: framework,
         entryPointName: entryPointName,
         to: path.join(extensionDirectory, entryPointName)
-      })
+      }
+      marketplaceOrganizationService.copyTemplateEntryPointToPath(copyParams)
     }
   }
 
@@ -92,9 +113,9 @@ class CreateCommand extends Command {
   static args = [
     {
       name: 'extensionDirectory',
-      required: true,
+      required: false,
       description:
-        'Endereço relativo a pasta ./src/pages onde será salvo sua extensão. Caso não exista a pasta ./src/pages o endereço fica relativo a raiz do projeto'
+        'Nome do diretório para a extensão (opcional). Se não fornecido, será derivado do nome da extensão escolhido no prompt. A extensão será criada em ./src/pages/nome-do-diretorio.'
     }
   ]
 }

@@ -31,39 +31,33 @@ class MarketplaceOrganization {
   }
 
   copyTemplateEntryPointToPath ({ extensionType = 'Com build', extensionFramework = 'vue', entryPointName, to } = {}) {
-    let templateSubPath = ''
-    // Determine template path based on framework and type
+    const { vueContent, reactTsxContent } = require('./extensionTemplates')
+
+    let fileContent = ''
+    let ext = ''
     if (extensionFramework === 'react') {
-      if (extensionType === 'Com build') {
-        templateSubPath = 'extension-react-with-build/index.jsx' // Placeholder, adjust to actual template name
-      } else { // Sem build
-        templateSubPath = 'extension-react-no-build/App.jsx' // Placeholder, adjust to actual template name
-      }
+      fileContent = reactTsxContent
+      ext = '.tsx'
     } else { // vue (default)
-      if (extensionType === 'Com build') {
-        templateSubPath = 'extension-vue-with-build/index.vue' // Placeholder, adjust to actual template name
-      } else { // Sem build
-        templateSubPath = 'extension-vue-no-build/App.vue' // Placeholder, adjust to actual template name
-      }
+      fileContent = vueContent
+      ext = '.vue'
     }
 
-    // If entryPointName is provided and matches expected names, it could also be used to infer/confirm the template
-    // For now, templateSubPath directly defines the template file relative to quoti-app-template-main
+    // Remove any previous extension from 'to' and force the correct one
+    const baseName = path.basename(to, path.extname(to))
+    const dirName = path.dirname(to)
+    const finalPath = path.join(dirName, baseName + ext)
 
-    const pathAccordingWithBuild = templateSubPath
-
-    const from = path.join(
-      this.templatePath,
-      'quoti-app-template-main',
-      pathAccordingWithBuild
-    )
-
-    if (fs.lstatSync(from).isFile()) {
-      // The 'to' parameter already includes the entryPointName from CreateCommand
-      fs.copyFileSync(from, to)
-    } else {
-      // It might be useful to log an error or throw if the template file is not found
-      console.warn(`Template file not found at: ${from}`)
+    try {
+      // Ensure the directory exists
+      if (!fs.existsSync(dirName)) {
+        fs.mkdirSync(dirName, { recursive: true })
+      }
+      fs.writeFileSync(finalPath, fileContent.trimStart())
+    } catch (error) {
+      // It might be useful to use a logger instance here if available
+      console.error(`Error creating file at ${finalPath}:`, error)
+      throw error // Re-throw error to be handled by the caller
     }
   }
 
