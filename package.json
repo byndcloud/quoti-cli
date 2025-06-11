@@ -1,7 +1,7 @@
 {
   "name": "quoti-cli",
   "description": "A Quoti Extensions CLI",
-  "version": "1.2.4",
+  "version": "1.2.10",
   "author": "Beyond Co @byndcloud",
   "preferGlobal": true,
   "bin": {
@@ -38,6 +38,7 @@
     "semver": "^7.3.5",
     "unzipper": "^0.10.11",
     "vite": "~5.3.4",
+    "@vitejs/plugin-react": "^4.4.1",
     "vite-plugin-css-injected-by-js": "~3.5.1",
     "vite-plugin-pug": "~0.3.2",
     "winston": "^3.3.3",
@@ -52,7 +53,6 @@
     "@types/express": "^4.17.11",
     "@types/md5": "^2.3.0",
     "@types/mocha": "^5.2.7",
-    "@vitejs/plugin-react": "^4.4.1",
     "chai": "^4.2.0",
     "eslint": "^8.49.0",
     "eslint-config-standard": "^16.0.3",
