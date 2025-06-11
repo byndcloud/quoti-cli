@@ -16,4 +16,5 @@ CLI-deploy/node_modules
 CLI-deploy/src
 CLI-deploy/qt.7z
 CLI-deploy/README.md
+CLI-deploy/platforms
 oclif.manifest.json
