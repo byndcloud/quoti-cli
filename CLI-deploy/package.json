@@ -2,6 +2,7 @@
   "author": "Nathan @nmf2",
   "name": "quoti-cli",
   "version": "1.2.10",
+  "preferGlobal": true,
   "bin": {
     "qt": "./bin/run"
   },
