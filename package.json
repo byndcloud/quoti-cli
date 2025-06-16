@@ -1,7 +1,7 @@
 {
   "name": "quoti-cli",
   "description": "A Quoti Extensions CLI",
-  "version": "1.2.10",
+  "version": "1.2.11",
   "author": "Beyond Co @byndcloud",
   "dependencies": {
     "@oclif/command": "^1.8.36",
@@ -96,7 +96,7 @@
   "scripts": {
     "test:unit": "NODE_ENV=test nyc mocha --forbid-only --exit \"test/unit/**/*.test.js\"",
     "test:e2e": "NODE_ENV=test bash test.sh",
-    "generate:docs": "oclif-dev manifest && oclif-dev readme",
+    "generate:docs": "npx oclif manifest && npx oclif readme",
     "lint": "eslint --fix -c .eslintrc.json src/**/*.js test/**/*.js",
     "format": "prettier --write src/**/*.js test/**/*.js",
     "build": "node build.js",
