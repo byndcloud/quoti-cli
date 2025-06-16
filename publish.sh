@@ -26,7 +26,7 @@ npm version $VERSION
 if [ -z $PUBLISH_TAG  ]; then
   # Publish the code to NPM with the "latest" tag
   echo "Publish to latest tag $PUBLISH_TAG"
-  echo "npm publish"
+  npm publish
 else
   # Publish the code to NPM with the tag from the package version
   echo "Publish to specific tag: $PUBLISH_TAG"
