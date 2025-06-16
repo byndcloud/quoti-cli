@@ -16,7 +16,7 @@
   "files": [
     "bin",
     "index.js",
-    "qt.7z",
+    "platforms",
     "README.md"
   ],
   "keywords": [
@@ -25,7 +25,7 @@
     "cli",
     "qt"
   ],
-  "license": "“MIT”",
+  "license": "MIT",
   "oclif": {
     "bin": "qt",
     "commands": "./src/commands",
