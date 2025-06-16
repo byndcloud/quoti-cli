@@ -94,7 +94,7 @@ _See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomp
 
 ## `qt create [EXTENSIONDIRECTORY]`
 
-Cria uma extensão vue para seu projeto
+Create a new extension (Vue or React) for your project
 
 ```
 USAGE
@@ -136,7 +136,7 @@ ALIASES
 
 ## `qt db:create [MODELSDIRECTORY]`
 
-Cria todos os modelos presentes na pasta especificada pelo arg modelDirectory
+Create all models present in the directory specified by the modelDirectory argument
 
 ```
 USAGE
@@ -154,7 +154,7 @@ _See code: [src/commands/db/create.js](https://github.com/byndcloud/quoti-cli/bl
 
 ## `qt db:syncFieldTypes`
 
-Sincroniza os tipos de campos disponíveis para databases presentes na organização
+Synchronize available field types for databases in the organization
 
 ```
 USAGE
@@ -168,14 +168,14 @@ _See code: [src/commands/db/syncFieldTypes.js](https://github.com/byndcloud/quot
 
 ## `qt deploy [ENTRYPOINTPATH]`
 
-Realiza deploy da sua extensão para o Quoti
+Deploy your extension to Quoti
 
 ```
 USAGE
   $ qt deploy [ENTRYPOINTPATH] [-a | ] [-av | ] [--org <value>]
 
 ARGUMENTS
-  ENTRYPOINTPATH  Endereço do entry point (arquivo principal) da extensão
+  ENTRYPOINTPATH  Path to the entry point (main file) of the extension
 
 FLAGS
   -a, --all          Realiza deploy de todas as extensões presente na propriedade quoti do package.json
@@ -218,14 +218,14 @@ ALIASES
 
 ## `qt download-current-version [FILEPATH]`
 
-Baixa a versão da extensão ativa
+Download the active version of the extension
 
 ```
 USAGE
   $ qt download-current-version [FILEPATH]
 
 ARGUMENTS
-  FILEPATH  [default: ./src/index.vue] Download current version
+  FILEPATH  [default: ./src/index.vue] Path to download the current version to
 
 DESCRIPTION
   Baixa a versão da extensão ativa
@@ -256,7 +256,7 @@ _See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.2
 
 ## `qt init`
 
-Inicializa um projeto Vue para uma ou mais extensões do Quoti
+Initialize a new project for one or more Quoti extensions with support for Vue and React
 
 ```
 USAGE
@@ -295,14 +295,14 @@ ALIASES
 
 ## `qt link [ENTRYPOINTPATH]`
 
-Faça um link de uma extensão no Quoti com o seu código
+Link a Quoti extension with your local code
 
 ```
 USAGE
   $ qt link [ENTRYPOINTPATH] [-b] [--org <value>]
 
 ARGUMENTS
-  ENTRYPOINTPATH  Endereço do entry point (arquivo principal) da extensão
+  ENTRYPOINTPATH  Path to the entry point (main file) of the extension
 
 FLAGS
   -b, --[no-]build   Use (--build|-b) se você está selecionando uma extensão com build ou use --no-build se você está
@@ -347,7 +347,7 @@ ALIASES
 
 ## `qt login`
 
-Realiza login em uma organização do Quoti
+Log in to a Quoti organization
 
 ```
 USAGE
@@ -380,14 +380,14 @@ _See code: [src/commands/logout.js](https://github.com/byndcloud/quoti-cli/blob/
 
 ## `qt p [ENTRYPOINTPATH]`
 
-Publica uma nova extensão ou atualiza uma extensão já publicada no Marketplace
+Publish a new extension or update an existing extension in the Marketplace
 
 ```
 USAGE
   $ qt p [ENTRYPOINTPATH] [--org <value>] [-v <value>] [-p] [-m] [-M] [-o]
 
 ARGUMENTS
-  ENTRYPOINTPATH  Endereço do entry point (arquivo principal) da extensão
+  ENTRYPOINTPATH  Path to the entry point (main file) of the extension
 
 FLAGS
   -M, --major            x.x.x -> x+1.x.x
@@ -460,14 +460,14 @@ ALIASES
 
 ## `qt serve [ENTRYPOINTPATH]`
 
-Observa mudanças no código local e as envia para o ambiente de desenvolvimento do Quoti
+Watch for changes in local code and send them to the Quoti development environment
 
 ```
 USAGE
   $ qt serve [ENTRYPOINTPATH] [--deploy-develop] [--new-session] [--org <value>]
 
 ARGUMENTS
-  ENTRYPOINTPATH  Endereço do entry point (arquivo principal) da extensão
+  ENTRYPOINTPATH  Path to the entry point (main file) of the extension
 
 FLAGS
   --deploy-develop  Indica se devemos salvar o build da extensão de develop no banco de dados da Beyond Company
