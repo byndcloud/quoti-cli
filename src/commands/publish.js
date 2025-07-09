@@ -4,6 +4,7 @@ const { flags } = require('@oclif/command')
 const api = require('../config/axios')
 const { firebase } = require('../config/firebase')
 const semver = require('semver')
+const { getOrgsLegisErp } = require('../utils/legis-erp.js')
 const {
   getManifestFromEntryPoint,
   confirmQuestion,
@@ -187,9 +188,16 @@ class PublishCommand extends Command {
     extensionId
   ) {
     let orgsToUpdate
-    if (flags.orgs) {
+    if (flags['orgs-to-update']) {
       const remoteExtensionService = new RemoteExtensionService()
       const orgs = await remoteExtensionService.getSubscribedOrgs(extensionId)
+      orgsToUpdate = await prompt(
+        'Selecione as organizações que receberão essa atualização',
+        orgs
+      )
+    }
+    if (flags.project === 'legis-erp') {
+      const orgs = await getOrgsLegisErp(token)
       orgsToUpdate = await prompt(
         'Selecione as organizações que receberão essa atualização',
         orgs
@@ -260,8 +268,12 @@ class PublishCommand extends Command {
     }
   }
 
-  commandSintaxeValid (flags) {
-    return Object.keys(flags).length < 2
+  commandSintaxeValid (flags = []) {
+    return (
+      Object.keys(flags)?.filter(flag =>
+        ['minor', 'patch', 'major'].includes(flag)
+      )?.length < 2
+    )
   }
 
   async validateVersionSemantics ({ targetVersion, lastVersion }) {
@@ -354,10 +366,14 @@ class PublishCommand extends Command {
       description: 'x.x.x -> x+1.x.x'
     }),
 
-    orgs: flags.boolean({
-      char: 'o',
+    'orgs-to-update': flags.boolean({
       description:
         'Publique e instale a extensão apenas em organizações específicas. Ideal para versões em homologação'
+    }),
+
+    project: flags.string({
+      description:
+        'Publique e instale a extensão em orgs de um projeto. Ideal para versões em homologação. Por enquanto, o único valor permitido é "legis-erp"'
     })
   }
 }
