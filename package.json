@@ -1,7 +1,7 @@
 {
   "name": "quoti-cli",
   "description": "A Quoti Extensions CLI",
-  "version": "1.2.11",
+  "version": "1.2.12",
   "author": "Beyond Co @byndcloud",
   "dependencies": {
     "@oclif/command": "^1.8.36",
