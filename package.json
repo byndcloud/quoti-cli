@@ -1,15 +1,8 @@
 {
   "name": "quoti-cli",
   "description": "A Quoti Extensions CLI",
-  "version": "1.2.4",
+  "version": "1.2.11",
   "author": "Beyond Co @byndcloud",
-  "preferGlobal": true,
-  "bin": {
-    "qt": "./bin/run"
-  },
-  "workspaces": [
-    "CLI-deploy"
-  ],
   "dependencies": {
     "@oclif/command": "^1.8.36",
     "@oclif/config": "^1.17.0",
@@ -38,6 +31,7 @@
     "semver": "^7.3.5",
     "unzipper": "^0.10.11",
     "vite": "~5.3.4",
+    "@vitejs/plugin-react": "^4.4.1",
     "vite-plugin-css-injected-by-js": "~3.5.1",
     "vite-plugin-pug": "~0.3.2",
     "winston": "^3.3.3",
@@ -103,13 +97,12 @@
   "scripts": {
     "test:unit": "NODE_ENV=test nyc mocha --forbid-only --exit \"test/unit/**/*.test.js\"",
     "test:e2e": "NODE_ENV=test bash test.sh",
-    "generate:docs": "oclif-dev manifest && oclif-dev readme",
+    "generate:docs": "npx oclif manifest && npx oclif readme",
     "lint": "eslint --fix -c .eslintrc.json src/**/*.js test/**/*.js",
     "format": "prettier --write src/**/*.js test/**/*.js",
     "build": "node build.js",
     "preversion": "if [ -z $SKIP_TESTS ]; then npm run test:e2e; fi;",
     "publish": "./publish.sh",
-    "prepare": "husky install",
     "install-npm": "npm i -g npm@10"
   },
   "lint-staged": {

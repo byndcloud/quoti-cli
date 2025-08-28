@@ -1,7 +1,8 @@
 {
   "author": "Nathan @nmf2",
   "name": "quoti-cli",
-  "version": "1.2.4",
+  "version": "1.2.11",
+  "preferGlobal": true,
   "bin": {
     "qt": "./bin/run"
   },
@@ -15,7 +16,7 @@
   "files": [
     "bin",
     "index.js",
-    "qt.7z",
+    "platforms",
     "README.md"
   ],
   "keywords": [
@@ -24,7 +25,7 @@
     "cli",
     "qt"
   ],
-  "license": "“MIT”",
+  "license": "MIT",
   "oclif": {
     "bin": "qt",
     "commands": "./src/commands",

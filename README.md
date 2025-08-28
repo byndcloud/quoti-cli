@@ -3,8 +3,10 @@
 A powerful CLI tool for creating, developing, and managing Quoti Extensions with support for Vue and React frameworks.
 
 <!-- toc -->
-* [Usage](#usage)
+* [Quoti CLI](#quoti-cli)
 * [Commands](#commands)
+* [Create a Vue extension (default)](#create-a-vue-extension-default)
+* [Create a React extension](#create-a-react-extension)
 <!-- tocstop -->
 ## Overview
 
@@ -31,8 +33,8 @@ $ npm install -g quoti-cli
 $ npm install -g quoti-cli
 $ qt COMMAND
 running command...
-$ qt (-v|--version|version)
-quoti-cli/1.2.0 darwin-arm64 node-v20.16.0
+$ qt (--version)
+quoti-cli/1.2.11 darwin-arm64 node-v20.12.2
 $ qt --help [COMMAND]
 USAGE
   $ qt COMMAND
@@ -42,17 +44,23 @@ USAGE
 # Commands
 <!-- commands -->
 * [`qt autocomplete [SHELL]`](#qt-autocomplete-shell)
-* [`qt create EXTENSIONDIRECTORY`](#qt-create-extensiondirectory)
+* [`qt create [EXTENSIONDIRECTORY]`](#qt-create-extensiondirectory)
+* [`qt d [ENTRYPOINTPATH]`](#qt-d-entrypointpath)
 * [`qt db:create [MODELSDIRECTORY]`](#qt-dbcreate-modelsdirectory)
 * [`qt db:syncFieldTypes`](#qt-dbsyncfieldtypes)
 * [`qt deploy [ENTRYPOINTPATH]`](#qt-deploy-entrypointpath)
+* [`qt dev [ENTRYPOINTPATH]`](#qt-dev-entrypointpath)
 * [`qt download-current-version [FILEPATH]`](#qt-download-current-version-filepath)
-* [`qt help [COMMAND]`](#qt-help-command)
+* [`qt help [COMMANDS]`](#qt-help-commands)
 * [`qt init`](#qt-init)
+* [`qt l [ENTRYPOINTPATH]`](#qt-l-entrypointpath)
 * [`qt link [ENTRYPOINTPATH]`](#qt-link-entrypointpath)
+* [`qt link-extension [ENTRYPOINTPATH]`](#qt-link-extension-entrypointpath)
 * [`qt login`](#qt-login)
 * [`qt logout`](#qt-logout)
+* [`qt p [ENTRYPOINTPATH]`](#qt-p-entrypointpath)
 * [`qt publish [ENTRYPOINTPATH]`](#qt-publish-entrypointpath)
+* [`qt s [ENTRYPOINTPATH]`](#qt-s-entrypointpath)
 * [`qt serve [ENTRYPOINTPATH]`](#qt-serve-entrypointpath)
 
 ## `qt autocomplete [SHELL]`
@@ -61,44 +69,70 @@ display autocomplete installation instructions
 
 ```
 USAGE
-  $ qt autocomplete [SHELL]
+  $ qt autocomplete [SHELL] [-r]
 
 ARGUMENTS
   SHELL  shell type
 
-OPTIONS
+FLAGS
   -r, --refresh-cache  Refresh cache (ignores displaying instructions)
+
+DESCRIPTION
+  display autocomplete installation instructions
 
 EXAMPLES
   $ qt autocomplete
+
   $ qt autocomplete bash
+
   $ qt autocomplete zsh
+
   $ qt autocomplete --refresh-cache
 ```
 
-_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v1.3.0/src/commands/autocomplete/index.ts)_
+_See code: [@oclif/plugin-autocomplete](https://github.com/oclif/plugin-autocomplete/blob/v1.4.6/src/commands/autocomplete/index.ts)_
 
-## `qt create EXTENSIONDIRECTORY`
+## `qt create [EXTENSIONDIRECTORY]`
 
 Create a new extension (Vue or React) for your project
 
 ```
 USAGE
-  $ qt create EXTENSIONDIRECTORY
+  $ qt create [EXTENSIONDIRECTORY]
 
 ARGUMENTS
-  EXTENSIONDIRECTORY  Relative path to the ./src/pages directory where your extension will be saved. If the ./src/pages
-                      directory doesn't exist, the path will be relative to the project root
+  EXTENSIONDIRECTORY  Nome do diretório para a extensão (opcional). Se não fornecido, será derivado do nome da extensão
+                      escolhido no prompt. A extensão será criada em ./src/pages/nome-do-diretorio.
 
-OPTIONS
-  --framework=vue|react  Framework to use for the extension (defaults to Vue if not specified)
-
-EXAMPLES
-  $ qt create my-extension
-  $ qt create my-extension --framework=react
+DESCRIPTION
+  Cria uma extensão vue para seu projeto
 ```
 
-_See code: [src/commands/create.js](https://github.com/byndcloud/quoti-cli/blob/v1.1.0/src/commands/create.js)_
+_See code: [src/commands/create.js](https://github.com/byndcloud/quoti-cli/blob/v1.2.11/src/commands/create.js)_
+
+## `qt d [ENTRYPOINTPATH]`
+
+Realiza deploy da sua extensão para o Quoti
+
+```
+USAGE
+  $ qt d [ENTRYPOINTPATH] [-a | ] [-av | ] [--org <value>]
+
+ARGUMENTS
+  ENTRYPOINTPATH  Endereço do entry point (arquivo principal) da extensão
+
+FLAGS
+  -a, --all          Realiza deploy de todas as extensões presente na propriedade quoti do package.json
+  -a, --ask-version  Permite selecionar uma versão para o deploy quando a flag --all for passada também. Por padrão, um
+                     timestamp será usado para identificar a versão.
+      --org=<value>  Slug da organização
+
+DESCRIPTION
+  Realiza deploy da sua extensão para o Quoti
+
+ALIASES
+  $ qt d
+```
 
 ## `qt db:create [MODELSDIRECTORY]`
 
@@ -109,11 +143,14 @@ USAGE
   $ qt db:create [MODELSDIRECTORY]
 
 ARGUMENTS
-  MODELSDIRECTORY  [default: ./src/models] Directory where your models are located. (Path relative to the
-                   ./src/pages directory. If ./src/pages doesn't exist, the path will be relative to the project root)
+  MODELSDIRECTORY  [default: ./src/models] Endereço onde será salvo sua extensão. (Endereço relativo a pasta
+                   ./src/pages. Caso ./src/pages não exista o endereço fica relativo a raiz do projeto)
+
+DESCRIPTION
+  Cria todos os modelos presentes na pasta especificada pelo arg modelDirectory
 ```
 
-_See code: [src/commands/db/create.js](https://github.com/byndcloud/quoti-cli/blob/v1.1.0/src/commands/db/create.js)_
+_See code: [src/commands/db/create.js](https://github.com/byndcloud/quoti-cli/blob/v1.2.11/src/commands/db/create.js)_
 
 ## `qt db:syncFieldTypes`
 
@@ -122,9 +159,12 @@ Synchronize available field types for databases in the organization
 ```
 USAGE
   $ qt db:syncFieldTypes
+
+DESCRIPTION
+  Sincroniza os tipos de campos disponíveis para databases presentes na organização
 ```
 
-_See code: [src/commands/db/syncFieldTypes.js](https://github.com/byndcloud/quoti-cli/blob/v1.1.0/src/commands/db/syncFieldTypes.js)_
+_See code: [src/commands/db/syncFieldTypes.js](https://github.com/byndcloud/quoti-cli/blob/v1.2.11/src/commands/db/syncFieldTypes.js)_
 
 ## `qt deploy [ENTRYPOINTPATH]`
 
@@ -132,24 +172,49 @@ Deploy your extension to Quoti
 
 ```
 USAGE
-  $ qt deploy [ENTRYPOINTPATH]
+  $ qt deploy [ENTRYPOINTPATH] [-a | ] [-av | ] [--org <value>]
 
 ARGUMENTS
   ENTRYPOINTPATH  Path to the entry point (main file) of the extension
 
-OPTIONS
-  -a, --all          Deploy all extensions listed in the quoti property of package.json
+FLAGS
+  -a, --all          Realiza deploy de todas as extensões presente na propriedade quoti do package.json
+  -a, --ask-version  Permite selecionar uma versão para o deploy quando a flag --all for passada também. Por padrão, um
+                     timestamp será usado para identificar a versão.
+      --org=<value>  Slug da organização
 
-  -a, --ask-version  Allow selecting a version for deployment when the --all flag is also passed. By default,
-                     a timestamp will be used to identify the version
-
-  --org=org          Organization slug
+DESCRIPTION
+  Realiza deploy da sua extensão para o Quoti
 
 ALIASES
   $ qt d
 ```
 
-_See code: [src/commands/deploy.js](https://github.com/byndcloud/quoti-cli/blob/v1.1.0/src/commands/deploy.js)_
+_See code: [src/commands/deploy.js](https://github.com/byndcloud/quoti-cli/blob/v1.2.11/src/commands/deploy.js)_
+
+## `qt dev [ENTRYPOINTPATH]`
+
+Observa mudanças no código local e as envia para o ambiente de desenvolvimento do Quoti
+
+```
+USAGE
+  $ qt dev [ENTRYPOINTPATH] [--deploy-develop] [--new-session] [--org <value>]
+
+ARGUMENTS
+  ENTRYPOINTPATH  Endereço do entry point (arquivo principal) da extensão
+
+FLAGS
+  --deploy-develop  Indica se devemos salvar o build da extensão de develop no banco de dados da Beyond Company
+  --new-session     Força a criação de um novo devSessionId
+  --org=<value>     Slug da organização
+
+DESCRIPTION
+  Observa mudanças no código local e as envia para o ambiente de desenvolvimento do Quoti
+
+ALIASES
+  $ qt s
+  $ qt dev
+```
 
 ## `qt download-current-version [FILEPATH]`
 
@@ -163,27 +228,31 @@ ARGUMENTS
   FILEPATH  [default: ./src/index.vue] Path to download the current version to
 
 DESCRIPTION
-  Downloads the currently active version of your extension from Quoti to your local environment
+  Baixa a versão da extensão ativa
+  ...
 ```
 
-_See code: [src/commands/download-current-version.js](https://github.com/byndcloud/quoti-cli/blob/v1.1.0/src/commands/download-current-version.js)_
+_See code: [src/commands/download-current-version.js](https://github.com/byndcloud/quoti-cli/blob/v1.2.11/src/commands/download-current-version.js)_
 
-## `qt help [COMMAND]`
+## `qt help [COMMANDS]`
 
-display help for qt
+Display help for qt.
 
 ```
 USAGE
-  $ qt help [COMMAND]
+  $ qt help [COMMANDS...] [-n]
 
 ARGUMENTS
-  COMMAND  command to show help for
+  COMMANDS...  Command to show help for.
 
-OPTIONS
-  --all  see all commands in CLI
+FLAGS
+  -n, --nested-commands  Include all nested commands in the output.
+
+DESCRIPTION
+  Display help for qt.
 ```
 
-_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v3.2.18/src/commands/help.ts)_
+_See code: [@oclif/plugin-help](https://github.com/oclif/plugin-help/blob/v5.2.20/src/commands/help.ts)_
 
 ## `qt init`
 
@@ -193,32 +262,30 @@ Initialize a new project for one or more Quoti extensions with support for Vue a
 USAGE
   $ qt init
 
-OPTIONS
-  --framework=vue|react  Set the default framework for the project (defaults to Vue if not specified)
-
 DESCRIPTION
-  Initializes a new project for Quoti extensions with all necessary configurations and dependencies.
-  You can choose between Vue and React frameworks for your extensions.
+  Inicializa um projeto Vue para uma ou mais extensões do Quoti
 ```
 
-_See code: [src/commands/init.js](https://github.com/byndcloud/quoti-cli/blob/v1.1.0/src/commands/init.js)_
+_See code: [src/commands/init.js](https://github.com/byndcloud/quoti-cli/blob/v1.2.11/src/commands/init.js)_
 
-## `qt link [ENTRYPOINTPATH]`
+## `qt l [ENTRYPOINTPATH]`
 
-Link a Quoti extension with your local code
+Faça um link de uma extensão no Quoti com o seu código
 
 ```
 USAGE
-  $ qt link [ENTRYPOINTPATH]
+  $ qt l [ENTRYPOINTPATH] [-b] [--org <value>]
 
 ARGUMENTS
-  ENTRYPOINTPATH  Path to the entry point (main file) of the extension
+  ENTRYPOINTPATH  Endereço do entry point (arquivo principal) da extensão
 
-OPTIONS
-  -b, --[no-]build  Use (--build|-b) if you are selecting an extension with build or use --no-build if you are
-                    selecting an extension without build
+FLAGS
+  -b, --[no-]build   Use (--build|-b) se você está selecionando uma extensão com build ou use --no-build se você está
+                     selecionando uma extensão sem build
+      --org=<value>  Slug da organização
 
-  --org=org         Organization slug
+DESCRIPTION
+  Faça um link de uma extensão no Quoti com o seu código
 
 ALIASES
   $ qt l
@@ -226,7 +293,57 @@ ALIASES
   $ qt link
 ```
 
-_See code: [src/commands/link.js](https://github.com/byndcloud/quoti-cli/blob/v1.1.0/src/commands/link.js)_
+## `qt link [ENTRYPOINTPATH]`
+
+Link a Quoti extension with your local code
+
+```
+USAGE
+  $ qt link [ENTRYPOINTPATH] [-b] [--org <value>]
+
+ARGUMENTS
+  ENTRYPOINTPATH  Path to the entry point (main file) of the extension
+
+FLAGS
+  -b, --[no-]build   Use (--build|-b) se você está selecionando uma extensão com build ou use --no-build se você está
+                     selecionando uma extensão sem build
+      --org=<value>  Slug da organização
+
+DESCRIPTION
+  Faça um link de uma extensão no Quoti com o seu código
+
+ALIASES
+  $ qt l
+  $ qt link-extension
+  $ qt link
+```
+
+_See code: [src/commands/link.js](https://github.com/byndcloud/quoti-cli/blob/v1.2.11/src/commands/link.js)_
+
+## `qt link-extension [ENTRYPOINTPATH]`
+
+Faça um link de uma extensão no Quoti com o seu código
+
+```
+USAGE
+  $ qt link-extension [ENTRYPOINTPATH] [-b] [--org <value>]
+
+ARGUMENTS
+  ENTRYPOINTPATH  Endereço do entry point (arquivo principal) da extensão
+
+FLAGS
+  -b, --[no-]build   Use (--build|-b) se você está selecionando uma extensão com build ou use --no-build se você está
+                     selecionando uma extensão sem build
+      --org=<value>  Slug da organização
+
+DESCRIPTION
+  Faça um link de uma extensão no Quoti com o seu código
+
+ALIASES
+  $ qt l
+  $ qt link-extension
+  $ qt link
+```
 
 ## `qt login`
 
@@ -234,15 +351,18 @@ Log in to a Quoti organization
 
 ```
 USAGE
-  $ qt login
+  $ qt login [-f] [--org <value>] [--local]
 
-OPTIONS
-  -f, --force  Force login to a new account
-  --local      Use local credentials (relative to the current directory)
-  --org=org    Organization slug (multiple authentication)
+FLAGS
+  -f, --force        Força o login em uma nova conta
+      --local        Utiliza credenciais locais (relativas ao diretório atual)
+      --org=<value>  Slug da organização (multipla autenticação)
+
+DESCRIPTION
+  Realiza login em uma organização do Quoti
 ```
 
-_See code: [src/commands/login.js](https://github.com/byndcloud/quoti-cli/blob/v1.1.0/src/commands/login.js)_
+_See code: [src/commands/login.js](https://github.com/byndcloud/quoti-cli/blob/v1.2.11/src/commands/login.js)_
 
 ## `qt logout`
 
@@ -251,38 +371,92 @@ Logout from the current organization
 ```
 USAGE
   $ qt logout
+
+DESCRIPTION
+  Logout from the current organization
 ```
 
-_See code: [src/commands/logout.js](https://github.com/byndcloud/quoti-cli/blob/v1.1.0/src/commands/logout.js)_
+_See code: [src/commands/logout.js](https://github.com/byndcloud/quoti-cli/blob/v1.2.11/src/commands/logout.js)_
 
-## `qt publish [ENTRYPOINTPATH]`
+## `qt p [ENTRYPOINTPATH]`
 
 Publish a new extension or update an existing extension in the Marketplace
 
 ```
 USAGE
-  $ qt publish [ENTRYPOINTPATH]
+  $ qt p [ENTRYPOINTPATH] [--org <value>] [-v <value>] [-p] [-m] [-M] [-o]
 
 ARGUMENTS
   ENTRYPOINTPATH  Path to the entry point (main file) of the extension
 
-OPTIONS
+FLAGS
   -M, --major            x.x.x -> x+1.x.x
   -m, --minor            x.x.x -> x.x+1.x
-
-  -o, --orgs             Publish and install the extension only in specific organizations. Ideal for staging versions
-
+  -o, --orgs             Publique e instale a extensão apenas em organizações específicas. Ideal para versões em
+                         homologação
   -p, --patch            x.x.x -> x.x.x+1
+  -v, --version=<value>  Versão da extensão
+      --org=<value>      Slug da organização
 
-  -v, --version=version  Extension version
-
-  --org=org              Organization slug
+DESCRIPTION
+  Publica uma nova extensão ou atualiza uma extensão já publicada no Marketplace
 
 ALIASES
   $ qt p
 ```
 
-_See code: [src/commands/publish.js](https://github.com/byndcloud/quoti-cli/blob/v1.1.0/src/commands/publish.js)_
+## `qt publish [ENTRYPOINTPATH]`
+
+Publica uma nova extensão ou atualiza uma extensão já publicada no Marketplace
+
+```
+USAGE
+  $ qt publish [ENTRYPOINTPATH] [--org <value>] [-v <value>] [-p] [-m] [-M] [-o]
+
+ARGUMENTS
+  ENTRYPOINTPATH  Endereço do entry point (arquivo principal) da extensão
+
+FLAGS
+  -M, --major            x.x.x -> x+1.x.x
+  -m, --minor            x.x.x -> x.x+1.x
+  -o, --orgs             Publique e instale a extensão apenas em organizações específicas. Ideal para versões em
+                         homologação
+  -p, --patch            x.x.x -> x.x.x+1
+  -v, --version=<value>  Versão da extensão
+      --org=<value>      Slug da organização
+
+DESCRIPTION
+  Publica uma nova extensão ou atualiza uma extensão já publicada no Marketplace
+
+ALIASES
+  $ qt p
+```
+
+_See code: [src/commands/publish.js](https://github.com/byndcloud/quoti-cli/blob/v1.2.11/src/commands/publish.js)_
+
+## `qt s [ENTRYPOINTPATH]`
+
+Observa mudanças no código local e as envia para o ambiente de desenvolvimento do Quoti
+
+```
+USAGE
+  $ qt s [ENTRYPOINTPATH] [--deploy-develop] [--new-session] [--org <value>]
+
+ARGUMENTS
+  ENTRYPOINTPATH  Endereço do entry point (arquivo principal) da extensão
+
+FLAGS
+  --deploy-develop  Indica se devemos salvar o build da extensão de develop no banco de dados da Beyond Company
+  --new-session     Força a criação de um novo devSessionId
+  --org=<value>     Slug da organização
+
+DESCRIPTION
+  Observa mudanças no código local e as envia para o ambiente de desenvolvimento do Quoti
+
+ALIASES
+  $ qt s
+  $ qt dev
+```
 
 ## `qt serve [ENTRYPOINTPATH]`
 
@@ -290,22 +464,25 @@ Watch for changes in local code and send them to the Quoti development environme
 
 ```
 USAGE
-  $ qt serve [ENTRYPOINTPATH]
+  $ qt serve [ENTRYPOINTPATH] [--deploy-develop] [--new-session] [--org <value>]
 
 ARGUMENTS
   ENTRYPOINTPATH  Path to the entry point (main file) of the extension
 
-OPTIONS
-  --deploy-develop  Indicates whether to save the development build of the extension in the Beyond Company database
-  --new-session     Force the creation of a new devSessionId
-  --org=org         Organization slug
+FLAGS
+  --deploy-develop  Indica se devemos salvar o build da extensão de develop no banco de dados da Beyond Company
+  --new-session     Força a criação de um novo devSessionId
+  --org=<value>     Slug da organização
+
+DESCRIPTION
+  Observa mudanças no código local e as envia para o ambiente de desenvolvimento do Quoti
 
 ALIASES
   $ qt s
   $ qt dev
 ```
 
-_See code: [src/commands/serve.js](https://github.com/byndcloud/quoti-cli/blob/v1.1.0/src/commands/serve.js)_
+_See code: [src/commands/serve.js](https://github.com/byndcloud/quoti-cli/blob/v1.2.11/src/commands/serve.js)_
 <!-- commandsstop -->
 
 ## Getting Started
