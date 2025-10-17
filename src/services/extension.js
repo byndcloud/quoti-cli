@@ -11,6 +11,8 @@ const credentials = require('../config/credentials')
 const Logger = require('../config/logger')
 const utils = require('../utils/index')
 const { uploadFile } = require('../utils/files')
+const fs = require('fs')
+const path = require('path')
 
 class ExtensionService {
   constructor (manifest, { spinnerOptions } = {}) {
@@ -125,6 +127,24 @@ class ExtensionService {
     }
   }
 
+  getVuetifySassImports (isSass = true) {
+    const projectRoot = utils.getProjectRootPath()
+
+    // Tenta encontrar o Vuetify no node_modules do projeto
+    const vuetifyPaths = [
+      path.join(projectRoot, 'node_modules/vuetify/src/styles/styles.sass'),
+      path.join(projectRoot, '../node_modules/vuetify/src/styles/styles.sass'),
+      path.join(projectRoot, '../../node_modules/vuetify/src/styles/styles.sass')
+    ]
+
+    for (const vuetifyPath of vuetifyPaths) {
+      if (fs.existsSync(vuetifyPath)) {
+        const importPath = vuetifyPath.replace(/\\/g, '/')
+        return isSass ? `@import '${importPath}'\n` : `@import '${importPath}';\n`
+      }
+    }
+  }
+
   async build (entry, { mode = 'production', remoteExtensionUUID } = {}) {
     try {
       const frameworkType = this.manifest.meta?.framework || 'vue'
@@ -151,6 +171,16 @@ class ExtensionService {
         define: {
           'process.env': {},
           'process.argv': {}
+        },
+        css: {
+          preprocessorOptions: {
+            sass: {
+              additionalData: this.getVuetifySassImports(true)
+            },
+            scss: {
+              additionalData: this.getVuetifySassImports(false)
+            }
+          }
         },
         build: {
           outDir: 'dist',
