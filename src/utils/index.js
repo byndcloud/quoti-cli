@@ -205,7 +205,7 @@ function getFrontBaseURL () {
     return 'http://localhost:8080'
   }
 
-  return 'https://quoti.cloud'
+  return 'https://uniambiente.inea.rj.gov.br'
 }
 
 function slugify (str, separator = '-') {

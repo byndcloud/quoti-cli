@@ -93,7 +93,9 @@ class DeployCommand extends Command {
         new Date().getTime().toString(),
         manifest.type === 'build'
       )
-      const url = `https://storage.cloud.google.com/dynamic-components/${filename}`
+      // Use MinIO instead of Google Cloud Storage
+      const { MINIO_BASE_URL } = require('../services/minio')
+      const url = `${MINIO_BASE_URL}/dynamic-components/${filename}`
 
       const remoteExtensionUUID = remoteExtension?.extension_uuid
       const extensionCode = await this.extensionService.build(entryPointPath, {

@@ -10,7 +10,7 @@ const api = require('../config/axios')
 const credentials = require('../config/credentials')
 const Logger = require('../config/logger')
 const utils = require('../utils/index')
-const { uploadFile } = require('../utils/files')
+const { uploadExtensionToMinio } = require('./minio')
 const fs = require('fs')
 const path = require('path')
 
@@ -58,9 +58,9 @@ class ExtensionService {
 
   /**
    *
-   * @description Uploads a file content to Firebase Storage.
+   * @description Uploads a file content to MinIO Storage.
    * @param {String} extensionCode code of the extension
-   * @param {String} filePath path to file be saved on firebase storage
+   * @param {String} filePath path to file be saved on MinIO storage
    */
   async upload (extensionCode, filePath) {
     if (!this.manifest.exists()) {
@@ -76,15 +76,13 @@ class ExtensionService {
       this.spinner.start(
         `Fazendo upload da extensão ${this.manifest.name}... ${filePath}`
       )
-      const { status, data } = await uploadFile({
-        fileContent: extensionCode,
-        filePath
+
+      await uploadExtensionToMinio({
+        extensionCode,
+        fileName: filePath,
+        institution: credentials.institution
       })
 
-      if (status !== 200) {
-        this.logger.error('Erro ao fazer upload da extensão', { data })
-        throw new Error('Erro ao fazer upload da extensão')
-      }
       this.spinner.succeed(
         `Upload da extensão ${this.manifest.name} finalizado!`
       )
