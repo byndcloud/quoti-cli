@@ -1,17 +1,17 @@
 const Minio = require('minio')
 const path = require('path')
 
-if (!process.env.BUCKET_ACCESS_KEY || !process.env.BUCKET_SECRET_KEY) {
-  throw new Error('Bucket access key and secret key are required')
-}
+// if (!process.env.BUCKET_ACCESS_KEY || !process.env.BUCKET_SECRET_KEY) {
+//   throw new Error('Bucket access key and secret key are required')
+// }
 
 // MinIO Configuration - você pode mover isso para um arquivo de configuração se necessário
 const MINIO_CONFIG = {
   endPoint: 'bucket-api.inea.rj.gov.br',
   port: 443,
   useSSL: true,
-  accessKey: process.env.BUCKET_ACCESS_KEY,
-  secretKey: process.env.BUCKET_SECRET_KEY
+  accessKey: 'RcySWkjdfcjo0X1hPIBH',
+  secretKey: 'x1siXNElWewLcJcjvxXbFC6WY9Qwcn2i0p9koZl7'
 }
 
 const BUCKET_NAME = 'dynamic-components'
